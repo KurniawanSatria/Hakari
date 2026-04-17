@@ -1,0 +1,33 @@
+{
+  "name": "hakari-v2",
+  "version": "2.0.0",
+  "description": "simple discord music bot",
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node index.js",
+    "test": "node test-bot-start.js",
+    "test:watch": "nodemon test-bot-start.js",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "audit": "npm audit"
+  },
+  "dependencies": {
+    "@discordjs/rest": "^2.6.0",
+    "axios": "^1.13.6",
+    "discord.js": "^14.25.1",
+    "dotenv": "^16.3.1",
+    "ejs": "^5.0.1",
+    "express": "^5.2.1",
+    "moonlink.js": "^5.0.0",
+    "musicard": "^3.0.1",
+    "mysql2": "^3.20.0",
+    "socket.io": "^4.8.3",
+    "style-logs": "^0.0.3",
+    "winston": "^3.11.0",
+    "winston-daily-rotate-file": "^4.7.1"
+  }
+}
