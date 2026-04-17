@@ -19,38 +19,46 @@ const LOOP_EMOJI = {
 
 module.exports = {
     name: "playerUpdate",
-    execute: async (client, player, payload) => {
-        // BUG FIX: player.queue.current does not exist — use player.current
-        const track = player.current;
 
-        if (!player.msg || !track || !track.duration) return;
+    // moonlink.js v5 emits: ("playerUpdate", player, track, payload)
+    // moonlink.js registers handlers as: (...args) => handler.execute(client, ...args)
+    // So our function receives:          (client, player, track, payload)
+    //
+    // The old signature was (client, player, payload) — "track" was missing,
+    // causing player/track/payload to all be shifted one argument off, which is
+    // why every property logged as undefined.
+    execute: async (client, player, track, payload) => {
+        // Guard: need a live message and a track with a known duration
+        if (!player?.msg || !track?.duration) return;
         if (!player.currentComponents) return;
 
-        const position = payload?.state?.position ?? 0;
+        // moonlink updates track.position before emitting, but payload.state.position
+        // is the authoritative live value from Lavalink
+        const position = payload?.state?.position ?? track.position ?? 0;
         const remaining = msToTime(Math.max(0, track.duration - position));
 
         try {
-            // Deep-clone to avoid mutating the stored template
+            // Deep-clone so we never mutate the stored template
             const comps = JSON.parse(JSON.stringify(player.currentComponents));
 
             const container = comps[0];
             if (!container || container.type !== 17 || !Array.isArray(container.components)) return;
 
-            // Row layout (see trackStart.js buildComponents):
-            // [0] section (thumbnail + title/author)
-            // [1] separator
-            // [2] info text  ← update remaining time here
-            // [3] action row (back/pause/stop/skip/loop)
-            // [4] action row (queue/shuffle/filter/lyrics/autoplay)
+            // Component layout built in trackStart.js buildComponents():
+            //   [0] section  (thumbnail + title/author)
+            //   [1] separator
+            //   [2] info text  ← remaining time lives here
+            //   [3] action row (back / pause / stop / skip / loop)
+            //   [4] action row (queue / shuffle / filter / lyrics / autoplay)
 
             const infoComp = container.components[2];
             if (infoComp?.type === 10) {
-                infoComp.content = `-# <:duration:1482113128077463682> ${remaining} • <:volume:1482112735910166609> 100% • <:requester:1465814308394107180> ${track.requester}`;
+                infoComp.content =
+                    `-# <:duration:1482113128077463682> ${remaining} • <:volume:1482112735910166609> 100% • <:requester:1465814308394107180> ${track.requester}`;
             }
 
-            // Update loop button emoji (row [3], button index 4)
-            const actionRow = container.components[3];
-            const loopBtn = actionRow?.components?.[4];
+            // Sync loop-button emoji with the current loop mode
+            const loopBtn = container.components[3]?.components?.[4];
             if (loopBtn?.custom_id === "loop") {
                 const emoji = LOOP_EMOJI[player.loop] ?? LOOP_EMOJI.off;
                 loopBtn.emoji = { id: emoji.id, name: emoji.name };
@@ -59,7 +67,7 @@ module.exports = {
             await player.msg.edit({ flags: 36864, accent_color: 16612524, components: comps });
             player.currentComponents = comps;
         } catch (err) {
-            // Suppress Unknown Message errors (message already deleted)
+            // 10008 = Unknown Message (already deleted) — not worth logging
             if (err.code !== 10008) {
                 console.error("[PLAYER UPDATE] Failed:", err.message);
             }
