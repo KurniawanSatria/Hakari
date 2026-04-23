@@ -4,7 +4,6 @@ const path = require('path');
 const config = require('../../structures/config');
 const logger = require('../../structures/logger');
 
-let commands = null;
 let aliases = null;
 
 function loadCommands() {
@@ -47,12 +46,14 @@ module.exports = {
     const args = message.content.slice(config.prefix.length).trim().split(/ +/);
     const commandName = args.shift().toLowerCase();
     
-    // Lazy load commands
-    if (!commands) {
+    // Load/reload commands (global for hot-reload support)
+    if (!global.__hakariCommands) {
       const loaded = loadCommands();
-      commands = loaded.commands;
+      global.__hakariCommands = loaded.commands;
       aliases = loaded.aliases;
     }
+    
+    const commands = global.__hakariCommands;
     
     let command = commands.get(commandName);
     if (!command) {
@@ -64,10 +65,11 @@ module.exports = {
     try {
       await command.execute(client, message, args);
     } catch (err) {
-      message.channel.send({
-        content: 'An error occurred while executing the command.',
-        components: []
-      }).catch(() => {});
+      const { wrap, e } = require('../../structures/components');
+      message.channel.send(wrap({
+        type: 10,
+        content: `### ${e('error')} Error\n\nAn error occurred while executing the command.`
+      })).catch(() => {});
     }
   }
 };

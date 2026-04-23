@@ -11,13 +11,24 @@ module.exports = {
       if (!player) {
         return message.channel.send(errorMsg('No Player', 'No active player in this server.'));
       }
-      
+      // Clean up lyrics
+      if (player.lyricsMsg) {
+        player.lyricsMsg.delete().catch(() => { });
+        player.lyricsMsg = null;
+      }
+      player.lyricsData = null;
+      player.lyricsLines = null;
+
+      // Clean up track message
+      if (player.msg?.delete) {
+        player.msg.delete().catch(() => { });
+      }
+      player.msg = null;
       const queueSize = player.queue.size;
       player.queue.clear();
       await player.destroy();
-      
-      message.channel.send(successMsg(`⏹ Stopped and cleared queue (\`${queueSize}\` tracks).`));
-      
+
+
     } catch (err) {
       message.channel.send(errorMsg('Error', 'Error stopping.'));
     }

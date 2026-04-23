@@ -1,7 +1,6 @@
 // src/commands/lyrics.js - Lyrics command
 
-const { ContainerBuilder, SectionBuilder, TextDisplayBuilder, ThumbnailBuilder, MessageFlags } = require('discord.js');
-const { errorMsg, successMsg, FALLBACK_THUMB } = require('../structures/components');
+const { errorMsg, FALLBACK_THUMB, wrap, sectionWithThumb, e } = require('../structures/components');
 
 module.exports = {
   name: 'lyrics',
@@ -11,15 +10,16 @@ module.exports = {
       const player = client.manager?.players.get(message.guild.id);
       
       if (!player || !player.current) {
-        const section = new SectionBuilder()
-          .addTextDisplayComponents(
-            new TextDisplayBuilder().setContent('### 🎵 Hakari Music - Lyrics\nNo track currently playing.\n\nUse `.play <song>` to start.')
-          );
-        
-        return message.channel.send({
-          flags: MessageFlags.IsComponentsV2,
-          components: [new ContainerBuilder().addSectionComponents(section)]
-        });
+        return message.channel.send(wrap(
+          {
+            type: 9,
+            components: [{
+              type: 10,
+              content: `### ${e('musicalnote')} Hakari Music - Lyrics\n\nNo track currently playing.\n\nUse \`.play <song>\` to start.`
+            }]
+          },
+          { type: 10, content: '-# Lyrics sync when available via NodeLink' }
+        ));
       }
       
       const track = player.current;
@@ -34,29 +34,25 @@ module.exports = {
             return l.text || '';
           }).join('\n');
           
-          const section = new SectionBuilder()
-            .addTextDisplayComponents(
-              new TextDisplayBuilder().setContent(`### 🎤 lyrics: ${track.title}\n${text}`)
-            )
-            .setThumbnailAccessory(new ThumbnailBuilder().setURL(track.thumbnail || FALLBACK_THUMB));
-          
-          return message.channel.send({
-            flags: MessageFlags.IsComponentsV2,
-            components: [new ContainerBuilder().addSectionComponents(section)]
-          });
+          return message.channel.send(wrap(
+            sectionWithThumb(
+              `### ${e('lyrics')} lyrics: ${track.title}\n\n${text}`,
+              '',
+              track.thumbnail || FALLBACK_THUMB
+            ),
+            { type: 10, content: `-# ${lines.length} synced lines` }
+          ));
         }
       }
       
-      const section = new SectionBuilder()
-        .addTextDisplayComponents(
-          new TextDisplayBuilder().setContent(`### ❌ No lyrics available\n**${track.title}**\nLyrics not found for this track.`)
-        )
-        .setThumbnailAccessory(new ThumbnailBuilder().setURL(track.thumbnail || FALLBACK_THUMB));
-      
-      return message.channel.send({
-        flags: MessageFlags.IsComponentsV2,
-        components: [new ContainerBuilder().addSectionComponents(section)]
-      });
+      return message.channel.send(wrap(
+        sectionWithThumb(
+          `### ${e('error')} No lyrics available\n\n**${track.title}**\n\nLyrics not found for this track.`,
+          '',
+          track.thumbnail || FALLBACK_THUMB
+        ),
+        { type: 10, content: '-# Use NodeLink for lyrics support' }
+      ));
       
     } catch (err) {
       message.channel.send(errorMsg('Error', 'Error getting lyrics.'));

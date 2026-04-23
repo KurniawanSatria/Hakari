@@ -1,16 +1,7 @@
-// src/events/moonlink/trackStart.js - Track start event with controls
+// src/events/moonlink/trackStart.js - Track start event
 
-const { 
-  ContainerBuilder, SectionBuilder, TextDisplayBuilder, 
-  ThumbnailBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle 
-} = require('discord.js');
 const logger = require('../../structures/logger');
 
-const FALLBACK_THUMB = 'https://files.catbox.moe/fnlch5.jpg';
-
-/**
- * Format milliseconds to time string
- */
 function msToTime(ms) {
   if (!ms || ms < 0) return '0:00';
   const totalSec = Math.floor(ms / 1000);
@@ -20,18 +11,6 @@ function msToTime(ms) {
   return h > 0 
     ? `${h}:${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`
     : `${m}:${String(sec).padStart(2, '0')}`;
-}
-
-/**
- * Get source emoji from URI
- */
-function getSource(uri) {
-  if (!uri) return '';
-  if (uri.includes('spotify')) return '🎧 ';
-  if (uri.includes('soundcloud')) return '🎵 ';
-  if (uri.includes('youtube')) return '▶ ';
-  if (uri.includes('deezer')) return '🎵 ';
-  return '';
 }
 
 module.exports = {
@@ -44,25 +23,37 @@ module.exports = {
         const channel = client.channels?.cache.get(player.textChannelId);
         if (!channel) return;
         
-// Clean up previous messages/m data
+        // Clean up previous lyrics
         if (player.lyricsMsg) {
           player.lyricsMsg.delete().catch(() => {});
           player.lyricsMsg = null;
         }
         player.lyricsData = null;
         player.lyricsLines = null;
-
+        
+        // Edit previous queue messages to now playing confirmation
+        const queueMsgs = player.queueMsgs || [];
+        if (queueMsgs.length > 0) {
+          for (const msg of queueMsgs) {
+            msg.delete().catch(() => {});
+          }
+          player.queueMsgs = [];
+        }
+        
+        // Clean up old player.msg
         if (player.msg?.delete) {
           player.msg.delete().catch(() => {});
         }
         player.msg = null;
         
-        // Get track info FIRST
+        // Get track info
         const title = track.title || 'Unknown';
         const author = track.author || 'Unknown';
-        const thumb = track.thumbnail || FALLBACK_THUMB;
+        const thumb = track.thumbnail || 'https://files.catbox.moe/fnlch5.jpg';
+        const duration = msToTime(track.duration);
+        const requester = track.requester?.username || 'Unknown';
         
-        // Subscribe to lyrics (NodeLink) with logging
+        // Subscribe to lyrics
         try {
           await player.subscribeLyrics();
           logger.info(`[trackStart] Subscribed to lyrics for ${title}`);
@@ -70,44 +61,72 @@ module.exports = {
           logger.error(`[trackStart] subscribeLyrics failed: ${err.message}`);
         }
         
-        const source = getSource(track.uri);
-        
         logger.info(`[trackStart] ${title} - ${author}`);
         
-        // Now playing embed
-        const section = new SectionBuilder()
-          .addTextDisplayComponents(
-            new TextDisplayBuilder().setContent(
-              `### ▶ Now Playing\n**${title}**\n${author}`
-            ),
-            new TextDisplayBuilder().setContent(
-              `Duration: \`${msToTime(track.duration)}\` • Requested by ${track.requester?.username || 'Unknown'}`
-            )
-          )
-          .setThumbnailAccessory(new ThumbnailBuilder().setURL(thumb));
+        const sent = await channel.send({
+          "flags": 32768,
+          "components": [
+            {
+              "type": 17,
+              "components": [
+                {
+                  "type": 9,
+                  "components": [
+                    {
+                      "type": 10,
+                      "content": `### <:musicalnote:1482113385486352586> Now Playing\n- **${title}**\n- *${author}*\n`
+                    }
+                  ],
+                  "accessory": {
+                    "type": 11,
+                    "media": {
+                      "url": thumb
+                    }
+                  }
+                },
+                {
+                  "type": 10,
+                  "content": `-# Requester: ${requester}\n-# Duration: \`${duration}\``
+                },
+                {
+                  "type": 14
+                },
+                {
+                  "type": 1,
+                  "components": [
+                    {
+                      "style": 4,
+                      "type": 2,
+                      "custom_id": "stop",
+                      "label": "Stop",
+                      "emoji": {
+                        "id": "1449501286360944853",
+                        "name": "stop"
+                      }
+                    },
+                    {
+                      "style": 1,
+                      "type": 2,
+                      "emoji": {
+                        "id": "1449501258791518370",
+                        "name": "skip"
+                      },
+                      "custom_id": "skip",
+                      "label": "Skip"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }).catch(e => {
+          logger.error(`[trackStart] Send failed: ${e.message}`);
+          return null;
+        });
         
-        // Control buttons
-        const row = new ActionRowBuilder()
-          .addComponents(
-            new ButtonBuilder()
-              .setCustomId('stop')
-              .setLabel('Stop')
-              .setStyle(ButtonStyle.Danger)
-              .setEmoji('⏹'),
-            new ButtonBuilder()
-              .setCustomId('skip')
-              .setLabel('Skip')
-              .setStyle(ButtonStyle.Primary)
-              .setEmoji('⏭')
-              .setDisabled(player.queue.size === 0)
-          );
-        
-        await channel.send({
-          embeds: [section],
-          components: [row]
-        }).then(m => {
-          player.msg = m;
-        }).catch(() => {});
+        if (sent) {
+          player.msg = sent;
+        }
         
       } catch (err) {
         logger.error(`[trackStart] ${err.message}`, { stack: err.stack });

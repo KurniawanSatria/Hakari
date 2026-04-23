@@ -29,13 +29,13 @@ module.exports = {
       
       if (player) {
         player.setAutoPlay(newState);
-        const status = newState ? 'enabled ✅' : 'disabled ❌';
-        message.channel.send(successMsg(`Autoplay is now **${status}**`));
+        const status = newState ? '**enabled <:toggleon:1488148374208119036>**' : '**disabled <:toggleoff:1488148371905577020>**';
+        message.channel.send(successMsg(`Autoplay is now ${status}`));
       } else {
         // Show current bot default
         const config = require('../structures/config');
         const defaultState = config.autoplay;
-        message.channel.send(successMsg(`Default autoplay: **${defaultState ? 'enabled' : 'disabled'}**\n\nUse \`.autoplay on/off\` when a player is active.`));
+        message.channel.send(successMsg(`Default autoplay: ${defaultState ? '**enabled**' : '**disabled**'}\n\nUse \`.autoplay on/off\` when a player is active.`));
       }
       
     } catch (err) {

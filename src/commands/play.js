@@ -1,6 +1,5 @@
 // src/commands/play.js - Play music command
 
-const MessageFlags = require('discord.js').MessageFlags;
 const { nowPlaying, trackAdded, playlistAdded, errorMsg } = require('../structures/components');
 const logger = require('../structures/logger');
 const config = require('../structures/config');
@@ -69,12 +68,17 @@ module.exports = {
         }
         
         const duration = tracks.reduce((a, t) => a + (t.duration || 0), 0);
-        await message.channel.send(playlistAdded(
+        const queueMsg = await message.channel.send(playlistAdded(
           playlistInfo?.name || 'Unknown',
           tracks.length,
           formatDuration(duration),
           tracks[0]?.thumbnail
         ));
+        
+        if (queueMsg && !player.playing && !player.paused) {
+          player.queueMsgs = player.queueMsgs || [];
+          player.queueMsgs.push(queueMsg);
+        }
         
       } else if (loadType === 'search' || loadType === 'track') {
         const track = tracks[0];
@@ -83,12 +87,16 @@ module.exports = {
         player.queue.add(track);
         
         const queueSize = player.queue.tracks?.length || 0;
-        const waitMs = calcWaitTime(player, position);
         const isPlaying = !player.playing && !player.paused;
         
-        await message.channel.send(trackAdded(
+        const queueMsg = await message.channel.send(trackAdded(
           track, position, queueSize, formatDuration(track.duration), isPlaying
         ));
+        
+        if (queueMsg) {
+          player.queueMsgs = player.queueMsgs || [];
+          player.queueMsgs.push(queueMsg);
+        }
         
       } else {
         return message.channel.send(errorMsg('No Results', 'No results found for that query.'));

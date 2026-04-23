@@ -8,54 +8,67 @@ module.exports = {
     try {
       // Only handle buttons
       if (!interaction.isButton()) return;
-      
+
       if (!client.manager) {
-        return interaction.reply({ 
-          content: 'Music not initialized.', 
-          ephemeral: true 
+        return interaction.reply({
+          content: 'Music not initialized.',
+          ephemeral: true
         });
       }
-      
+
       const player = client.manager.players.get(interaction.guildId);
       if (!player) {
-        return interaction.reply({ 
-          content: 'No active player.', 
-          ephemeral: true 
+        return interaction.reply({
+          content: 'No active player.',
+          ephemeral: true
         });
       }
-      
+
       const { customId } = interaction;
-      
+
       switch (customId) {
         case 'stop':
+          // Clean up lyrics
+          if (player.lyricsMsg) {
+            player.lyricsMsg.delete().catch(() => { });
+            player.lyricsMsg = null;
+          }
+          player.lyricsData = null;
+          player.lyricsLines = null;
+
+          // Clean up track message
+          if (player.msg?.delete) {
+            player.msg.delete().catch(() => { });
+          }
+          player.msg = null;
           player.queue.clear();
           await player.destroy();
-          await interaction.reply({ 
-            content: '⏹ Stopped and disconnected.', 
-            ephemeral: true 
+          await interaction.reply({
+            content: '⏹ Stopped and disconnected.',
+            ephemeral: true
           });
           break;
-          
+
         case 'skip':
           const title = player.current?.title || 'track';
           player.skip();
-          await interaction.reply({ 
-            content: `⏭ Skipped **${title}**.`, 
-            ephemeral: true 
+          await interaction.reply({
+            content: `⏭ Skipped **${title}**.`,
+            ephemeral: true
           });
           break;
-          
+
         default:
           logger.warn(`Unknown button: ${customId}`);
       }
-      
+
     } catch (err) {
       logger.error(`[interaction] ${err.message}`);
       if (!interaction.replied) {
-        interaction.reply({ 
-          content: 'Error processing interaction.', 
-          ephemeral: true 
-        }).catch(() => {});
+        interaction.reply({
+          content: 'Error processing interaction.',
+          ephemeral: true
+        }).catch(() => { });
       }
     }
   }

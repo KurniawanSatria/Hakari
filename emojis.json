@@ -1,0 +1,202 @@
+[
+  {
+    "id": "1449501258791518370",
+    "name": "skip",
+    "animated": false
+  },
+  {
+    "id": "1449501262642020442",
+    "name": "volume_down",
+    "animated": false
+  },
+  {
+    "id": "1449501265720774656",
+    "name": "pause",
+    "animated": false
+  },
+  {
+    "id": "1449501267847151707",
+    "name": "play",
+    "animated": false
+  },
+  {
+    "id": "1449501269818609876",
+    "name": "loop_queue",
+    "animated": false
+  },
+  {
+    "id": "1449501271643001013",
+    "name": "loop_track",
+    "animated": false
+  },
+  {
+    "id": "1449501276131033219",
+    "name": "shuffle",
+    "animated": false
+  },
+  {
+    "id": "1449501284272181309",
+    "name": "prev",
+    "animated": false
+  },
+  {
+    "id": "1449501286360944853",
+    "name": "stop",
+    "animated": false
+  },
+  {
+    "id": "1449501288869138482",
+    "name": "volume_up",
+    "animated": false
+  },
+  {
+    "id": "1449505531453767792",
+    "name": "loop_false",
+    "animated": false
+  },
+  {
+    "id": "1451682056927973476",
+    "name": "autoplay",
+    "animated": false
+  },
+  {
+    "id": "1451682061697159310",
+    "name": "queue",
+    "animated": false
+  },
+  {
+    "id": "1451683856494235790",
+    "name": "musicfolder",
+    "animated": false
+  },
+  {
+    "id": "1451683859845615697",
+    "name": "filter",
+    "animated": false
+  },
+  {
+    "id": "1451697663396413481",
+    "name": "mic",
+    "animated": false
+  },
+  {
+    "id": "1465814301787820178",
+    "name": "arrow",
+    "animated": false
+  },
+  {
+    "id": "1465814303536840837",
+    "name": "dura",
+    "animated": false
+  },
+  {
+    "id": "1465814305764278589",
+    "name": "pos",
+    "animated": false
+  },
+  {
+    "id": "1465814308394107180",
+    "name": "requester",
+    "animated": false
+  },
+  {
+    "id": "1476619345680400534",
+    "name": "success",
+    "animated": false
+  },
+  {
+    "id": "1476619348457291809",
+    "name": "debug",
+    "animated": false
+  },
+  {
+    "id": "1476619350927741131",
+    "name": "info",
+    "animated": false
+  },
+  {
+    "id": "1476619352748064818",
+    "name": "warning",
+    "animated": false
+  },
+  {
+    "id": "1476619354706542766",
+    "name": "error",
+    "animated": false
+  },
+  {
+    "id": "1476620143353266353",
+    "name": "radiowaves",
+    "animated": false
+  },
+  {
+    "id": "1477743154538090659",
+    "name": "track",
+    "animated": false
+  },
+  {
+    "id": "1477753804656218202",
+    "name": "fastforward",
+    "animated": false
+  },
+  {
+    "id": "1477860395195699200",
+    "name": "rewind",
+    "animated": false
+  },
+  {
+    "id": "1481718389226602506",
+    "name": "sc",
+    "animated": false
+  },
+  {
+    "id": "1481718391847915631",
+    "name": "spy",
+    "animated": false
+  },
+  {
+    "id": "1481718394075222248",
+    "name": "yt",
+    "animated": false
+  },
+  {
+    "id": "1481719485172945119",
+    "name": "pinkdot",
+    "animated": true
+  },
+  {
+    "id": "1482110308435628153",
+    "name": "lyrics",
+    "animated": false
+  },
+  {
+    "id": "1482112735910166609",
+    "name": "volume",
+    "animated": false
+  },
+  {
+    "id": "1482113128077463682",
+    "name": "duration",
+    "animated": false
+  },
+  {
+    "id": "1482113385486352586",
+    "name": "musicalnote",
+    "animated": false
+  },
+  {
+    "id": "1482121759330275400",
+    "name": "hakari",
+    "animated": false
+  },
+  {
+    "id": "1488148371905577020",
+    "name": "toggleoff",
+    "animated": false
+  },
+  {
+    "id": "1488148374208119036",
+    "name": "toggleon",
+    "animated": false
+  }
+]

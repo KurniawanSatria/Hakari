@@ -1,6 +1,5 @@
 // src/events/moonlink/lyricsLine.js - Real-time synced lyrics updates
 
-const { ContainerBuilder, SectionBuilder, TextDisplayBuilder, ThumbnailBuilder, MessageFlags, EmbedBuilder } = require('discord.js');
 const logger = require('../../structures/logger');
 const { FALLBACK_THUMB } = require('../../structures/components');
 
@@ -54,19 +53,19 @@ module.exports = {
         let description;
         
         if (currentIdx >= 0 && lines.length > 0) {
-          const beforeLines = [];
+          const before = [];
           for (let i = Math.max(0, currentIdx - CONTEXT); i < currentIdx; i++) {
-            beforeLines.push(getLineText(lines[i]));
+            before.push(getLineText(lines[i]));
           }
           
-          const currentLine = `**▶ ${getLineText(lines[currentIdx])} ◀**`;
+          const current = `**${getLineText(lines[currentIdx])}**`;
           
-          const afterLines = [];
+          const after = [];
           for (let i = currentIdx + 1; i < Math.min(lines.length, currentIdx + CONTEXT + 1); i++) {
-            afterLines.push(getLineText(lines[i]));
+            after.push(getLineText(lines[i]));
           }
           
-          description = [...beforeLines.map(t => `*${t}*`), currentLine, ...afterLines.map(t => `*${t}*`)].join('\n');
+          description = [...before.map(t => `~~${t}~~`), current, ...after.map(t => `~~${t}~~`)].join('\n');
         } else if (lineText) {
           description = lineText;
         } else {
@@ -74,32 +73,43 @@ module.exports = {
         }
         
         const timeStr = lineTime !== undefined ? formatTime(lineTime) : null;
-        const status = player.paused ? '⏸ Paused' : '▶ Playing';
+        const status = player.paused ? 'Paused' : 'Playing';
+        const thumb = track?.thumbnail || FALLBACK_THUMB;
+        const title = track?.title || 'Unknown';
+        const author = track?.author || 'Unknown';
         
-        // Try ComponentV2 first
-        try {
-          const section = new SectionBuilder()
-            .addTextDisplayComponents(
-              new TextDisplayBuilder().setContent(`### 🎤 ${track?.title || 'Unknown'}\n${description}`),
-              new TextDisplayBuilder().setContent(`-# ⏱ ${timeStr || '0:00'} • ${status}`)
-            )
-            .setThumbnailAccessory(new ThumbnailBuilder().setURL(track?.thumbnail || FALLBACK_THUMB));
-          
-          await msg.edit({
-            flags: MessageFlags.IsComponentsV2,
-            components: [new ContainerBuilder().addSectionComponents(section)]
-          });
-        } catch (e) {
-          // Fallback to regular embed if edit fails
-          const embed = new EmbedBuilder()
-            .setColor(player.paused ? 65536 : 16612524)
-            .setTitle(`🎤 ${track?.title || 'Unknown'}`)
-            .setDescription(description?.slice(0, 4000) || '♪')
-            .setThumbnail(track?.thumbnail || FALLBACK_THUMB)
-            .setFooter({ text: `⏱ ${timeStr || '0:00'} • ${status}` });
-          
-          await msg.edit({ embeds: [embed] }).catch(() => {});
-        }
+        await msg.edit({
+          "flags": 32768,
+          "components": [
+            {
+              "type": 17,
+              "components": [
+                {
+                  "type": 9,
+                  "components": [
+                    {
+                      "type": 10,
+                      "content": `### <:lyrics:1482110308435628153> Lyrics Synced\n- **${title}**\n- *${author}*`
+                    }
+                  ],
+                  "accessory": {
+                    "type": 11,
+                    "media": {
+                      "url": thumb
+                    }
+                  }
+                },
+                {
+                  "type": 14
+                },
+                {
+                  "type": 10,
+                  "content": '```' + description + '```'
+                }
+              ]
+            }
+          ]
+        });
         
       } catch (err) {
         logger.error(`[lyricsLine] ${err.message}`);

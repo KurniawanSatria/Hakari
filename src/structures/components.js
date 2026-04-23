@@ -1,151 +1,120 @@
-// src/structures/components.js - ComponentV2 UI helpers
+// src/structures/components.js - Raw JSON ComponentV2 helpers
 
-const { 
-  ContainerBuilder, SectionBuilder, TextDisplayBuilder, 
-  ThumbnailBuilder, SeparatorBuilder, ActionRowBuilder, ButtonBuilder, 
-  ButtonStyle, SeparatorSpacingSize, MessageFlags 
-} = require('discord.js');
+const fs = require('fs');
+const path = require('path');
+
+// Load custom emojis (robust loading)
+let EMOJIS = {};
+try {
+  const emojisPath = path.join(__dirname, '../../emojis.json');
+  if (fs.existsSync(emojisPath)) {
+    const raw = fs.readFileSync(emojisPath, 'utf8');
+    if (raw && raw.trim()) {
+      const emojisData = JSON.parse(raw);
+      for (const e of emojisData) {
+        EMOJIS[e.name] = e;
+      }
+    }
+  }
+} catch (e) {
+  console.error('Failed to load emojis:', e.message);
+}
+
+// Emoji helper
+function getEmoji(name) {
+  const e = EMOJIS[name];
+  if (!e) return null;
+  return { name: e.name, id: e.id };
+}
+
+// Get emoji name string
+function e(name) {
+  const emoji = getEmoji(name);
+  return emoji ? emoji.name : '';
+}
 
 const FALLBACK_THUMB = 'https://files.catbox.moe/fnlch5.jpg';
 
-// Simple text message
-function text(content, ephemeral = false) {
+// Wrap in container
+function wrap(...items) {
   return {
-    content,
-    flags: ephemeral ? MessageFlags.Ephemeral : 0,
-    components: []
+    flags: 32768,
+    components: [{
+      type: 17,
+      components: items.filter(Boolean)
+    }]
   };
 }
 
-// Section with text display
-function section(title, description, thumb = null, footer = null) {
-  const s = new SectionBuilder()
-    .addTextDisplayComponents(
-      new TextDisplayBuilder().setContent(`### ${title}\n${description}`)
-    );
+// Separator
+function separator() {
+  return { type: 14, divider: true };
+}
+
+// Section with thumbnail
+function sectionWithThumb(label, thumb) {
+  const sec = {
+    type: 9,
+    components: [{
+      type: 10,
+      content: label
+    }]
+  };
   
   if (thumb) {
-    s.setThumbnailAccessory(new ThumbnailBuilder().setURL(thumb));
+    sec.accessory = {
+      type: 11,
+      media: { url: thumb },
+      description: 'thumbnail'
+    };
   }
   
-  const container = new ContainerBuilder()
-    .addSectionComponents(s);
-  
-  const result = { flags: MessageFlags.IsComponentsV2, components: [container] };
-  
-  if (footer) {
-    // Can't add footer to container directly in v2 format
-  }
-  
-  return result;
+  return sec;
 }
 
-// Row with buttons
-function buttons(...buttons) {
-  const row = new ActionRowBuilder();
-  for (const btn of buttons) {
-    row.addComponents(btn);
-  }
-  return row;
-}
-
-// Create button
-function button(label, customId, style = 'primary', emoji = null) {
-  const btn = new ButtonBuilder()
-    .setCustomId(customId)
-    .setLabel(label);
-  
-  if (style === 'danger') btn.setStyle(ButtonStyle.Danger);
-  else if (style === 'success') btn.setStyle(ButtonStyle.Success);
-  else if (style === 'secondary') btn.setStyle(ButtonStyle.Secondary);
-  else btn.setStyle(ButtonStyle.Primary);
-  
-  if (emoji) btn.setEmoji(emoji);
-  
-  return btn;
-}
-
-// Disabled button
-function buttonDisabled(label, customId, style = 'primary') {
-  return button(label, customId, style).setDisabled(true);
-}
-
-// Now playing embed (Section with thumbnail)
+// Now playing with controls
 function nowPlaying(track, requester, duration) {
-  const section = new SectionBuilder()
-    .addTextDisplayComponents(
-      new TextDisplayBuilder().setContent(`### ▶ Now Playing\n**${track.title}**\n${track.author}`),
-      new TextDisplayBuilder().setContent(`Duration: \`${duration}\` • Requested by ${requester}`)
-    )
-    .setThumbnailAccessory(new ThumbnailBuilder().setURL(track.thumbnail || FALLBACK_THUMB));
-  
-  const row = new ActionRowBuilder()
-    .addComponents(
-      new ButtonBuilder()
-        .setCustomId('stop')
-        .setLabel('Stop')
-        .setStyle(ButtonStyle.Danger)
-        .setEmoji('⏹'),
-      new ButtonBuilder()
-        .setCustomId('skip')
-        .setLabel('Skip')
-        .setStyle(ButtonStyle.Primary)
-        .setEmoji('⏭')
-    );
-  
-  return {
-    flags: MessageFlags.IsComponentsV2,
-    components: [
-      new ContainerBuilder().addSectionComponents(section),
-      row
-    ]
-  };
+  return wrap(
+    sectionWithThumb(
+      `### <:musicalnote:1482113385486352586> Now Playing\n**${track.title}**\n${track.author}\n\n${e('duration')} \`${duration}\` • ${e('requester')} ${requester}`,
+      track.thumbnail || FALLBACK_THUMB
+    ),
+    separator(),
+    {
+      type: 1,
+      components: [
+        { style: 4, type: 2, custom_id: 'stop', label: 'Stop', emoji: getEmoji('stop') },
+        { style: 1, type: 2, custom_id: 'skip', label: 'Skip', emoji: getEmoji('skip') }
+      ]
+    }
+  );
 }
 
 // Track added to queue
 function trackAdded(track, position, queueSize, duration, isPlaying) {
-  const posLabel = isPlaying ? `#${position + 1}` : 'Up next';
-  
-  const section = new SectionBuilder()
-    .addTextDisplayComponents(
-      new TextDisplayBuilder().setContent(`### Added to Queue\n**[${track.title}](${track.uri})**\n${track.author}`),
-      new TextDisplayBuilder().setContent(`Duration: \`${duration}\``)
-    )
-    .setThumbnailAccessory(new ThumbnailBuilder().setURL(track.thumbnail || FALLBACK_THUMB));
-  
-  const meta = new TextDisplayBuilder().setContent(
-    `-# Position: \`${posLabel}\` • Queue: \`${queueSize} tracks\``
+  return wrap(
+    sectionWithThumb(
+      `### ${e('track')} Added to Queue\n**[${track.title}](${track.uri})**\n${track.author}\n\n${e('duration')} \`${duration}\``,
+      track.thumbnail || FALLBACK_THUMB
+    ),
+    { type: 10, content: `-# ${e('pos')} Position: \`${isPlaying ? '#' + (position + 1) : 'Up next'}\` • ${e('queue')} Queue: \`${queueSize} tracks\`` }
   );
-  
-  return {
-    flags: MessageFlags.IsComponentsV2,
-    components: [
-      new ContainerBuilder()
-        .addSectionComponents(section)
-        .addTextDisplayComponents(meta)
-    ]
-  };
 }
 
 // Playlist added
 function playlistAdded(name, trackCount, duration, thumb) {
-  const section = new SectionBuilder()
-    .addTextDisplayComponents(
-      new TextDisplayBuilder().setContent(`### 🎵 Playlist Loaded: **${name}**`),
-      new TextDisplayBuilder().setContent(`\`${trackCount}\` tracks • \`${duration}\``)
+  return wrap(
+    sectionWithThumb(
+      `### ${e('queue')} Playlist Loaded: **${name}**\n\n${e('track')} \`${trackCount}\` tracks • ${e('duration')} \`${duration}\``,
+      thumb || FALLBACK_THUMB
     )
-    .setThumbnailAccessory(new ThumbnailBuilder().setURL(thumb || FALLBACK_THUMB));
-  
-  return {
-    flags: MessageFlags.IsComponentsV2,
-    components: [new ContainerBuilder().addSectionComponents(section)]
-  };
+  );
 }
 
 // Queue list
 function queueList(current, tracks, totalDuration) {
   let desc = current 
-    ? `**▶ Playing:** [${current.title}](${current.uri})\n${current.author}\n`
+    ? `**${e('play')} Now Playing:** [${current.title}](${current.uri})\n\n`
     : '';
   
   desc += `**Up Next:**\n`;
@@ -157,64 +126,72 @@ function queueList(current, tracks, totalDuration) {
     desc += `\n... and ${tracks.length - 10} more`;
   }
   
-  const section = new SectionBuilder()
-    .addTextDisplayComponents(
-      new TextDisplayBuilder().setContent('### 📋 Music Queue'),
-      new TextDisplayBuilder().setContent(desc)
-    )
-    .setThumbnailAccessory(new ThumbnailBuilder().setURL(current?.thumbnail || FALLBACK_THUMB));
-  
-  const meta = new TextDisplayBuilder().setContent(
-    `-# Total: ${tracks.length} tracks • ${totalDuration}`
+  return wrap(
+    sectionWithThumb(
+      `### ${e('queue')} Music Queue\n\n${desc}`,
+      current?.thumbnail || FALLBACK_THUMB
+    ),
+    separator(),
+    { type: 10, content: `-# Total: ${tracks.length} tracks • ${totalDuration}` }
   );
-  
-  return {
-    flags: MessageFlags.IsComponentsV2,
-    components: [
-      new ContainerBuilder()
-        .addSectionComponents(section)
-        .addTextDisplayComponents(meta)
-    ]
-  };
 }
 
 // Error message
 function errorMsg(title, description) {
-  const section = new SectionBuilder()
-    .addTextDisplayComponents(
-      new TextDisplayBuilder().setContent(`### ❌ ${title}\n${description}`)
-    );
-  
   return {
-    flags: MessageFlags.IsComponentsV2,
-    components: [new ContainerBuilder().addSectionComponents(section)]
+    flags: 32768,
+    components: [{
+      type: 17,
+      components: [{
+        type: 10,
+        content: `### ${title}\n${description}`
+      }],
+      accent_color: 16056337
+    }]
   };
 }
 
 // Success message
 function successMsg(description) {
-  const section = new SectionBuilder()
-    .addTextDisplayComponents(
-      new TextDisplayBuilder().setContent(description)
-    );
-  
   return {
-    flags: MessageFlags.IsComponentsV2,
-    components: [new ContainerBuilder().addSectionComponents(section)]
+    flags: 32768,
+    components: [{
+      type: 17,
+      components: [{
+        type: 10,
+        content: `### ${description}`
+      }],
+      accent_color: 65388
+    }]
+  };
+}
+
+// Now playing confirmation
+function nowPlayingConfirm(trackTitle) {
+  return {
+    flags: 32768,
+    components: [{
+      type: 17,
+      components: [{
+        type: 10,
+        content: `### Now Playing\n\n**${trackTitle}**`
+      }]
+    }]
   };
 }
 
 module.exports = {
-  text,
-  section,
-  buttons,
-  button,
-  buttonDisabled,
+  wrap,
+  sectionWithThumb,
+  separator,
   nowPlaying,
   trackAdded,
   playlistAdded,
   queueList,
   errorMsg,
   successMsg,
-  FALLBACK_THUMB
+  nowPlayingConfirm,
+  FALLBACK_THUMB,
+  getEmoji,
+  e
 };

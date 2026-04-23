@@ -8,7 +8,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "dev": "node index.js",
+    "dev": "nodemon --watch src --ext js --delay 1 index.js",
     "cluster": "node cluster.js",
     "test": "node test-bot-start.js",
     "test:watch": "nodemon test-bot-start.js",

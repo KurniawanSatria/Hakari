@@ -1,10 +1,9 @@
 // src/events/moonlink/lyricsFound.js - Handle when lyrics are found
 
-const { ContainerBuilder, SectionBuilder, TextDisplayBuilder, ThumbnailBuilder, MessageFlags } = require('discord.js');
 const logger = require('../../structures/logger');
-const { FALLBACK_THUMB } = require('../../structures/components');
+const { FALLBACK_THUMB, wrap, sectionWithThumb, e } = require('../../structures/components');
 
-const MAX_PREVIEW = 15;
+const MAX_PREVIEW = 10;
 
 function getLineText(line) {
   if (!line) return '';
@@ -19,7 +18,7 @@ function formatLyrics(payload) {
   if (!payload) return 'No lyrics available';
   
   if (payload.text && !payload.lines) {
-    return payload.text;
+    return payload.text.slice(0, 1000);
   }
   
   if (payload.lines && Array.isArray(payload.lines)) {
@@ -34,7 +33,7 @@ function formatLyrics(payload) {
       : lines;
   }
   
-  return typeof payload === 'string' ? payload : JSON.stringify(payload).slice(0, 1000);
+  return typeof payload === 'string' ? payload.slice(0, 1000) : 'Lyrics available';
 }
 
 module.exports = {
@@ -49,6 +48,7 @@ module.exports = {
         
         const track = player.current;
         const title = track?.title || 'Unknown';
+        const author = track?.author || 'Unknown';
         const thumb = track?.thumbnail || FALLBACK_THUMB;
         
         logger.info(`[lyricsFound] ${title} (${player.guildId})`);
@@ -57,27 +57,46 @@ module.exports = {
         player.lyricsLines = payload?.lines || [];
         
         const lyricsText = formatLyrics(payload);
-        const type = payload?.type || 'unknown';
-        
-        // ComponentV2
-        const section = new SectionBuilder()
-          .addTextDisplayComponents(
-            new TextDisplayBuilder().setContent(`### 🎵 lyrics: ${title}\n${lyricsText}`),
-            new TextDisplayBuilder().setContent(`-# Synced lyrics • Type: ${type}`)
-          )
-          .setThumbnailAccessory(new ThumbnailBuilder().setURL(thumb));
         
         try {
           player.lyricsMsg = await channel.send({
-            flags: MessageFlags.IsComponentsV2,
-            components: [new ContainerBuilder().addSectionComponents(section)]
-          });
+  "flags": 32768,
+  "components": [
+    {
+      "type": 17,
+      "components": [
+        {
+          "type": 9,
+          "components": [
+            {
+              "type": 10,
+              "content": `### <:lyrics:1482110308435628153> Lyrics\n- **${title}**\n- **${author}**`
+            }
+          ],
+          "accessory": {
+            "type": 11,
+            "media": {
+              "url": thumb
+            },
+          }
+        },
+        {
+          "type": 14
+        },
+        {
+          "type": 10,
+          "content": lyricsText
+        }
+      ]
+    }
+  ]
+});
         } catch (e) {
           logger.error(`[lyricsFound] Send failed: ${e.message}`);
         }
         
       } catch (err) {
-        logger.error(`[lyricsFound] ${err.message}`, { stack: err.stack });
+        logger.error(`[lyricsFound] ${err.message}`);
       }
     });
   }
