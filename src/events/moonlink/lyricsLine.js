@@ -28,49 +28,49 @@ module.exports = {
       try {
         if (!player || player.destroyed) return;
         if (!player.playing && !player.paused) return;
-        
+
         const track = player.current;
         const msg = player.msg;
-        
+
         if (!msg || !msg.editable) return;
-        
+
         const lineData = payload?.line;
         const lineTime = lineData?.timestamp;
         const lineText = lineData?.line || '';
-        
+
         const lines = player.lyricsLines || [];
         let currentIdx = -1;
-        
+
         if (payload?.lineIndex !== undefined) {
           currentIdx = payload.lineIndex;
         } else if (lineTime !== undefined && lines.length > 0) {
-          currentIdx = lines.findIndex(l => 
+          currentIdx = lines.findIndex(l =>
             l.time <= lineTime && (l.endTime === undefined || l.endTime > lineTime)
           );
         }
-        
+
         let lyricsDisplay;
-        
+
         if (currentIdx >= 0 && lines.length > 0) {
           const before = [];
           for (let i = Math.max(0, currentIdx - CONTEXT); i < currentIdx; i++) {
             before.push(getLineText(lines[i]));
           }
-          
+
           const current = getLineText(lines[currentIdx]);
-          
+
           const after = [];
           for (let i = currentIdx + 1; i < Math.min(lines.length, currentIdx + CONTEXT + 1); i++) {
             after.push(getLineText(lines[i]));
           }
-          
+
           lyricsDisplay = before.map(t => `~~${t}~~`).join('\n') + '\n**' + current + '**\n' + after.map(t => `~~${t}~~`).join('\n');
         } else if (lineText) {
           lyricsDisplay = lineText;
         } else {
           lyricsDisplay = '♪';
         }
-        
+
         const timeStr = lineTime !== undefined ? formatTime(lineTime) : null;
         const thumb = track?.thumbnail || 'https://files.catbox.moe/fnlch5.jpg';
         const title = track?.title || 'Unknown';
@@ -78,7 +78,7 @@ module.exports = {
         const requester = track?.requester?.username || 'Unknown';
         const duration = formatTime(track?.duration);
         const status = player.paused ? 'Paused' : 'Playing';
-        
+
         await msg.edit({
           "flags": 32768,
           "components": [
@@ -86,21 +86,22 @@ module.exports = {
               "type": 17,
               "components": [
                 {
-                  "type": 9,
-                  "components": [
+                  "type": 12,
+                  "items": [
                     {
-                      "type": 10,
-                      "content": `### <:musicalnote:1482113385486352586> Now Playing\n- **${title}**\n- *${author}*\n\n### <:lyrics:1482110308435628153> Lyrics Synced\n♪ \`${lyricsDisplay}\``
+                      "media": {
+                        "url": 'attachment://nowplaying.png'
+                      }
                     }
-                  ],
-                  "accessory": {
-                    "type": 11,
-                    "media": { "url": thumb }
-                  }
+                  ]
                 },
                 {
                   "type": 10,
-                  "content": `-# Requester: ${requester} • Duration: \`${duration}\` • ${timeStr || '0:00'}`
+                  "content": '```ANSI\n[1;37m' + lyricsDisplay + '[0m\n```'
+                },
+                {
+                  "type": 10,
+                  "content": `-# Requester: ${requester} • Duration: \`${duration}\``
                 },
                 {
                   "type": 14
@@ -128,7 +129,7 @@ module.exports = {
             }
           ]
         });
-        
+
       } catch (err) {
         logger.error(`[lyricsLine] ${err.message}`);
       }

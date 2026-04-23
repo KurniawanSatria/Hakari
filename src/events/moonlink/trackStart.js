@@ -1,6 +1,7 @@
-// src/events/moonlink/trackStart.js - Track start event with combined lyrics
+// src/events/moonlink/trackStart.js - Track start event with music card
 
 const logger = require('../../structures/logger');
+const { initFonts, generateNowPlayingCard } = require('../../structures/musicard');
 
 function msToTime(ms) {
   if (!ms || ms < 0) return '0:00';
@@ -8,7 +9,7 @@ function msToTime(ms) {
   const h = Math.floor(totalSec / 3600);
   const m = Math.floor((totalSec % 3600) / 60);
   const sec = totalSec % 60;
-  return h > 0 
+  return h > 0
     ? `${h}:${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`
     : `${m}:${String(sec).padStart(2, '0')}`;
 }
@@ -19,27 +20,27 @@ module.exports = {
     client.manager.on('trackStart', async (player, track) => {
       try {
         if (!player || player.destroyed) return;
-        
+
         const channel = client.channels?.cache.get(player.textChannelId);
         if (!channel) return;
-        
+
         // Clean up previous messages
         if (player.msg?.delete) {
-          player.msg.delete().catch(() => {});
+          player.msg.delete().catch(() => { });
         }
         const queueMsgs = player.queueMsgs || [];
         for (const msg of queueMsgs) {
-          msg.delete().catch(() => {});
+          msg.delete().catch(() => { });
         }
         player.queueMsgs = [];
-        
+
         // Get track info
         const title = track.title || 'Unknown';
         const author = track.author || 'Unknown';
         const thumb = track.thumbnail || 'https://files.catbox.moe/fnlch5.jpg';
         const duration = msToTime(track.duration);
         const requester = track.requester?.username || 'Unknown';
-        
+
         // Subscribe to lyrics
         try {
           await player.subscribeLyrics();
@@ -47,28 +48,34 @@ module.exports = {
         } catch (err) {
           logger.error(`[trackStart] subscribeLyrics failed: ${err.message}`);
         }
-        
+
         logger.info(`[trackStart] ${title} - ${author}`);
-        
-        // Send combined Now Playing + Lyrics message
+
+        // Generate music card
+        await initFonts();
+        const cardBuffer = await generateNowPlayingCard(track);
+
+        // Send music card + controls
         const sent = await channel.send({
+          files: [{ attachment: cardBuffer, name: 'nowplaying.png' }],
           "flags": 32768,
           "components": [
             {
               "type": 17,
               "components": [
                 {
-                  "type": 9,
-                  "components": [
+                  "type": 12,
+                  "items": [
                     {
-                      "type": 10,
-                      "content": `### <:musicalnote:1482113385486352586> Now Playing\n- **${title}**\n- *${author}*\n\n### <:lyrics:1482110308435628153> Lyrics Synced\n♪ Waiting for lyrics...`
+                      "media": {
+                        "url": 'attachment://nowplaying.png'
+                      }
                     }
-                  ],
-                  "accessory": {
-                    "type": 11,
-                    "media": { "url": thumb }
-                  }
+                  ]
+                },
+                {
+                  "type": 10,
+                  "content": `### <:lyrics:1482110308435628153> Lyrics Synced\n♪ Lyrics will be shown here... **(if available)**`
                 },
                 {
                   "type": 10,
@@ -103,11 +110,20 @@ module.exports = {
           logger.error(`[trackStart] Send failed: ${e.message}`);
           return null;
         });
-        
+
         if (sent) {
           player.msg = sent;
         }
-        
+
+        // // Send music card as attachment if generated
+        // if (cardBuffer) {
+        //   await channel.send({
+        //     files: [{ attachment: cardBuffer, name: 'nowplaying.png' }]
+        //   }).catch(e => {
+        //     logger.error(`[trackStart] Card send failed: ${e.message}`);
+        //   });
+        // }
+
       } catch (err) {
         logger.error(`[trackStart] ${err.message}`, { stack: err.stack });
       }

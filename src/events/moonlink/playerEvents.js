@@ -5,6 +5,23 @@ const logger = require('../../structures/logger');
 module.exports = {
   name: 'playerEvents',
   register: (client) => {
+    // Node events
+    client.manager.on('nodeReady', (node) => {
+      logger.info(`[node] Ready: ${node.identifier}`);
+    });
+
+    client.manager.on('nodeError', (node, error) => {
+      logger.error(`[node] Error: ${node.identifier}: ${error.message}`);
+    });
+
+    client.manager.on('nodeConnect', (node) => {
+      logger.info(`[node] Connected: ${node.identifier}`);
+    });
+
+    client.manager.on('nodeDisconnect', (node, reason) => {
+      logger.warn(`[node] Disconnected: ${node.identifier} - ${reason}`);
+    });
+
     // Player lifecycle
     client.manager.on('playerCreate', (player) => {
       logger.info(`[player] Created: ${player.guildId}`);
@@ -21,13 +38,11 @@ module.exports = {
     client.manager.on('playerDisconnected', (player) => {
       logger.info(`[player] Disconnected: ${player.guildId}`);
       
-      // Auto-destroy after disconnect
       if (player && !player.destroyed) {
         player.destroy('voice disconnected');
       }
     });
 
-    // Voice state
     client.manager.on('playerMuteChange', (player, selfMute, serverMute) => {
       logger.debug(`[player] Mute: ${player.guildId} (self: ${selfMute}, server: ${serverMute})`);
     });
@@ -40,12 +55,10 @@ module.exports = {
       logger.debug(`[player] Suppress: ${player.guildId} (${suppress})`);
     });
 
-    // Volume
     client.manager.on('playerChangedVolume', (player, oldVol, newVol) => {
       logger.debug(`[player] Volume: ${player.guildId} ${oldVol} → ${newVol}`);
     });
 
-    // Loop
     client.manager.on('playerChangedLoop', (player, oldLoop, newLoop) => {
       logger.info(`[player] Loop: ${player.guildId} ${oldLoop} → ${newLoop}`);
     });
