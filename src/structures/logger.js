@@ -37,7 +37,6 @@ const colors = {
   reset: '\x1b[0m'
 };
 
-// Get color
 function getColor(label) {
   return colors[label] || colors.INFO;
 }
