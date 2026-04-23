@@ -23,7 +23,7 @@ const client = new Client({
   ]
 });
 
-// Initialize Moonlink Manager (after client logs in)
+// Initialize Moonlink Manager
 function initMoonlink() {
   client.manager = new Manager({
     nodes: config.nodes,
@@ -37,7 +37,7 @@ function initMoonlink() {
         retryDelay: 2000
       },
       playerHealth: {
-        enabled: false, // Disable stuck detection
+        enabled: false,
         staleTime: 10000,
         maxBufferDiff: 1000
       }
@@ -117,6 +117,51 @@ function loadCommands() {
   }
 }
 
+// Setup file watcher for hot-reload (delayed start)
+function setupWatcher() {
+  // Delay starting watcher to ensure nodes are fully initialized
+  setTimeout(() => {
+    const watchPaths = [
+      path.join(__dirname, 'src/commands'),
+      path.join(__dirname, 'src/events'),
+      path.join(__dirname, 'src/structures')
+    ];
+    
+    let reloadTimeout = null;
+    
+    for (const watchPath of watchPaths) {
+      if (fs.existsSync(watchPath)) {
+        fs.watch(watchPath, { recursive: true }, (eventType, filename) => {
+          if (filename && filename.endsWith('.js')) {
+            logger.info(`[Watcher] ${eventType}: ${filename}`);
+            
+            // Debounce reloads
+            clearTimeout(reloadTimeout);
+            reloadTimeout = setTimeout(() => {
+              const fullPath = path.join(watchPath, filename);
+              delete require.cache[require.resolve(fullPath)];
+              
+              // Reload commands if changed
+              if (watchPath.includes('commands')) {
+                loadCommands();
+                logger.info(`Reloaded commands: ${client.commands.size} loaded`);
+              }
+              
+              // Reload handlers if events/structures changed
+              if (watchPath.includes('events') || watchPath.includes('structures')) {
+                loadHandlers();
+                logger.info('Reloaded handlers');
+              }
+            }, 500);
+          }
+        });
+      }
+    }
+    
+    logger.info('File watcher active (delayed start)');
+  }, 5000); // Wait 5 seconds after login before starting watcher
+}
+
 // Login and start
 async function start() {
   try {
@@ -127,6 +172,9 @@ async function start() {
     await client.login(config.token);
     logger.info('Hakari Music Bot started successfully');
     logger.info(`Loaded: ${client.commands.size} commands`);
+    
+    // Setup watcher after everything is ready
+    setupWatcher();
   } catch (err) {
     logger.error(`Failed to start: ${err.message}`, { stack: err.stack });
     process.exit(1);
