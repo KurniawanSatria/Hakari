@@ -1,89 +1,147 @@
-const { Client, GatewayIntentBits, Events } = require("discord.js");
-const fs = require("fs");
-const path = require("path");
-const { initMusic } = require("./moonlink");
-const config = require("./config");
-const logger = require("./logging");
+// Hakari Music Bot - Main Entry Point
+// A Discord music bot with lyrics sync support using Moonlink.js + NodeLink
 
+const fs = require('fs');
+const path = require('path');
 
+// Load environment variables
+require('dotenv').config();
+
+const { Client, GatewayIntentBits } = require('discord.js');
+const { Manager, Connectors } = require('moonlink.js');
+const logger = require('./src/structures/logger');
+const config = require('./src/structures/config');
+
+// Create Discord client
 const client = new Client({
-    intents: [
-        GatewayIntentBits.Guilds,
-        GatewayIntentBits.GuildMembers,
-        GatewayIntentBits.GuildMessages,
-        GatewayIntentBits.MessageContent,
-        GatewayIntentBits.GuildVoiceStates
-    ],
+  intents: [
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMembers,
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.MessageContent,
+    GatewayIntentBits.GuildVoiceStates
+  ]
 });
 
-
-initMusic(client);
-
-// Auto-load client events from events/client/
-const clientEventsPath = path.join(__dirname, "events/client");
-for (const file of fs.readdirSync(clientEventsPath).filter(f => f.endsWith(".js"))) {
-    const eventName = file.replace(".js", "");
-    const handler = require(path.join(clientEventsPath, file));
-    if (typeof handler.execute !== "function") {
-        logger.warn(`Skipping client event ${file}: missing execute`);
-        continue;
+// Initialize Moonlink Manager (after client logs in)
+function initMoonlink() {
+  client.manager = new Manager({
+    nodes: config.nodes,
+    options: {
+      clientName: 'Hakari/v2.0',
+      node: {
+        selectionStrategy: 'leastLoad',
+        avoidUnhealthyNodes: true,
+        autoMovePlayers: true,
+        retryAmount: 3,
+        retryDelay: 2000
+      },
+      playerHealth: {
+        enabled: false, // Disable stuck detection
+        staleTime: 10000,
+        maxBufferDiff: 1000
+      }
+    },
+    send: (guildId, payload) => {
+      const guild = client.guilds.cache.get(guildId);
+      if (guild) guild.shard?.send(payload);
     }
-    client.on(eventName, (...args) => handler.execute(client, ...args));
+  });
+
+  client.manager.use(new Connectors.DiscordJs(), client);
+  return client.manager;
 }
 
-
-client.once(Events.ClientReady, async () => {
-    logger.info(`Logged in as ${client.user.tag}`);
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    await loadGuildSettings();
-});
-
-
-async function loadGuildSettings() {
-    // Load guild settings from database or file
-    logger.info(`Guild settings loaded`);
+// Load event handlers
+function loadHandlers() {
+  const eventsPath = path.join(__dirname, 'src/events');
+  
+  // Load moonlink events
+  const moonlinkEvents = path.join(eventsPath, 'moonlink');
+  if (fs.existsSync(moonlinkEvents)) {
+    for (const file of fs.readdirSync(moonlinkEvents).filter(f => f.endsWith('.js'))) {
+      try {
+        const handler = require(path.join(moonlinkEvents, file));
+        if (typeof handler.register === 'function') {
+          handler.register(client);
+          logger.info(`Loaded moonlink event: ${handler.name}`);
+        }
+      } catch (err) {
+        logger.error(`Failed to load moonlink event ${file}: ${err.message}`);
+      }
+    }
+  }
+  
+  // Load client events
+  const clientEvents = path.join(eventsPath, 'client');
+  if (fs.existsSync(clientEvents)) {
+    for (const file of fs.readdirSync(clientEvents).filter(f => f.endsWith('.js'))) {
+      try {
+        const eventName = file.replace('.js', '');
+        const handler = require(path.join(clientEvents, file));
+        if (typeof handler.execute === 'function') {
+          client.on(eventName, (...args) => handler.execute(client, ...args));
+          logger.info(`Loaded client event: ${eventName}`);
+        }
+      } catch (err) {
+        logger.error(`Failed to load client event ${file}: ${err.message}`);
+      }
+    }
+  }
 }
 
+// Load commands
+function loadCommands() {
+  const commandsPath = path.join(__dirname, 'src/commands');
+  client.commands = new Map();
+  client.aliases = new Map();
+  
+  if (fs.existsSync(commandsPath)) {
+    for (const file of fs.readdirSync(commandsPath).filter(f => f.endsWith('.js'))) {
+      try {
+        const cmd = require(path.join(commandsPath, file));
+        if (cmd.execute) {
+          client.commands.set(file.replace('.js', ''), cmd);
+          logger.info(`Loaded command: ${file.replace('.js', '')}`);
+          
+          if (cmd.aliases) {
+            for (const alias of cmd.aliases) {
+              client.aliases.set(alias, file.replace('.js', ''));
+            }
+          }
+        }
+      } catch (err) {
+        logger.error(`Failed to load command ${file}: ${err.message}`);
+      }
+    }
+  }
+}
 
-login();
+// Login and start
+async function start() {
+  try {
+    initMoonlink();
+    loadHandlers();
+    loadCommands();
+    
+    await client.login(config.token);
+    logger.info('Hakari Music Bot started successfully');
+    logger.info(`Loaded: ${client.commands.size} commands`);
+  } catch (err) {
+    logger.error(`Failed to start: ${err.message}`, { stack: err.stack });
+    process.exit(1);
+  }
+}
 
-process.on('unhandledRejection', error => {
-    logger.error(`Unhandled Rejection: ${error.message}`, error);
-    cleanupAndExit(1);
-});
-
-process.on('uncaughtException', error => {
-    logger.error(`Uncaught Exception: ${error.message}`, error);
-    cleanupAndExit(1);
-});
-
+// Handle shutdown
 process.on('SIGINT', () => {
-    logger.info(`Received SIGINT, shutting down gracefully`);
-    cleanupAndExit(0);
+  logger.info('Received SIGINT, shutting down...');
+  client.destroy();
+  process.exit(0);
 });
 
-process.on('SIGTERM', () => {
-    logger.info(`Received SIGTERM, shutting down gracefully`);
-    cleanupAndExit(0);
+process.on('unhandledRejection', (err) => {
+  logger.error(`Unhandled rejection: ${err.message}`, { stack: err.stack });
 });
 
-async function login() {
-    try {
-        await client.login(config.token);
-        logger.info(`Bot successfully logged in`);
-    } catch (error) {
-        logger.error(`Failed to login: ${error.message}`, error);
-        cleanupAndExit(1);
-    }
-}
-
-async function cleanupAndExit(code) {
-    logger.info(`Cleaning up before exit...`);
-    try {
-        await client.destroy();
-        logger.info(`Client destroyed successfully`);
-    } catch (error) {
-        logger.error(`Error during cleanup: ${error.message}`, error);
-    }
-    process.exit(code);
-}
+start();

@@ -9,11 +9,13 @@
   "scripts": {
     "start": "node index.js",
     "dev": "node index.js",
+    "cluster": "node cluster.js",
     "test": "node test-bot-start.js",
     "test:watch": "nodemon test-bot-start.js",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "audit": "npm audit"
+    "audit": "npm audit",
+    "restart": "node -e \"require(\"./runner.js\").restart()\""
   },
   "dependencies": {
     "@discordjs/rest": "^2.6.0",
@@ -29,5 +31,12 @@
     "style-logs": "^0.0.3",
     "winston": "^3.11.0",
     "winston-daily-rotate-file": "^4.7.1"
+  },
+  "private": true,
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
   }
 }
