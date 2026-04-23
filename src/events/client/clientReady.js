@@ -6,25 +6,26 @@ module.exports = {
   name: 'clientReady',
   execute: async (client) => {
     try {
-      logger.info(`Logged in as ${client.user.tag}`);
-      logger.info(`Serving ${client.guilds.cache.size} servers`);
+      logger.started(`Logged in as ${client.user.tag}`);
+      logger.started(`Serving ${client.guilds.cache.size} servers`);
       
       if (client.manager) {
-        logger.info(`Manager type: ${client.manager.constructor?.name}`);
-        logger.info(`Manager nodes type: ${client.manager.nodes?.constructor?.name}`);
-        logger.info(`Manager has players: ${!!client.manager.players}`);
+        const nodeMap = client.manager.nodes?.nodes;
+        const nodeCount = nodeMap?.size || 0;
         
-        // Try different paths to get node count
-        const size1 = client.manager.nodes?.nodes?.size;
-        const size2 = client.manager.nodes?.size;
-        logger.info(`nodes.nodes.size = ${size1}, nodes.size = ${size2}`);
-        
+        if (nodeCount > 0) {
+          for (const [id, node] of nodeMap) {
+            logger.moonlink(`Node ${id}: ${node.connected ? 'connected' : 'disconnected'} (${node.host})`);
+          }
+        } else {
+          logger.warn('No nodes configured!');
+        }
       } else {
         logger.error('Manager not initialized!');
       }
       
     } catch (err) {
-      logger.error(`[ready] ${err.message}`, { stack: err.stack });
+      logger.error(`ready error: ${err.message}`, { stack: err.stack });
     }
   }
 };

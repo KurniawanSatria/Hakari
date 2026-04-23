@@ -64,7 +64,7 @@ function loadHandlers() {
         const handler = require(path.join(moonlinkEvents, file));
         if (typeof handler.register === 'function') {
           handler.register(client);
-          logger.info(`Loaded moonlink event: ${handler.name}`);
+          logger.moonlink(`Loaded: ${handler.name}`);
         }
       } catch (err) {
         logger.error(`Failed to load moonlink event ${file}: ${err.message}`);
@@ -81,7 +81,7 @@ function loadHandlers() {
         const handler = require(path.join(clientEvents, file));
         if (typeof handler.execute === 'function') {
           client.on(eventName, (...args) => handler.execute(client, ...args));
-          logger.info(`Loaded client event: ${eventName}`);
+          logger.events(`Loaded: ${eventName}`);
         }
       } catch (err) {
         logger.error(`Failed to load client event ${file}: ${err.message}`);
@@ -102,7 +102,7 @@ function loadCommands() {
         const cmd = require(path.join(commandsPath, file));
         if (cmd.execute) {
           client.commands.set(file.replace('.js', ''), cmd);
-          logger.info(`Loaded command: ${file.replace('.js', '')}`);
+          logger.commands(`Loaded: ${file.replace('.js', '')}`);
           
           if (cmd.aliases) {
             for (const alias of cmd.aliases) {
@@ -133,7 +133,7 @@ function setupWatcher() {
       if (fs.existsSync(watchPath)) {
         fs.watch(watchPath, { recursive: true }, (eventType, filename) => {
           if (filename && filename.endsWith('.js')) {
-            logger.info(`[Watcher] ${eventType}: ${filename}`);
+            logger.watcher(`${eventType}: ${filename}`);
             
             // Debounce reloads
             clearTimeout(reloadTimeout);
@@ -144,13 +144,13 @@ function setupWatcher() {
               // Reload commands if changed
               if (watchPath.includes('commands')) {
                 loadCommands();
-                logger.info(`Reloaded commands: ${client.commands.size} loaded`);
+                logger.commands(`Reloaded: ${client.commands.size} loaded`);
               }
               
               // Reload handlers if events/structures changed
               if (watchPath.includes('events') || watchPath.includes('structures')) {
                 loadHandlers();
-                logger.info('Reloaded handlers');
+                logger.events('Reloaded handlers');
               }
             }, 500);
           }
@@ -158,7 +158,7 @@ function setupWatcher() {
       }
     }
     
-    logger.info('File watcher active (delayed start)');
+    logger.watcher('Active (delayed start)');
   }, 5000); // Wait 5 seconds after login before starting watcher
 }
 
@@ -170,8 +170,8 @@ async function start() {
     loadCommands();
     
     await client.login(config.token);
-    logger.info('Hakari Music Bot started successfully');
-    logger.info(`Loaded: ${client.commands.size} commands`);
+    logger.started('Hakari Music Bot started');
+    logger.commands(`Loaded: ${client.commands.size} commands`);
     
     // Setup watcher after everything is ready
     setupWatcher();

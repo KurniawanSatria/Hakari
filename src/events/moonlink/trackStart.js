@@ -44,12 +44,12 @@ module.exports = {
         // Subscribe to lyrics
         try {
           await player.subscribeLyrics();
-          logger.info(`[trackStart] Subscribed to lyrics for ${title}`);
+          logger.moonlink(`Subscribed to lyrics for ${title}`);
         } catch (err) {
-          logger.error(`[trackStart] subscribeLyrics failed: ${err.message}`);
+          logger.error(`subscribeLyrics failed: ${err.message}`);
         }
 
-        logger.info(`[trackStart] ${title} - ${author}`);
+        logger.player(`Now playing: ${title} - ${author}`);
 
         // Generate music card
         await initFonts();
@@ -107,7 +107,7 @@ module.exports = {
             }
           ]
         }).catch(e => {
-          logger.error(`[trackStart] Send failed: ${e.message}`);
+          logger.error(`Send failed: ${e.message}`);
           return null;
         });
 
@@ -125,7 +125,7 @@ module.exports = {
         // }
 
       } catch (err) {
-        logger.error(`[trackStart] ${err.message}`, { stack: err.stack });
+        logger.error(`trackStart error: ${err.message}`, { stack: err.stack });
       }
     });
   }
