@@ -15,7 +15,7 @@ module.exports = {
       const title = player.current.title;
       player.skip();
       
-      message.channel.send(successMsg(`⏭ Skipped **${title}**`));
+      message.channel.send(successMsg(`Skipped **${title}**`));
       
     } catch (err) {
       message.channel.send(errorMsg('Error', 'Error skipping track.'));

@@ -1,4 +1,4 @@
-// src/events/moonlink/trackStart.js - Track start event
+// src/events/moonlink/trackStart.js - Track start event with combined lyrics
 
 const logger = require('../../structures/logger');
 
@@ -23,28 +23,15 @@ module.exports = {
         const channel = client.channels?.cache.get(player.textChannelId);
         if (!channel) return;
         
-        // Clean up previous lyrics
-        if (player.lyricsMsg) {
-          player.lyricsMsg.delete().catch(() => {});
-          player.lyricsMsg = null;
-        }
-        player.lyricsData = null;
-        player.lyricsLines = null;
-        
-        // Edit previous queue messages to now playing confirmation
-        const queueMsgs = player.queueMsgs || [];
-        if (queueMsgs.length > 0) {
-          for (const msg of queueMsgs) {
-            msg.delete().catch(() => {});
-          }
-          player.queueMsgs = [];
-        }
-        
-        // Clean up old player.msg
+        // Clean up previous messages
         if (player.msg?.delete) {
           player.msg.delete().catch(() => {});
         }
-        player.msg = null;
+        const queueMsgs = player.queueMsgs || [];
+        for (const msg of queueMsgs) {
+          msg.delete().catch(() => {});
+        }
+        player.queueMsgs = [];
         
         // Get track info
         const title = track.title || 'Unknown';
@@ -63,6 +50,7 @@ module.exports = {
         
         logger.info(`[trackStart] ${title} - ${author}`);
         
+        // Send combined Now Playing + Lyrics message
         const sent = await channel.send({
           "flags": 32768,
           "components": [
@@ -74,19 +62,17 @@ module.exports = {
                   "components": [
                     {
                       "type": 10,
-                      "content": `### <:musicalnote:1482113385486352586> Now Playing\n- **${title}**\n- *${author}*\n`
+                      "content": `### <:musicalnote:1482113385486352586> Now Playing\n- **${title}**\n- *${author}*\n\n### <:lyrics:1482110308435628153> Lyrics Synced\n♪ Waiting for lyrics...`
                     }
                   ],
                   "accessory": {
                     "type": 11,
-                    "media": {
-                      "url": thumb
-                    }
+                    "media": { "url": thumb }
                   }
                 },
                 {
                   "type": 10,
-                  "content": `-# Requester: ${requester}\n-# Duration: \`${duration}\``
+                  "content": `-# Requester: ${requester} • Duration: \`${duration}\` • 0:00`
                 },
                 {
                   "type": 14
@@ -99,18 +85,12 @@ module.exports = {
                       "type": 2,
                       "custom_id": "stop",
                       "label": "Stop",
-                      "emoji": {
-                        "id": "1449501286360944853",
-                        "name": "stop"
-                      }
+                      "emoji": { "id": "1449501286360944853", "name": "stop" }
                     },
                     {
                       "style": 1,
                       "type": 2,
-                      "emoji": {
-                        "id": "1449501258791518370",
-                        "name": "skip"
-                      },
+                      "emoji": { "id": "1449501258791518370", "name": "skip" },
                       "custom_id": "skip",
                       "label": "Skip"
                     }

@@ -1,7 +1,6 @@
 // src/events/moonlink/lyricsLine.js - Real-time synced lyrics updates
 
 const logger = require('../../structures/logger');
-const { FALLBACK_THUMB } = require('../../structures/components');
 
 const CONTEXT = 2;
 
@@ -31,7 +30,7 @@ module.exports = {
         if (!player.playing && !player.paused) return;
         
         const track = player.current;
-        const msg = player.lyricsMsg;
+        const msg = player.msg;
         
         if (!msg || !msg.editable) return;
         
@@ -50,7 +49,7 @@ module.exports = {
           );
         }
         
-        let description;
+        let lyricsDisplay;
         
         if (currentIdx >= 0 && lines.length > 0) {
           const before = [];
@@ -58,25 +57,27 @@ module.exports = {
             before.push(getLineText(lines[i]));
           }
           
-          const current = `**${getLineText(lines[currentIdx])}**`;
+          const current = getLineText(lines[currentIdx]);
           
           const after = [];
           for (let i = currentIdx + 1; i < Math.min(lines.length, currentIdx + CONTEXT + 1); i++) {
             after.push(getLineText(lines[i]));
           }
           
-          description = [...before.map(t => `~~${t}~~`), current, ...after.map(t => `~~${t}~~`)].join('\n');
+          lyricsDisplay = before.map(t => `~~${t}~~`).join('\n') + '\n**' + current + '**\n' + after.map(t => `~~${t}~~`).join('\n');
         } else if (lineText) {
-          description = lineText;
+          lyricsDisplay = lineText;
         } else {
-          description = '♪';
+          lyricsDisplay = '♪';
         }
         
         const timeStr = lineTime !== undefined ? formatTime(lineTime) : null;
-        const status = player.paused ? 'Paused' : 'Playing';
-        const thumb = track?.thumbnail || FALLBACK_THUMB;
+        const thumb = track?.thumbnail || 'https://files.catbox.moe/fnlch5.jpg';
         const title = track?.title || 'Unknown';
         const author = track?.author || 'Unknown';
+        const requester = track?.requester?.username || 'Unknown';
+        const duration = formatTime(track?.duration);
+        const status = player.paused ? 'Paused' : 'Playing';
         
         await msg.edit({
           "flags": 32768,
@@ -89,22 +90,39 @@ module.exports = {
                   "components": [
                     {
                       "type": 10,
-                      "content": `### <:lyrics:1482110308435628153> Lyrics Synced\n- **${title}**\n- *${author}*`
+                      "content": `### <:musicalnote:1482113385486352586> Now Playing\n- **${title}**\n- *${author}*\n\n### <:lyrics:1482110308435628153> Lyrics Synced\n♪ \`${lyricsDisplay}\``
                     }
                   ],
                   "accessory": {
                     "type": 11,
-                    "media": {
-                      "url": thumb
-                    }
+                    "media": { "url": thumb }
                   }
+                },
+                {
+                  "type": 10,
+                  "content": `-# Requester: ${requester} • Duration: \`${duration}\` • ${timeStr || '0:00'}`
                 },
                 {
                   "type": 14
                 },
                 {
-                  "type": 10,
-                  "content": '```' + description + '```'
+                  "type": 1,
+                  "components": [
+                    {
+                      "style": 4,
+                      "type": 2,
+                      "custom_id": "stop",
+                      "label": "Stop",
+                      "emoji": { "id": "1449501286360944853", "name": "stop" }
+                    },
+                    {
+                      "style": 1,
+                      "type": 2,
+                      "emoji": { "id": "1449501258791518370", "name": "skip" },
+                      "custom_id": "skip",
+                      "label": "Skip"
+                    }
+                  ]
                 }
               ]
             }
