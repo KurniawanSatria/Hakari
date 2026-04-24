@@ -67,7 +67,7 @@ module.exports = {
               description: `**${playlistInfo.name}**\n`,
                 fields: [
                 { name: 'Tracks', value: `**${tracks.length}**`, inline: true },
-                { name: 'Duration', value: `\`${playlistInfo.duration || formatDuration(totalDuration)}\`\n`, inline: true },
+                { name: 'Duration', value: `\`${formatDuration(playlistInfo.duration) || formatDuration(totalDuration)}\`\n`, inline: true },
               ],
               thumbnail: {
                 url: tracks[0]?.thumbnail
