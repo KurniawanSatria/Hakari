@@ -10,7 +10,31 @@ return line.segments.map(s => s.text || '').join('');
 }
 return line.text || line.line || '';
 }
+function randomColoransi() {
+  const colors = [
+    "\x1b[31m",
+    "\x1b[32m",
+    "\x1b[33m",
+    "\x1b[34m",
+    "\x1b[35m",
+    "\x1b[36m",
+    "\x1b[91m",
+    "\x1b[92m",
+    "\x1b[93m",
+    "\x1b[94m",
+    "\x1b[95m",
+    "\x1b[96m"
+  ]
+  return colors[Math.floor(Math.random() * colors.length)]
+}
 
+function formatLyricsAnsi(lyricsDisplay) {
+  const bold = "\x1b[1m"
+  const reset = "\x1b[0m"
+  const color = randomColoransi()
+
+  return `${color}${bold}${lyricsDisplay}${reset}`
+}
 function formatTime(ms) {
 if (!ms || ms < 0) return '0:00';
 const totalSec = Math.floor(ms / 1000);
@@ -101,7 +125,7 @@ type: 12,
 items: [
 {
 media: {
-url: 'https://i.ibb.co.com/tpZ2Vg8P/Now-Playing.gif'
+url: 'https://i.ibb.co.com/ksXKzFg1/Now-Playing.gif'
 }
 }
 ]
@@ -113,13 +137,10 @@ components: [
 type: 10,
 content: [
 `## ${title}`,
-'',
 `**${title} - ${author}**`,
-`\`${progressBar}\``,
+`${progressBar}`,
 `-# ${status} | \`${currentTime}\``,
-'',
-`-# ${queueText}`,
-`-# Requester: **${requester}**`
+`-# ${queueText}`
 ].join('\n')
 }
 ],
@@ -127,10 +148,6 @@ accessory: {
 type: 11,
 media: { url: thumb }
 }
-},
-{
-type: 10,
-content: `### <:lyrics:1482110308435628153> Lyrics\n${lyricsDisplay}`
 },
 {type : 14 },
 {
@@ -199,11 +216,16 @@ emoji: { name: 'volume up', id: '1449501288869138482' }
 style: 2,
 type: 2,
 custom_id: 'lyrics',
-emoji: { name: 'lyrics', id: '1482110308435628153' }, disabled: true
+emoji: { name: 'lyrics', id: '1451697663396413481' }, disabled: true
 }
 ]
 }
-]
+],
+},
+{
+type: 17,
+components: [{type: 10, content: `## <:lyrics:1451697663396413481> Lyrics\n\`\`\`${formatLyricsAnsi(lyricsDisplay)}\n\n\`\`\``}],
+accent_color: 16687280
 }
 ]
 });

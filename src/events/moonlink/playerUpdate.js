@@ -40,7 +40,7 @@ type: 17,
 components: [
 {
 type: 12,
-items: [{ media: { url: 'https://i.ibb.co.com/tpZ2Vg8P/Now-Playing.gif' } }]
+items: [{ media: { url: 'https://i.ibb.co.com/ksXKzFg1/Now-Playing.gif' } }]
 },
 {
 type: 9,
@@ -49,13 +49,10 @@ components: [
 type: 10,
 content: [
 `## ${track?.title || 'Unknown'}`,
-'',
 `**${track?.title || 'Unknown'} - ${track?.author || 'Unknown'}**`,
-`\`${progressBar}\``,
+`${progressBar}`,
 `-# ${status} | \`${currentTime}\``,
-'',
 `-# ${player.queue?.size ?? 0} song${player.queue?.size !== 1 ? 's' : ''} in queue`,
-`-# Requester: **${track?.requester?.username || 'Unknown'}**`
 ].join('\n')
 }
 ],
@@ -79,7 +76,7 @@ components: [
 { style: 2, type: 2, custom_id: 'loop', emoji: { name: 'loop', id: '1449501269818609876' } },
 { style: 2, type: 2, custom_id: 'volume_down', emoji: { name: 'volume down', id: '1449501262642020442' } },
 { style: 2, type: 2, custom_id: 'volume_up', emoji: { name: 'volume up', id: '1449501288869138482' } },
-{ style: 2, type: 2, custom_id: 'lyrics', emoji: { name: 'lyrics', id: '1482110308435628153' } }
+{ style: 2, type: 2, custom_id: 'lyrics', emoji: { name: 'lyrics', id: '1451697663396413481' } }
 ]
 }
 ]

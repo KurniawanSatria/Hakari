@@ -49,13 +49,14 @@ module.exports = {
           components: [
             {
               type: 17,
+              accent_color: 16687280,
               components: [
                 {
                   type: 12,
                   items: [
                     {
                       media: {
-                        url: 'https://i.ibb.co.com/tpZ2Vg8P/Now-Playing.gif'
+                        url: 'https://i.ibb.co.com/ksXKzFg1/Now-Playing.gif'
                       }
                     }
                   ]
@@ -67,13 +68,10 @@ module.exports = {
                       type: 10,
                       content: [
                         `## ${title}`,
-                        '',
                         `**${title} - ${author}**`,
-                        `\`${progressBar}\``,
+                        `${progressBar}`,
                         `-# Playing | \`${duration}\``,
-                        '',
                         `-# ${queueText}`,
-                        `-# Requester: **${requester}**`
                       ].join('\n')
                     }
                   ],
@@ -149,7 +147,7 @@ module.exports = {
                       style: 2,
                       type: 2,
                       custom_id: 'lyrics',
-                      emoji: { name: 'lyrics', id: '1482110308435628153' }
+                      emoji: { name: 'lyrics', id: '1451697663396413481' }
                     }
                   ]
                 }
