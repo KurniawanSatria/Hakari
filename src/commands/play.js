@@ -74,7 +74,7 @@ module.exports = {
               },
               color: 16687280,
               footer: {
-                text: source,
+                text: source.name,
                 icon_url: source.icon
               }
             }]
