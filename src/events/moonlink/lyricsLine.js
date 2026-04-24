@@ -128,7 +128,8 @@ media: {
 url: 'https://i.ibb.co.com/ksXKzFg1/Now-Playing.gif'
 }
 }
-]
+],
+accent_color: 16687280
 },
 {
 type: 9,
