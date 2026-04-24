@@ -27,7 +27,7 @@ ephemeral: true
 const { customId } = interaction;
 
 switch (customId) {
-case 'stop':
+case 'stop':{
 // Clean up lyrics
 if (player.lyricsMsg) {
 player.lyricsMsg.delete().catch(() => { });
@@ -44,64 +44,92 @@ player.msg.delete().catch(() => { });
 player.msg = null;
 player.queue.clear();
 await player.destroy();
-await interaction.reply({flags:32768,components:[{type: 17,components:[{type:10,content:"**<:hakari:1482121759330275400> Hakari Music**"},{type: 14,ndivider: true,spacing: 1},{type: 10,content:`Stopped by <@${interaction.user.id}>.`}],accent_color: 16687280}]});
+msg = await interaction.reply({flags:32768,components:[{type: 17,components:[{type:10,content:"**<:hakari:1482121759330275400> Hakari Music**"},{type: 14,ndivider: true,spacing: 1},{type: 10,content:`Stopped by <@${interaction.user.id}>.`}],accent_color: 16687280}]});
+setTimeout(() => {
+msg.delete().catch(() => { })
+}, 3000) 
+}
 break;
 
-case 'skip':
+case 'skip':{
 const title = player.current?.title || 'track';
 player.skip();
-await interaction.reply({flags:32768,components:[{type: 17,components:[{type:10,content:"**<:hakari:1482121759330275400> Hakari Music**"},{type: 14,ndivider: true,spacing: 1},{type: 10,content:`Skipped ${title} by <@${interaction.user.id}>.`}],accent_color: 16687280}]});
+let msg = await interaction.reply({flags:32768,components:[{type: 17,components:[{type:10,content:"**<:hakari:1482121759330275400> Hakari Music**"},{type: 14,ndivider: true,spacing: 1},{type: 10,content:`Skipped ${title} by <@${interaction.user.id}>.`}],accent_color: 16687280}]});
+setTimeout(() => {
+msg.delete().catch(() => { })
+}, 3000) 
+}
 break;
 
-case 'pause_resume':
+case 'pause_resume':{
+let msg;
 if (player.paused) {
 player.resume();
 const title = player.current?.title || 'track';
-await interaction.reply({flags:32768,components:[{type: 17,components:[{type:10,content:"**<:hakari:1482121759330275400> Hakari Music**"},{type: 14,ndivider: true,spacing: 1},{type: 10,content:`Resumed ${title} by <@${interaction.user.id}>.`}],accent_color: 16687280}]});
+msg = await interaction.reply({flags:32768,components:[{type: 17,components:[{type:10,content:"**<:hakari:1482121759330275400> Hakari Music**"},{type: 14,ndivider: true,spacing: 1},{type: 10,content:`Resumed ${title} by <@${interaction.user.id}>.`}],accent_color: 16687280}]});
 } else {
 player.pause();
-await interaction.reply({
+msg = await interaction.reply({
 content: '⏸ Paused.',
 ephemeral: true
 });
+setTimeout(() => {
+msg.delete().catch(() => { })
+}, 3000) 
+}
 }
 break;
 
-case 'previous':
+case 'previous':{
+let msg;
 const wentBack = await player.back();
 if (wentBack) {
-await interaction.reply({flags:32768,components:[{type: 17,components:[{type:10,content:"**<:hakari:1482121759330275400> Hakari Music**"},{type: 14,ndivider: true,spacing: 1},{type: 10,content:`<@${interaction.user.id}> went back.`}],accent_color: 16687280}]});
+msg = await interaction.reply({flags:32768,components:[{type: 17,components:[{type:10,content:"**<:hakari:1482121759330275400> Hakari Music**"},{type: 14,ndivider: true,spacing: 1},{type: 10,content:`<@${interaction.user.id}> went back.`}],accent_color: 16687280}]});
 } else {
-await interaction.reply({flags:32768,components:[{type: 17,components:[{type:10,content:"**<:hakari:1482121759330275400> Hakari Music**"},{type: 14,ndivider: true,spacing: 1},{type: 10,content:'No previous track.'}],accent_color: 16687280}]});
+msg = await interaction.reply({flags:32768,components:[{type: 17,components:[{type:10,content:"**<:hakari:1482121759330275400> Hakari Music**"},{type: 14,ndivider: true,spacing: 1},{type: 10,content:'No previous track.'}],accent_color: 16687280}]});
+}
+setTimeout(() => {
+msg.delete().catch(() => { })
+}, 3000) 
 }
 break;
 
-case 'queue':
+case 'queue':{
 const queue = player.queue;
+let msg;
 if (queue && queue.size > 0) {
 const queueList = queue.tracks.slice(0, 10).map((t, i) =>
 `${i + 1}. [${t.title} - ${t.author}](${t.uri})`
 ).join('\n');
-await interaction.reply({flags:32768,components:[{type: 17,components:[{type:10,content:"**<:hakari:1482121759330275400> Hakari Music**"},{type: 14,ndivider: true,spacing: 1},{type: 10,content:`**Queue:**\n${queueList}${queue.size > 10 ? `\n... and ${queue.size - 10} more` : ''}`}],accent_color: 16687280}]});
+msg = await interaction.reply({flags:32768,components:[{type: 17,components:[{type:10,content:"**<:hakari:1482121759330275400> Hakari Music**"},{type: 14,ndivider: true,spacing: 1},{type: 10,content:`**Queue:**\n${queueList}${queue.size > 10 ? `\n... and ${queue.size - 10} more` : ''}`}],accent_color: 16687280}]});
 } else {
-await interaction.reply({
+msg = await interaction.reply({
 content: 'Queue is empty.',
 ephemeral: true
 });
 }
-break;
-
-case 'shuffle':
-if (player.queue && player.queue.size > 1) {
-player.shuffle();
-await interaction.reply({flags:32768,components:[{type: 17,components:[{type:10,content:"**<:hakari:1482121759330275400> Hakari Music**"},{type: 14,ndivider: true,spacing: 1},{type: 10,content:`Queue shuffled by <@${interaction.user.id}>.`}],accent_color: 16687280}]});
-} else {
-await interaction.reply({flags:32768,components:[{type: 17,components:[{type:10,content:"**<:hakari:1482121759330275400> Hakari Music**"},{type: 14,ndivider: true,spacing: 1},{type: 10,content:'Queue is too short to shuffle.'}],accent_color: 16687280}]});
+setTimeout(() => {
+msg.delete().catch(() => { })
+}, 3000) 
 }
 break;
 
-case 'loop':
-// Toggle loop: track → queue → off
+case 'shuffle':{
+let msg;
+if (player.queue && player.queue.size > 1) {
+player.shuffle();
+msg = await interaction.reply({flags:32768,components:[{type: 17,components:[{type:10,content:"**<:hakari:1482121759330275400> Hakari Music**"},{type: 14,ndivider: true,spacing: 1},{type: 10,content:`Queue shuffled by <@${interaction.user.id}>.`}],accent_color: 16687280}]});
+} else {
+msg = await interaction.reply({flags:32768,components:[{type: 17,components:[{type:10,content:"**<:hakari:1482121759330275400> Hakari Music**"},{type: 14,ndivider: true,spacing: 1},{type: 10,content:'Queue is too short to shuffle.'}],accent_color: 16687280}]});
+}
+setTimeout(() => {
+msg.delete().catch(() => { })
+}, 3000) 
+}
+break;
+
+case 'loop':{
+let msg;
 const currentLoop = player.loop;
 let newLoop;
 if (currentLoop === 'track') {
@@ -113,15 +141,15 @@ newLoop = 'track';
 }
 player.setLoop(newLoop);
 if (newLoop) {
-await interaction.reply({flags:32768,components:[{type: 17,components:[{type:10,content:"**<:hakari:1482121759330275400> Hakari Music**"},{type: 14,ndivider: true,spacing: 1},{type: 10,content: `<@${interaction.user.id}> changed loop mode to ${newLoop}.`}],accent_color: 16687280}]});
+msg = await interaction.reply({flags:32768,components:[{type: 17,components:[{type:10,content:"**<:hakari:1482121759330275400> Hakari Music**"},{type: 14,ndivider: true,spacing: 1},{type: 10,content: `<@${interaction.user.id}> changed loop mode to ${newLoop}.`}],accent_color: 16687280}]});
 } else {
-await interaction.reply({flags:32768,components:[{type: 17,components:[{type:10,content:"**<:hakari:1482121759330275400> Hakari Music**"},{type: 14,ndivider: true,spacing: 1},{type: 10,content:`<@${interaction.user.id}> disabled loop mode.`}],accent_color: 16687280}]});
+msg = await interaction.reply({flags:32768,components:[{type: 17,components:[{type:10,content:"**<:hakari:1482121759330275400> Hakari Music**"},{type: 14,ndivider: true,spacing: 1},{type: 10,content:`<@${interaction.user.id}> disabled loop mode.`}],accent_color: 16687280}]});
+}
 }
 break;
 
 case 'volume_up': {
 const current = Math.min(player.volume ?? 100, 100)
-
 let content
 if (current >= 100) {
 content = '🔊 Already max.'
@@ -130,19 +158,16 @@ const newVol = Math.min(current + 10, 100)
 player.setVolume(newVol)
 content = `<@${interaction.user.id}> changed the volume to \`🔊 ${newVol}%\``
 }
-
-if (interaction.replied || interaction.deferred) {
-await interaction.editReply({flags:32768,components:[{type: 17,components:[{type:10,content:"**<:hakari:1482121759330275400> Hakari Music**"},{type: 14,ndivider: true,spacing: 1},{type: 10,content}],accent_color: 16687280}]})
-} else {
-await interaction.reply({flags:32768,components:[{type: 17,components:[{type:10,content:"**<:hakari:1482121759330275400> Hakari Music**"},{type: 14,ndivider: true,spacing: 1},{type: 10,content}],accent_color: 16687280}]})
+let msg =await interaction.reply({flags:32768,components:[{type: 17,components:[{type:10,content:"**<:hakari:1482121759330275400> Hakari Music**"},{type: 14,ndivider: true,spacing: 1},{type: 10,content}],accent_color: 16687280}]})
+setTimeout(() => {
+msg.delete().catch(() => { })
+}, 3000)
 }
-
 break
-}
+
 
 case 'volume_down': {
 const current = Math.max(player.volume ?? 100, 0)
-
 let content
 if (current <= 0) {
 content = '🔉 Already mute.'
@@ -151,15 +176,13 @@ const newVol = Math.max(current - 10, 0)
 player.setVolume(newVol)
 content = `@${interaction.user.id}> changed the volume to \`🔉 ${newVol}%\``
 }
-
-if (interaction.replied || interaction.deferred) {
-await interaction.editReply({flags:32768,components:[{type: 17,components:[{type:10,content:"**<:hakari:1482121759330275400> Hakari Music**"},{type: 14,ndivider: true,spacing: 1},{type: 10,content}],accent_color: 16687280}]})
-} else {
-await interaction.reply({flags:32768,components:[{type: 17,components:[{type:10,content:"**<:hakari:1482121759330275400> Hakari Music**"},{type: 14,ndivider: true,spacing: 1},{type: 10,content}],accent_color: 16687280}]})
+let msg = await interaction.reply({flags:32768,components:[{type: 17,components:[{type:10,content:"**<:hakari:1482121759330275400> Hakari Music**"},{type: 14,ndivider: true,spacing: 1},{type: 10,content}],accent_color: 16687280}]})
+setTimeout(() => {
+msg.delete().catch(() => { })
+}, 3000)
 }
-
 break
-}
+
 
 case 'lyrics':
 if (player.current) {
