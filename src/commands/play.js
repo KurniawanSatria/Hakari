@@ -1,5 +1,3 @@
-import { sources } from 'moonlink.js/dist/src/Util';
-
 const logger = require('../structures/logger');
 const config = require('../structures/config');
 
