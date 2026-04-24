@@ -8,20 +8,25 @@ module.exports = {
     client.manager.on('lyricsFound', async (player, payload) => {
       try {
         if (!player || player.destroyed) return;
-        
+        const channel = client.channels?.cache.get(player.textChannelId);
         const track = player.current;
         const title = track?.title || 'Unknown';
-        
+
         logger.info(`[lyricsFound] ${title} - ${payload?.lines?.length || 0} lines (${player.guildId})`);
-        
+
         player.lyricsData = payload;
         player.lyricsLines = payload?.lines || [];
-        
-        // No message sent - lyrics shown in now playing message
-        // Updated via lyricsLine event
-        
+        player.current.lyrics_provider = payload.lyrics.provider || 'Unknown';
+        if (player.pendingLyricsMsg) {
+          let msg = await player.pendingLyricsMsg.edit({ flags: 32768, components: [{ type: 17, components: [{ type: 10, content: "**<:hakari:1482121759330275400> Hakari Music**" }, { type: 14, divider: true, spacing: 1 }, { type: 10, content: `Found lyrics for ${title} from ${player.current.lyrics_provider}` }], accent_color: 16687280 }] })
+          setTimeout(() => {
+            msg.delete().catch(() => { })
+          }, 3000) 
+        }
+        console.log(`Found lyrics for ${title} from ${player.current.lyrics_provider}`)
+
       } catch (err) {
-        logger.error(`[lyricsFound] ${err.message}`);
+        console.error(`[lyricsFound] ${err.message}`);
       }
     });
   }

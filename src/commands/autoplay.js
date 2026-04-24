@@ -1,6 +1,19 @@
 // src/commands/autoplay.js - Toggle autoplay
 
-const { successMsg, errorMsg } = require('../structures/components');
+const { ACCENT_COLOR } = require('../structures/components');
+
+const msg = (content) => ({
+  flags: 32768,
+  components: [{
+    type: 17,
+    components: [
+      { type: 10, content: content.split('\n')[0] },
+      { type: 14 },
+      { type: 10, content: content.split('\n').slice(1).join('\n') }
+    ],
+    accent_color: ACCENT_COLOR
+  }]
+});
 
 module.exports = {
   name: 'autoplay',
@@ -9,79 +22,28 @@ module.exports = {
     try {
       const player = client.manager?.players.get(message.guild.id);
 
-      // Toggle or show status
       let newState;
-
       if (args[0]) {
-        // Set explicit state
         const arg = args[0].toLowerCase();
-        if (arg === 'on' || arg === 'true' || arg === '1') {
-          newState = true;
-        } else if (arg === 'off' || arg === 'false' || arg === '0') {
-          newState = false;
-        } else {
-          return message.channel.send(errorMsg('Invalid Option', 'Use `.autoplay on` or `.autoplay off`'));
-        }
+        if (arg === 'on' || arg === 'true' || arg === '1') newState = true;
+        else if (arg === 'off' || arg === 'false' || arg === '0') newState = false;
+        else return message.channel.send(msg('### Invalid Option\nUse `.autoplay on` or `.autoplay off`'));
       } else {
-        // Toggle current
         newState = !player?.autoPlay;
       }
 
       if (player) {
         player.setAutoPlay(newState);
-        const emoji = newState ? '<:toggleon:1488148374208119036>' : '<:toggleoff:1488148371905577020>';
         const status = newState ? '**enabled**' : '**disabled**';
-
-        message.channel.send({
-          "flags": 32768,
-          "components": [
-            {
-              "type": 17,
-              "components": [
-                {
-                  "type": 10,
-                  "content": `### ${emoji} AutoPlay`
-                },
-                {
-                  "type": 14
-                },
-                {
-                  "type": 10,
-                  "content": `Autoplay is now ${status}`
-                }
-              ],
-            }
-          ]
-        });
+        message.channel.send(msg(`### <:autoplay:1451682056927973476> AutoPlay\nAutoplay is now ${status}`));
       } else {
-        // Show current bot default
         const config = require('../structures/config');
         const defaultState = config.autoplay;
-        message.channel.send({
-          "flags": 32768,
-          "components": [
-            {
-              "type": 17,
-              "components": [
-                {
-                  "type": 10,
-                  "content": `### <:autoplay:1451682056927973476> AutoPlay`
-                },
-                {
-                  "type": 14
-                },
-                {
-                  "type": 10,
-                  "content": `Default autoplay: ${defaultState ? '**enabled**' : '**disabled**'}\n\nUse \`.autoplay on/off\` when a player is active.`
-                }
-              ],
-            }
-          ]
-        })
+        message.channel.send(msg(`### <:autoplay:1451682056927973476> AutoPlay\nDefault autoplay: ${defaultState ? '**enabled**' : '**disabled**'}\n\nUse \`.autoplay on/off\` when a player is active.`));
       }
 
     } catch (err) {
-      message.channel.send(errorMsg('Error', 'Error toggling autoplay.'));
+      message.channel.send(msg('### Error\nError toggling autoplay.'));
     }
   }
 };

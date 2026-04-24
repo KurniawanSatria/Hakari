@@ -163,9 +163,9 @@ break
 
 case 'lyrics':
 if (player.current) {
-player.subscribeLyrics()
-.then(() => interaction.reply({flags:32768,components:[{type: 17,components:[{type:10,content:"**<:hakari:1482121759330275400> Hakari Music**"},{type: 14,ndivider: true,spacing: 1},{type: 10,content: 'Lyrics will appear in the now playing message (if available).'}],accent_color: 16687280}]}))
-.catch(err => interaction.reply({ content: `Lyrics unavailable: ${err.message}`, ephemeral: true }));
+await player.subscribeLyrics()
+let msg = await interaction.reply({flags:32768,components:[{type: 17,components:[{type:10,content:"**<:hakari:1482121759330275400> Hakari Music**"},{type: 14,ndivider: true,spacing: 1},{type: 10,content: 'Loading...'}],accent_color: 16687280}]})
+player.pendingLyricsMsg = msg;
 } else {
 await interaction.reply({flags:32768,components:[{type: 17,components:[{type:10,content:"**<:hakari:1482121759330275400> Hakari Music**"},{type: 14,ndivider: true,spacing: 1},{type: 10,content:'no track playing.'}],accent_color: 16687280}]});
 }

@@ -36,6 +36,7 @@ await msg.edit({
 flags: 32768,
 components: [
 {
+accent_color: 16687280,
 type: 17,
 components: [
 {
@@ -82,7 +83,6 @@ components: [
 ]
 }
 ],
-accent_color: 16687280
 });
 } catch (err) {
 console.log(`[playerUpdate] ${err.message}`)

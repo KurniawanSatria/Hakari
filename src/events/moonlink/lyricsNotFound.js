@@ -6,11 +6,12 @@ client.manager.on('lyricsNotFound', async (player, payload) => {
 try {
 if (!player || player.destroyed) return;
 const title = player.current?.title || 'Unknown';
-logger.info(`[lyricsNotFound] ${title} (${player.guildId})`);
+console.error(`[lyricsNotFound] ${title} (${player.guildId})`);
 player.lyricsData = null;
 player.lyricsLines = null;
+player.current.lyrics_provider = 'Unknown';
 } catch (err) {
-logger.error(`[lyricsNotFound] ${err.message}`);
+console.error(`[lyricsNotFound] ${err.message}`);
 }
 });
 }

@@ -1,5 +1,5 @@
 const logger = require('../../structures/logger');
-
+//const {node} = require('../../index');
 const CONTEXT = 2;
 
 function getLineText(line) {
@@ -118,6 +118,7 @@ await msg.edit({
 flags: 32768,
 components: [
 {
+accent_color: 16687280,
 type: 17,
 components: [
 {
@@ -129,7 +130,6 @@ url: 'https://i.ibb.co.com/ksXKzFg1/Now-Playing.gif'
 }
 }
 ],
-accent_color: 16687280
 },
 {
 type: 9,
@@ -225,14 +225,18 @@ emoji: { name: 'lyrics', id: '1451697663396413481' }, disabled: true
 },
 {
 type: 17,
-components: [{type: 10, content: `## <:lyrics:1451697663396413481> Lyrics\n\`\`\`ansi\n${formatLyricsAnsi(lyricsDisplay)}\n\n\`\`\``}],
+components: [
+{type: 10, content: `## <:lyrics:1451697663396413481> Lyrics\n\`\`\`ansi\n${formatLyricsAnsi(lyricsDisplay)}\n\n\`\`\``},
+{type: 14, divider: true, spacing: 1},
+{type: 10, content: `-# Sourced from: ${track.lyrics_provider}`}
+],
 accent_color: 16687280
 }
 ]
 });
 
 } catch (err) {
-console.log(`[lyricsLine] ${err.message}`);
+console.error(`[lyricsLine] ${err.message}`);
 }
 });
 }

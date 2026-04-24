@@ -26,12 +26,19 @@ module.exports = {
   // Lavalink/NodeLink nodes
   nodes: [
     {
-      identifier: 'main',
-      host: process.env.LAVALINK_HOST || 'localhost',
-      password: process.env.LAVALINK_PASSWORD || 'youshallnotpass',
-      port: parseIntDefault(process.env.LAVALINK_PORT, 2333),
-      secure: parseBool(process.env.LAVALINK_SECURE, false)
-    }
+      identifier: 'Hakari',
+      host: 'node.saturia.codes',
+      password: 'youshallnotpass',
+      port: 1235,
+      secure: false
+    },
+    // {
+    //   identifier: 'Hakari Backup',
+    //   host: process.env.LAVALINK_HOST || 'localhost',
+    //   password: process.env.LAVALINK_PASSWORD || 'youshallnotpass',
+    //   port: parseIntDefault(process.env.LAVALINK_PORT, 2333),
+    //   secure: parseBool(process.env.LAVALINK_SECURE, false)
+    // }
   ],
   
   // Bot settings
