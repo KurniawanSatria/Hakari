@@ -224,7 +224,7 @@ emoji: { name: 'lyrics', id: '1451697663396413481' }, disabled: true
 },
 {
 type: 17,
-components: [{type: 10, content: `## <:lyrics:1451697663396413481> Lyrics\n\`\`\`${formatLyricsAnsi(lyricsDisplay)}\n\n\`\`\``}],
+components: [{type: 10, content: `## <:lyrics:1451697663396413481> Lyrics\n\`\`\`ansi\n${formatLyricsAnsi(lyricsDisplay)}\n\n\`\`\``}],
 accent_color: 16687280
 }
 ]
