@@ -40,7 +40,7 @@ type: 17,
 components: [
 {
 type: 12,
-items: [{ media: { url: 'https://i.ibb.co.com/svYxCr4B/Now-playing.png' } }]
+items: [{ media: { url: 'https://i.ibb.co.com/1tvWMQs0/Grey-and-Black-Simple-Marketing-Linked-In-Banner.gif' } }]
 },
 {
 type: 9,
