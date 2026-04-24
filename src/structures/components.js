@@ -65,7 +65,7 @@ function sectionWithThumb(label, thumb) {
     sec.accessory = {
       type: 11,
       media: { url: thumb },
-      description: 'thumbnail'
+      description: 'Album thumbnail'
     };
   }
   
@@ -94,7 +94,7 @@ function nowPlaying(track, requester, duration) {
 function trackAdded(track, position, queueSize, duration, isPlaying) {
   return wrap(
     sectionWithThumb(
-      `### ${e('track')} Added to Queue\n**[${track.title}](${track.uri})**\n${track.author}\n\n${e('duration')} \`${duration}\``,
+      `### <:musicalnote:1482113385486352586> Added to Queue\n**[${track.title}](${track.uri})**\n${track.author}\n\n${e('duration')} \`${duration}\``,
       track.thumbnail || FALLBACK_THUMB
     ),
     { type: 10, content: `-# ${e('pos')} Position: \`${isPlaying ? '#' + (position + 1) : 'Up next'}\` • ${e('queue')} Queue: \`${queueSize} tracks\`` }
@@ -119,7 +119,7 @@ function queueList(current, tracks, totalDuration) {
   
   desc += `**Up Next:**\n`;
   desc += tracks.slice(0, 10).map((t, i) => 
-    `${i + 1}. ${t.title} - ${t.author}`
+    `${i + 1}. [${t.title} - ${t.author}](${t.uri})`
   ).join('\n');
   
   if (tracks.length > 10) {
@@ -128,7 +128,7 @@ function queueList(current, tracks, totalDuration) {
   
   return wrap(
     sectionWithThumb(
-      `### ${e('queue')} Music Queue\n\n${desc}`,
+      `### <:queue:1451682061697159310> Music Queue\n\n${desc}`,
       current?.thumbnail || FALLBACK_THUMB
     ),
     separator(),

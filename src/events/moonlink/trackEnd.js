@@ -14,6 +14,7 @@ module.exports = {
         }
         player.lyricsData = null;
         player.lyricsLines = null;
+        player.HandleByLyrics = false;
         
         // Clean up track message
         if (player.msg?.delete) {

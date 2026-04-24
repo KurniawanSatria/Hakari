@@ -33,6 +33,8 @@ const colors = {
   WATCHER: '\x1b[38;5;227m', // bright yellow
   PLAYER: '\x1b[32m',   // green
   STARTED: '\x1b[34m',   // blue
+  NODE: '\x1b[38m',      // crimson
+  
   
   reset: '\x1b[0m'
 };
@@ -114,6 +116,8 @@ logger.events = (...args) => logger('EVENTS', ...args);
 logger.watcher = (...args) => logger('WATCHER', ...args);
 logger.player = (...args) => logger('PLAYER', ...args);
 logger.started = (...args) => logger('STARTED', ...args);
+logger.node = (...args) => logger('NODE', ...args);
+
 
 // Initialize log file
 initLogStream();

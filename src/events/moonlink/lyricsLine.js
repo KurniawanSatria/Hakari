@@ -1,138 +1,216 @@
-// src/events/moonlink/lyricsLine.js - Real-time synced lyrics updates
-
 const logger = require('../../structures/logger');
 
 const CONTEXT = 2;
 
 function getLineText(line) {
-  if (!line) return '';
-  if (typeof line === 'string') return line;
-  if (line.segments && Array.isArray(line.segments)) {
-    return line.segments.map(s => s.text || '').join('');
-  }
-  return line.text || line.line || '';
+if (!line) return '';
+if (typeof line === 'string') return line;
+if (line.segments && Array.isArray(line.segments)) {
+return line.segments.map(s => s.text || '').join('');
+}
+return line.text || line.line || '';
 }
 
 function formatTime(ms) {
-  if (!ms || ms < 0) return null;
-  const totalSec = Math.floor(ms / 1000);
-  const m = Math.floor(totalSec / 60);
-  const s = totalSec % 60;
-  return `${m}:${String(s).padStart(2, '0')}`;
+if (!ms || ms < 0) return '0:00';
+const totalSec = Math.floor(ms / 1000);
+const m = Math.floor(totalSec / 60);
+const s = totalSec % 60;
+return `${m}:${String(s).padStart(2, '0')}`;
+}
+
+function buildProgressBar(current = 0, total = 0, length = 12) {
+if (!total || total <= 0) return '●───────────────────';
+const filled = Math.round((current / total) * length);
+const empty = length - filled;
+return '▬'.repeat(Math.max(filled - 1, 0)) + '🔘' + '─'.repeat(Math.max(empty, 0));
+}
+
+function buildLyricsDisplay(lines, currentIdx, lineText) {
+if (currentIdx >= 0 && lines.length > 0) {
+const before = [];
+for (let i = Math.max(0, currentIdx - CONTEXT); i < currentIdx; i++) {
+const t = getLineText(lines[i]);
+if (t) before.push(`-# ~~${t}~~`);
+}
+
+const current = getLineText(lines[currentIdx]);
+
+const after = [];
+for (let i = currentIdx + 1; i < Math.min(lines.length, currentIdx + CONTEXT + 1); i++) {
+const t = getLineText(lines[i]);
+if (t) after.push(`-# ~~${t}~~`);
+}
+
+const parts = [];
+if (before.length) parts.push(before.join('\n'));
+if (current)       parts.push(`**${current}**`);
+if (after.length)  parts.push(after.join('\n'));
+
+return parts.join('\n') || '♪';
+}
+
+return lineText || '♪';
 }
 
 module.exports = {
-  name: 'lyricsLine',
-  register: (client) => {
-    client.manager.on('lyricsLine', async (player, payload) => {
-      try {
-        if (!player || player.destroyed) return;
-        if (!player.playing && !player.paused) return;
+name: 'lyricsLine',
+register: (client) => {
+client.manager.on('lyricsLine', async (player, payload) => {
+try {
+if (!player || player.destroyed) return;
+if (!player.playing && !player.paused) return;
+player.HandleByLyrics = true;
+const track = player.current;
+const msg   = player.msg;
+if (!msg || !msg.editable) return;
+const thumb     = track?.thumbnail || 'https://files.catbox.moe/fnlch5.jpg';
+const title     = track?.title     || 'Unknown';
+const author    = track?.author    || 'Unknown';
+const requester = track?.requester?.username || 'Unknown';
+const duration  = formatTime(track?.duration);
+const status    = player.paused ? 'Paused' : 'Playing';
+const queueSize = player.queue?.size ?? player.queue?.length ?? 0;
+const queueText = queueSize > 0 ? `${queueSize} song${queueSize !== 1 ? 's' : ''} in queue` : 'No songs in queue';
+const lineData  = payload?.line;
+const lineTime  = lineData?.timestamp;
+const lineText  = lineData?.line || '';
+const lines     = player.lyricsLines || [];
 
-        const track = player.current;
-        const msg = player.msg;
+let currentIdx = -1;
+if (payload?.lineIndex !== undefined) {
+currentIdx = payload.lineIndex;
+} else if (lineTime !== undefined && lines.length > 0) {
+currentIdx = lines.findIndex(l =>
+l.time <= lineTime && (l.endTime === undefined || l.endTime > lineTime)
+);
+}
+const lyricsDisplay = buildLyricsDisplay(lines, currentIdx, lineText);
+const currentMs   = lineTime ?? player.position ?? 0;
+const totalMs     = track?.duration ?? 0;
+const progressBar = buildProgressBar(currentMs, totalMs);
+const currentTime = formatTime(currentMs);
+await msg.edit({
+flags: 32768,
+components: [
+{
+type: 17,
+components: [
+{
+type: 12,
+items: [
+{
+media: {
+url: 'https://i.ibb.co.com/svYxCr4B/Now-playing.png'
+}
+}
+]
+},
+{
+type: 9,
+components: [
+{
+type: 10,
+content: [
+`## ${title}`,
+'',
+`**${title} - ${author}**`,
+`\`${progressBar}\``,
+`-# ${status} | \`${currentTime}\``,
+'',
+`-# ${queueText}`,
+`-# Requester: **${requester}**`
+].join('\n')
+}
+],
+accessory: {
+type: 11,
+media: { url: thumb }
+}
+},
+{
+type: 10,
+content: `### <:lyrics:1482110308435628153> Lyrics\n${lyricsDisplay}`
+},
+{type : 14 },
+{
+type: 1,
+components: [
+{
+style: 4,
+type: 2,
+custom_id: 'stop',
+emoji: { id: '1449501286360944853', name: 'stop' }
+},
+{
+style: 2,
+type: 2,
+custom_id: 'previous',
+emoji: { name: 'previous', id:'1449501284272181309' }
+},
+{
+style: 2,
+type: 2,
+custom_id: 'pause_resume',
+emoji: { name: 'pause', id:'1449501265720774656' }
+},
+{
+style: 2,
+type: 2,
+custom_id: 'skip',
+emoji: { id: '1449501258791518370', name: 'skip' }
+},
+{
+style: 2,
+type: 2,
+custom_id: 'queue',
+emoji: { name: 'queue', id: '1451682061697159310' }
+}
+]
+},
+{
+type: 1,
+components: [
+{
+style: 2,
+type: 2,
+custom_id: 'shuffle',
+emoji: { name: 'shuffle', id: '1449501276131033219' }
+},
+{
+style: 2,
+type: 2,
+custom_id: 'loop',
+emoji: { name: 'loop', id: '1449501269818609876' }
+},
+{
+style: 2,
+type: 2,
+custom_id: 'volume_down',
+emoji: { name: 'volume down', id: '1449501262642020442' }
+},
+{
+style: 2,
+type: 2,
+custom_id: 'volume_up',
+emoji: { name: 'volume up', id: '1449501288869138482' }
+},
+{
+style: 2,
+type: 2,
+custom_id: 'lyrics',
+emoji: { name: 'lyrics', id: '1482110308435628153' }, disabled: true
+}
+]
+}
+]
+}
+]
+});
 
-        if (!msg || !msg.editable) return;
-
-        const lineData = payload?.line;
-        const lineTime = lineData?.timestamp;
-        const lineText = lineData?.line || '';
-
-        const lines = player.lyricsLines || [];
-        let currentIdx = -1;
-
-        if (payload?.lineIndex !== undefined) {
-          currentIdx = payload.lineIndex;
-        } else if (lineTime !== undefined && lines.length > 0) {
-          currentIdx = lines.findIndex(l =>
-            l.time <= lineTime && (l.endTime === undefined || l.endTime > lineTime)
-          );
-        }
-
-        let lyricsDisplay;
-
-        if (currentIdx >= 0 && lines.length > 0) {
-          const before = [];
-          for (let i = Math.max(0, currentIdx - CONTEXT); i < currentIdx; i++) {
-            before.push(getLineText(lines[i]));
-          }
-
-          const current = getLineText(lines[currentIdx]);
-
-          const after = [];
-          for (let i = currentIdx + 1; i < Math.min(lines.length, currentIdx + CONTEXT + 1); i++) {
-            after.push(getLineText(lines[i]));
-          }
-
-          lyricsDisplay = before.map(t => `~~${t}~~`).join('\n') + '\n**' + current + '**\n' + after.map(t => `~~${t}~~`).join('\n');
-        } else if (lineText) {
-          lyricsDisplay = lineText;
-        } else {
-          lyricsDisplay = '♪';
-        }
-
-        const timeStr = lineTime !== undefined ? formatTime(lineTime) : null;
-        const thumb = track?.thumbnail || 'https://files.catbox.moe/fnlch5.jpg';
-        const title = track?.title || 'Unknown';
-        const author = track?.author || 'Unknown';
-        const requester = track?.requester?.username || 'Unknown';
-        const duration = formatTime(track?.duration);
-        const status = player.paused ? 'Paused' : 'Playing';
-
-        await msg.edit({
-          "flags": 32768,
-          "components": [
-            {
-              "type": 17,
-              "components": [
-                {
-                  "type": 12,
-                  "items": [
-                    {
-                      "media": {
-                        "url": 'attachment://nowplaying.png'
-                      }
-                    }
-                  ]
-                },
-                {
-                  "type": 10,
-                  "content": '```ANSI\n[1;37m' + lyricsDisplay + '[0m\n```'
-                },
-                {
-                  "type": 10,
-                  "content": `-# Requester: ${requester} • Duration: \`${duration}\``
-                },
-                {
-                  "type": 14
-                },
-                {
-                  "type": 1,
-                  "components": [
-                    {
-                      "style": 4,
-                      "type": 2,
-                      "custom_id": "stop",
-                      "label": "Stop",
-                      "emoji": { "id": "1449501286360944853", "name": "stop" }
-                    },
-                    {
-                      "style": 1,
-                      "type": 2,
-                      "emoji": { "id": "1449501258791518370", "name": "skip" },
-                      "custom_id": "skip",
-                      "label": "Skip"
-                    }
-                  ]
-                }
-              ]
-            }
-          ]
-        });
-
-      } catch (err) {
-        logger.error(`[lyricsLine] ${err.message}`);
-      }
-    });
-  }
+} catch (err) {
+logger.error(`[lyricsLine] ${err.message}`);
+}
+});
+}
 };

@@ -1,10 +1,5 @@
-// Hakari Music Bot - Main Entry Point
-// A Discord music bot with lyrics sync support using Moonlink.js + NodeLink
-
 const fs = require('fs');
 const path = require('path');
-
-// Load environment variables
 require('dotenv').config();
 
 const { Client, GatewayIntentBits } = require('discord.js');
@@ -12,7 +7,6 @@ const { Manager, Connectors } = require('moonlink.js');
 const logger = require('./src/structures/logger');
 const config = require('./src/structures/config');
 
-// Create Discord client
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
@@ -23,11 +17,11 @@ const client = new Client({
   ]
 });
 
-// Initialize Moonlink Manager
 function initMoonlink() {
   client.manager = new Manager({
     nodes: config.nodes,
     options: {
+      debug: true,
       clientName: 'Hakari/v2.0',
       node: {
         selectionStrategy: 'leastLoad',
@@ -52,11 +46,8 @@ function initMoonlink() {
   return client.manager;
 }
 
-// Load event handlers
 function loadHandlers() {
   const eventsPath = path.join(__dirname, 'src/events');
-  
-  // Load moonlink events
   const moonlinkEvents = path.join(eventsPath, 'moonlink');
   if (fs.existsSync(moonlinkEvents)) {
     for (const file of fs.readdirSync(moonlinkEvents).filter(f => f.endsWith('.js'))) {
@@ -72,7 +63,6 @@ function loadHandlers() {
     }
   }
   
-  // Load client events
   const clientEvents = path.join(eventsPath, 'client');
   if (fs.existsSync(clientEvents)) {
     for (const file of fs.readdirSync(clientEvents).filter(f => f.endsWith('.js'))) {
@@ -90,7 +80,6 @@ function loadHandlers() {
   }
 }
 
-// Load commands
 function loadCommands() {
   const commandsPath = path.join(__dirname, 'src/commands');
   client.commands = new Map();
@@ -117,52 +106,6 @@ function loadCommands() {
   }
 }
 
-// Setup file watcher for hot-reload (delayed start)
-function setupWatcher() {
-  // Delay starting watcher to ensure nodes are fully initialized
-  setTimeout(() => {
-    const watchPaths = [
-      path.join(__dirname, 'src/commands'),
-      path.join(__dirname, 'src/events'),
-      path.join(__dirname, 'src/structures')
-    ];
-    
-    let reloadTimeout = null;
-    
-    for (const watchPath of watchPaths) {
-      if (fs.existsSync(watchPath)) {
-        fs.watch(watchPath, { recursive: true }, (eventType, filename) => {
-          if (filename && filename.endsWith('.js')) {
-            logger.watcher(`${eventType}: ${filename}`);
-            
-            // Debounce reloads
-            clearTimeout(reloadTimeout);
-            reloadTimeout = setTimeout(() => {
-              const fullPath = path.join(watchPath, filename);
-              delete require.cache[require.resolve(fullPath)];
-              
-              // Reload commands if changed
-              if (watchPath.includes('commands')) {
-                loadCommands();
-                logger.commands(`Reloaded: ${client.commands.size} loaded`);
-              }
-              
-              // Reload handlers if events/structures changed
-              if (watchPath.includes('events') || watchPath.includes('structures')) {
-                loadHandlers();
-                logger.events('Reloaded handlers');
-              }
-            }, 500);
-          }
-        });
-      }
-    }
-    
-    logger.watcher('Active (delayed start)');
-  }, 5000); // Wait 5 seconds after login before starting watcher
-}
-
-// Login and start
 async function start() {
   try {
     initMoonlink();
@@ -172,16 +115,12 @@ async function start() {
     await client.login(config.token);
     logger.started('Hakari Music Bot started');
     logger.commands(`Loaded: ${client.commands.size} commands`);
-    
-    // Setup watcher after everything is ready
-    setupWatcher();
   } catch (err) {
     logger.error(`Failed to start: ${err.message}`, { stack: err.stack });
     process.exit(1);
   }
 }
 
-// Handle shutdown
 process.on('SIGINT', () => {
   logger.info('Received SIGINT, shutting down...');
   client.destroy();
