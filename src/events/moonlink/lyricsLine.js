@@ -232,7 +232,7 @@ accent_color: 16687280
 });
 
 } catch (err) {
-logger.error(`[lyricsLine] ${err.message}`);
+console.log(`[lyricsLine] ${err.message}`);
 }
 });
 }
