@@ -101,7 +101,7 @@ type: 12,
 items: [
 {
 media: {
-url: 'https://i.ibb.co.com/1tvWMQs0/Grey-and-Black-Simple-Marketing-Linked-In-Banner.gif'
+url: 'https://i.ibb.co.com/tpZ2Vg8P/Now-Playing.gif'
 }
 }
 ]
