@@ -4,9 +4,9 @@ module.exports = {
     name: 'clientReady',
     execute: async (client) => {
         try {
-            logger.started(`Logged in as ${client.user.tag.split('#')}`);
+            logger.info(`Logged in as ${client.user.tag.split('#')[0]}`);
         } catch (err) {
-            logger.error(`ready error: ${err.message}`, { stack: err.stack });
+            logger.error(`in clientReady: ${err.message}`, { stack: err.stack });
         }
     }
 };

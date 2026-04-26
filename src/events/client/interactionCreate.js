@@ -119,7 +119,7 @@ module.exports = {
             }
 
         } catch (err) {
-            logger.error(`[interaction] ${err.message}`);
+            logger.error(`in interactionCreate: ${err.message}`);
             if (!interaction.replied) {
                 interaction.reply({
                     content: 'Error processing interaction.',

@@ -71,7 +71,7 @@ module.exports = {
                     ],
                 });
             } catch (err) {
-                console.log(`[playerUpdate] ${err.message}`)
+                logger.error(`in playerUpdate: ${err.message}`)
             }
         });
     }

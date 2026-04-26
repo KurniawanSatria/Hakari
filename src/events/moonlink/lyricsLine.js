@@ -191,7 +191,7 @@ module.exports = {
         });
 
       } catch (err) {
-        console.error(`[lyricsLine] ${err.message}`);
+        logger.error(`in lyricsLine:${err.message}`);
       }
     });
   }

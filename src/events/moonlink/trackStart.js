@@ -65,7 +65,7 @@ module.exports = {
         const queueSize = player.queue?.size ?? player.queue?.length ?? 0;
         const progressBar = buildProgressBar(0, track.duration ?? 0);
 
-        logger.player(`Now playing: ${title} - ${author}`);
+        logger.info(`playing: ${title} by ${author} in ${channel.name} ${channel.guild.name}`);
         const queueText = queueSize > 0 ? `${queueSize} song${queueSize !== 1 ? 's' : ''} in queue` : 'No songs in queue';
         const sent = await channel.send({
           flags: 32768,

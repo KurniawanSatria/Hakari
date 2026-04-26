@@ -9,24 +9,27 @@ module.exports = {
       try {
         // Clean up lyrics
         if (player.lyricsMsg) {
-          player.lyricsMsg.delete().catch(() => {});
+          player.lyricsMsg.delete().catch(() => { });
           player.lyricsMsg = null;
         }
         player.lyricsData = null;
         player.lyricsLines = null;
         player.HandleByLyrics = false;
-        
+
         // Clean up track message
         if (player.msg?.delete) {
-          player.msg.delete().catch(() => {});
+          player.msg.delete().catch(() => { });
         }
         player.msg = null;
-        
-        const title = track?.title || 'Unknown';
-        logger.info(`[trackEnd] ${title} (${reason})`);
-        
+
+        const title = track.title || 'Unknown';
+        const author = track.author || 'Unknown';
+        const guildName = client.guilds?.cache.get(player.guildId)?.name || 'Unknown';
+        const channelName = client.channels?.cache.get(player.textChannelId)?.name || 'Unknown';
+        logger.info(`Finished playing ${title} by ${author} in ${guildName} (${channelName})`);
+
       } catch (err) {
-        logger.error(`[trackEnd] ${err.message}`);
+        logger.error(`in trackEnd: ${err.message}`);
       }
     });
   }

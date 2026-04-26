@@ -54,7 +54,7 @@ module.exports = {
     try {
       await command.execute(client, message, args);
     } catch (err) {
-      logger.error(`Command ${commandName} failed: ${err.message}`);
+      logger.error(`in messageCreate: Command ${commandName} failed: ${err.message}`);
       message.reply('An error occurred.').catch(() => { });
     }
   }

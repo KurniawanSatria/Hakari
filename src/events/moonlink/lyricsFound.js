@@ -23,10 +23,10 @@ module.exports = {
             msg.delete().catch(() => { })
           }, 3000) 
         }
-        console.log(`Found lyrics for ${title} from ${player.current.lyrics_provider}`)
+        logger.info(`Found lyrics for ${title} from ${player.current.lyrics_provider}`)
 
       } catch (err) {
-        console.error(`[lyricsFound] ${err.message}`);
+        logger.error(`in lyricsFound: ${err.message}`);
       }
     });
   }

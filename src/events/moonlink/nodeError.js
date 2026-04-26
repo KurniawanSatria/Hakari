@@ -4,7 +4,7 @@ module.exports = {
   name: 'nodeError',
   register: (client) => {
     client.manager.on('nodeError', (node, error) => {
-      logger.error(`Node ${node.identifier}: ${error.message}`);
+      logger.error(`in nodeError: Node ${node.identifier}: ${error.message}`);
     });
   }
 };

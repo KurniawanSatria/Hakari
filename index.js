@@ -6,6 +6,9 @@ const { Client, GatewayIntentBits } = require('discord.js');
 const { Manager, Connectors } = require('moonlink.js');
 const logger = require('./src/structures/logger');
 const config = require('./src/structures/config');
+const figlet = require('figlet');
+const chalk = require('chalk');
+
 
 const client = new Client({
   intents: [
@@ -55,7 +58,7 @@ function loadHandlers() {
         const handler = require(path.join(moonlinkEvents, file));
         if (typeof handler.register === 'function') {
           handler.register(client);
-          logger.moonlink(`Loaded: ${handler.name}`);
+          logger.info(`Moon link Event Loaded: ${handler.name}`);
         }
       } catch (err) {
         logger.error(`Failed to load moonlink event ${file}: ${err.message}`);
@@ -71,7 +74,7 @@ function loadHandlers() {
         const handler = require(path.join(clientEvents, file));
         if (typeof handler.execute === 'function') {
           client.on(eventName, (...args) => handler.execute(client, ...args));
-          logger.events(`Loaded: ${eventName}`);
+          logger.info(`Client Event Loaded: ${eventName}`);
         }
       } catch (err) {
         logger.error(`Failed to load client event ${file}: ${err.message}`);
@@ -91,7 +94,7 @@ function loadCommands() {
         const cmd = require(path.join(commandsPath, file));
         if (cmd.execute) {
           client.commands.set(file.replace('.js', ''), cmd);
-          logger.commands(`Loaded: ${file.replace('.js', '')}`);
+          logger.info(`Command Loaded: ${file.replace('.js', '')}`);
           
           if (cmd.aliases) {
             for (const alias of cmd.aliases) {
@@ -107,14 +110,33 @@ function loadCommands() {
 }
 
 async function start() {
+  console.clear();
   try {
+    const banner = await new Promise((resolve, reject) => {
+      figlet.text(
+        'Hakari',
+        {
+          font: 'Bloody',
+          horizontalLayout: 'default',
+          verticalLayout: 'default',
+          width: 80,
+          whitespaceBreak: true
+        },
+        (err, data) => {
+          if (err) return reject(err)
+          resolve(data)
+        }
+      )
+    })
+    console.log(chalk.hex('#ff69b4')(banner))
+    console.log(chalk.hex('#ffffff')('v2.1'))
+    console.log(chalk.hex('#05ffea')('Created by Saturia.'))
     initMoonlink();
     loadHandlers();
     loadCommands();
     
     await client.login(config.token);
-    logger.started('Hakari Music Bot started');
-    logger.commands(`Loaded: ${client.commands.size} commands`);
+    logger.info(`Loaded: ${client.commands.size} commands`);
   } catch (err) {
     logger.error(`Failed to start: ${err.message}`, { stack: err.stack });
     process.exit(1);

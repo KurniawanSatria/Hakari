@@ -4,7 +4,7 @@ module.exports = {
 name: 'nodeConnected',
 register: (client) => {
   client.manager.on('nodeConnected', (node) => {
-    logger.started(`Connected To node ${node.identifier}`);
+    logger.info(`Connected To node ${node.identifier}`);
   });
   }
 };

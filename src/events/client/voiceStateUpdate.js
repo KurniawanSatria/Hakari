@@ -37,7 +37,7 @@ module.exports = {
       }
       
     } catch (err) {
-      logger.error(`[voiceState] ${err.message}`);
+      logger.error(`in voiceStateUpdate: ${err.message}`);
     }
   }
 };
