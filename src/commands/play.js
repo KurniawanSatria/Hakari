@@ -27,9 +27,6 @@ module.exports = {
       if (!query) return message.reply('Please provide a song name or URL.');
       if (!message.member.voice.channel) return message.reply('You must be in a voice channel.');
       if (!client.manager) return message.reply('Music manager not initialized.');
-
-      message.delete().catch(() => { });
-
       const player = client.manager.players.create({
         guildId: message.guild.id,
         voiceChannelId: message.member.voice.channel.id,
@@ -47,6 +44,7 @@ module.exports = {
       if (!tracks || tracks.length === 0) {
         return message.reply('No results found.');
       }
+          message.delete().catch(() => { });
 
       if (loadType === 'playlist') {
           const queueStart = player.queue.tracks?.length || 0;
@@ -117,10 +115,10 @@ module.exports = {
         const msg = err.message;
         logger.error(`Play: ${msg}`);
         if (msg.includes('disconnected') || msg.includes('Connection')) {
-          message.reply('Voice connection issue. Try again in a moment.');
+          message.channel.send('Voice connection issue. Try again in a moment.');
         } else {
           player?.destroy();
-          message.reply('An error occurred.');
+          message.channel.send('An error occurred.');
         }
       }
     }

@@ -1,6 +1,8 @@
 const logger = require('../../structures/logger');
-//const {node} = require('../../index');
-const CONTEXT = 2;
+const fs = require('fs');
+
+
+const WINDOW = 5;
 
 function getLineText(line) {
   if (!line) return '';
@@ -8,33 +10,9 @@ function getLineText(line) {
   if (line.segments && Array.isArray(line.segments)) {
     return line.segments.map(s => s.text || '').join('');
   }
-  return line.text || line.line || '';
-}
-function randomColoransi() {
-  const colors = [
-    "\x1b[31m",
-    "\x1b[32m",
-    "\x1b[33m",
-    "\x1b[34m",
-    "\x1b[35m",
-    "\x1b[36m",
-    "\x1b[91m",
-    "\x1b[92m",
-    "\x1b[93m",
-    "\x1b[94m",
-    "\x1b[95m",
-    "\x1b[96m"
-  ]
-  return colors[Math.floor(Math.random() * colors.length)]
+  return line.line || line.text || '';
 }
 
-function formatLyricsAnsi(lyricsDisplay) {
-  const bold = "\x1b[1m"
-  const reset = "\x1b[0m"
-  const color = randomColoransi()
-
-  return `${color}${bold}${lyricsDisplay}${reset}`
-}
 function formatTime(ms) {
   if (!ms || ms < 0) return '0:00';
   const totalSec = Math.floor(ms / 1000);
@@ -52,26 +30,23 @@ function buildProgressBar(current = 0, total = 0, length = 12) {
 
 function buildLyricsDisplay(lines, currentIdx, lineText) {
   if (currentIdx >= 0 && lines.length > 0) {
-    const before = [];
-    for (let i = Math.max(0, currentIdx - CONTEXT); i < currentIdx; i++) {
-      const t = getLineText(lines[i]);
-      if (t) before.push(`-# ~~${t}~~`);
-    }
+    const start = Math.max(0, currentIdx - WINDOW);
+    const end = Math.min(lines.length, currentIdx + WINDOW + 1);
 
-    const current = getLineText(lines[currentIdx]);
+    const parts = lines.slice(start, end).map((line, i) => {
+      const realIdx = start + i;
+      const t = getLineText(line);
+      if (!t) return null;
 
-    const after = [];
-    for (let i = currentIdx + 1; i < Math.min(lines.length, currentIdx + CONTEXT + 1); i++) {
-      const t = getLineText(lines[i]);
-      if (t) after.push(`-# ~~${t}~~`);
-    }
+      if (realIdx < currentIdx) return `-# ~~${t}~~`;
+      if (realIdx === currentIdx) return `**__${t}__**`;
+      return `-# ${t}`;
+    }).filter(Boolean);
 
-    const parts = [];
-    if (before.length) parts.push(before.join('\n'));
-    if (current) parts.push(`**${current}**`);
-    if (after.length) parts.push(after.join('\n'));
+    const prefix = start > 0 ? `-# ··· ${start} baris sebelumnya\n` : '';
+    const suffix = end < lines.length ? `\n-# ··· ${lines.length - end}` : '';
 
-    return parts.join('\n') || '♪';
+    return prefix + parts.join('\n') + suffix || '♪';
   }
 
   return lineText || '♪';
@@ -84,18 +59,20 @@ module.exports = {
       try {
         if (!player || player.destroyed) return;
         if (!player.playing && !player.paused) return;
+
         player.HandleByLyrics = true;
+
         const track = player.current;
         const msg = player.msg;
         if (!msg || !msg.editable) return;
+
         const thumb = track?.thumbnail || 'https://files.catbox.moe/fnlch5.jpg';
-        const title = track?.title || 'Unknown';
-        const author = track?.author || 'Unknown';
-        const requester = track?.requester?.username || 'Unknown';
+        const title = track?.title.slice(0, 30) || 'Unknown';
         const duration = formatTime(track?.duration);
-        const status = player.paused ? 'Paused' : 'Playing';
+
         const queueSize = player.queue?.size ?? player.queue?.length ?? 0;
         const queueText = queueSize > 0 ? `${queueSize} song${queueSize !== 1 ? 's' : ''} in queue` : 'No songs in queue';
+
         const lineData = payload?.line;
         const lineTime = lineData?.timestamp;
         const lineText = lineData?.line || '';
@@ -106,14 +83,19 @@ module.exports = {
           currentIdx = payload.lineIndex;
         } else if (lineTime !== undefined && lines.length > 0) {
           currentIdx = lines.findIndex(l =>
-            l.time <= lineTime && (l.endTime === undefined || l.endTime > lineTime)
+            l.timestamp <= lineTime && (l.timestamp + l.duration >= lineTime)
           );
         }
+
+        fs.writeFileSync('./debug/lyricsLine.json', JSON.stringify(payload, null, 2));
+
         const lyricsDisplay = buildLyricsDisplay(lines, currentIdx, lineText);
         const currentMs = lineTime ?? player.position ?? 0;
         const totalMs = track?.duration ?? 0;
+
         const progressBar = buildProgressBar(currentMs, totalMs);
         const currentTime = formatTime(currentMs);
+
         await msg.edit({
           flags: 32768,
           components: [
@@ -140,7 +122,7 @@ module.exports = {
                 { type: 14 },
                 {
                   type: 10,
-                  content: `## <:lyrics:1451697663396413481> Lyrics\n**__${lyricsDisplay}__**`
+                  content: `## <:lyrics:1451697663396413481> Lyrics\n${lyricsDisplay}`
                 },
                 { type: 14 },
                 {
@@ -153,40 +135,15 @@ module.exports = {
                 {
                   type: 1,
                   components: [
-                    {
-                      style: 4,
-                      type: 2,
-                      custom_id: 'stop',
-                      emoji: { id: '1449501286360944853', name: 'stop' }
-                    },
-                    {
-                      style: 2,
-                      type: 2,
-                      custom_id: 'previous',
-                      emoji: { name: 'previous', id: '1449501284272181309' }
-                    },
-                    {
-                      style: 2,
-                      type: 2,
-                      custom_id: 'pause_resume',
-                      emoji: { name: 'pause', id: '1449501265720774656' }
-                    },
-                    {
-                      style: 2,
-                      type: 2,
-                      custom_id: 'skip',
-                      emoji: { id: '1449501258791518370', name: 'skip' }
-                    },
-                    {
-                      style: 2,
-                      type: 2,
-                      custom_id: 'queue',
-                      emoji: { name: 'queue', id: '1451682061697159310' }
-                    }
+                    { style: 4, type: 2, custom_id: 'stop', emoji: { id: '1449501286360944853', name: 'stop' } },
+                    { style: 2, type: 2, custom_id: 'previous', emoji: { name: 'previous', id: '1449501284272181309' } },
+                    { style: 2, type: 2, custom_id: 'pause_resume', emoji: { name: 'pause', id: '1449501265720774656' } },
+                    { style: 2, type: 2, custom_id: 'skip', emoji: { id: '1449501258791518370', name: 'skip' } },
+                    { style: 2, type: 2, custom_id: 'queue', emoji: { name: 'queue', id: '1451682061697159310' } }
                   ]
-                },
-              ],
-            },
+                }
+              ]
+            }
           ]
         });
 

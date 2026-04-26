@@ -33,38 +33,15 @@ module.exports = {
         for (const msg of queueMsgs) {
           msg.delete().catch(() => { });
         }
-        const removeSpecialChars = (str) => {
-          return str.replace(/[^\p{L}\p{N}\s]/gu, "");
-        };
-        const cleanTitle = (str) => {
-          let output = removeSpecialChars(str);
-
-          output = output.toLowerCase();
-          output = output.replace(
-            /\b(copyright(-free)?|non-copyright|no copyright(?: song| music)?|copyright free|official|music|video|lyrics|audio|animated|amv|omv|m\/v|a?m\s*v)\b|\bofficial\s*(audio|music|lyrics\s*video|lyrics)?\b/gi,
-            ""
-          );
-          output = output.replace(/- Topic$/gi, "");
-          output = output.replace(/s+/g, " ");
-          output = output.replace(/\s{2,}/g, " ");
-          output = output.replace(/^\s+|\s+$/g, "");
-          output = output.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-          output = output.trim();
-
-          output = output.slice(0, 255);
-
-          return output;
-        };
         player.queueMsgs = [];
-        const title = track.title || 'Unknown';
-        track.title = cleanTitle(title);
+        const title = track.title.slice(0, 30) || 'Unknown';
         const author = track.author || 'Unknown';
         const thumb = track.thumbnail || 'https://files.catbox.moe/fnlch5.jpg';
         const duration = track.duration ? msToTime(track.duration) : '0:00';
         const requester = track.requester?.username || 'Unknown';
         const queueSize = player.queue?.size ?? player.queue?.length ?? 0;
         const progressBar = buildProgressBar(0, track.duration ?? 0);
-
+        
         logger.info(`playing: ${title} by ${author} in ${channel.name} ${channel.guild.name}`);
         const queueText = queueSize > 0 ? `${queueSize} song${queueSize !== 1 ? 's' : ''} in queue` : 'No songs in queue';
         const sent = await channel.send({

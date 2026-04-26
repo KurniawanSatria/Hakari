@@ -1,5 +1,3 @@
-// src/events/client/voiceStateUpdate.js - Auto-leave when empty
-
 const logger = require('../../structures/logger');
 
 module.exports = {
@@ -10,14 +8,16 @@ module.exports = {
       if (oldState.member.id !== client.user.id) return;
       
       // Bot joined a channel
+      const guildName = client.guilds?.cache.get(newState.guild.id)?.name || 'Unknown';
+      const channelName = client.channels?.cache.get(newState.channelId)?.name || 'Unknown';
       if (!oldState.channelId && newState.channelId) {
-        logger.info(`[voice] Joined ${newState.channelId}`);
+        logger.info(`Bot Joined Voice Channel ${channelName} in ${guildName}`);
         return;
       }
       
       // Bot left a channel
       if (oldState.channelId && !newState.channelId) {
-        logger.info(`[voice] Left ${oldState.channelId}`);
+        logger.info(`Bot Left Voice Channel ${channelName} in ${guildName}`);
         
         // Clean up player if exists
         const player = client.manager?.players.get(oldState.guild?.id);

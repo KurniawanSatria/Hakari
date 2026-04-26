@@ -1,0 +1,14 @@
+{
+  "op": "event",
+  "type": "LyricsLineEvent",
+  "guildId": "1420854984865611830",
+  "lineIndex": 41,
+  "line": {
+    "timestamp": 258010,
+    "duration": 32320,
+    "line": "",
+    "words": [],
+    "plugin": {}
+  },
+  "skipped": false
+}

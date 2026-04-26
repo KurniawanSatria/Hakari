@@ -144,7 +144,7 @@ async function start() {
 }
 
 process.on('SIGINT', () => {
-  logger.info('Received SIGINT, shutting down...');
+  logger.warn('Received SIGINT, shutting down...');
   client.destroy();
   process.exit(0);
 });
