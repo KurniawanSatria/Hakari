@@ -13,7 +13,7 @@ function buildProgressBar(current = 0, total = 0, length = 12) {
   if (!total || total <= 0) return '●───────────────────';
   const filled = Math.round((current / total) * length);
   const empty = length - filled;
-  return '▬'.repeat(Math.max(filled - 1, 0)) + '🔘' + '─'.repeat(Math.max(empty, 0));
+  return '▬'.repeat(Math.max(filled - 1, 0)) + '<:hakari:1482121759330275400>' + '─'.repeat(Math.max(empty, 0));
 }
 
 module.exports = {

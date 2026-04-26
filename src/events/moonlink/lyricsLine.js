@@ -25,7 +25,7 @@ function buildProgressBar(current = 0, total = 0, length = 12) {
   if (!total || total <= 0) return '●───────────────────';
   const filled = Math.round((current / total) * length);
   const empty = length - filled;
-  return '▬'.repeat(Math.max(filled - 1, 0)) + '🔘' + '─'.repeat(Math.max(empty, 0));
+  return '▬'.repeat(Math.max(filled - 1, 0)) + '<:hakari:1482121759330275400>' + '─'.repeat(Math.max(empty, 0));
 }
 
 function buildLyricsDisplay(lines, currentIdx, lineText) {
@@ -43,8 +43,8 @@ function buildLyricsDisplay(lines, currentIdx, lineText) {
       return `-# ${t}`;
     }).filter(Boolean);
 
-    const prefix = start > 0 ? `-# ··· ${start} lines earlier\n` : '';
-    const suffix = end < lines.length ? `\n-# ··· ${lines.length - end} lines later` : '';
+    const prefix = start > 0 ? `-# ···\n` : '';
+    const suffix = end < lines.length ? `\n-# ···` : '';
 
     return prefix + parts.join('\n') + suffix || '♪';
   }

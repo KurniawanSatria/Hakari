@@ -12,30 +12,9 @@ function buildProgressBar(current = 0, total = 0, length = 12) {
     if (!total || total <= 0) return '●───────────────────';
     const filled = Math.round((current / total) * length);
     const empty = length - filled;
-    return '▬'.repeat(Math.max(filled - 1, 0)) + '🔘' + '─'.repeat(Math.max(empty, 0));
+    return '▬'.repeat(Math.max(filled - 1, 0)) + '<:hakari:1482121759330275400>' + '─'.repeat(Math.max(empty, 0));
 }
-const removeSpecialChars = (str) => {
-          return str.replace(/[^\p{L}\p{N}\s]/gu, "");
-        };
-        const cleanTitle = (str) => {
-          let output = removeSpecialChars(str);
 
-          output = output.toLowerCase();
-          output = output.replace(
-            /\b(copyright(-free)?|non-copyright|no copyright(?: song| music)?|copyright free|official|music|video|lyrics|audio|animated|amv|omv|m\/v|a?m\s*v)\b|\bofficial\s*(audio|music|lyrics\s*video|lyrics)?\b/gi,
-            ""
-          );
-          output = output.replace(/- Topic$/gi, "");
-          output = output.replace(/s+/g, " ");
-          output = output.replace(/\s{2,}/g, " ");
-          output = output.replace(/^\s+|\s+$/g, "");
-          output = output.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-          output = output.trim();
-
-          output = output.slice(0, 255);
-
-          return output;
-        };
 module.exports = {
     name: 'playerUpdate',
     register: (client) => {
@@ -68,7 +47,7 @@ module.exports = {
                                             type: 10,
                                             content: [
                                                 `## <a:hakari:1497764150099574904> Now Playing`,
-                                                `### [${cleanTitle(track?.title)}](${track.uri})`,
+                                                `### [${track?.title.slice(0, 30) || 'Unknown'}](${track.uri})`,
                                                 `${track.author} — \`${duration}\``,
                                             ].join('\n')
                                         }
