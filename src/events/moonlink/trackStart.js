@@ -22,10 +22,10 @@ module.exports = {
     client.manager.on('trackStart', async (player, track) => {
       try {
         if (!player || player.destroyed) return;
-
+        
         const channel = client.channels?.cache.get(player.textChannelId);
         if (!channel) return;
-
+        await player.subscribeLyrics()
         if (player.msg?.delete) {
           player.msg.delete().catch(() => {});
         }
@@ -49,29 +49,16 @@ module.exports = {
           components: [
             {
               type: 17,
-              accent_color: 16687280,
               components: [
-                {
-                  type: 12,
-                  items: [
-                    {
-                      media: {
-                        url: 'https://i.ibb.co.com/ksXKzFg1/Now-Playing.gif'
-                      }
-                    }
-                  ]
-                },
                 {
                   type: 9,
                   components: [
                     {
                       type: 10,
                       content: [
-                        `## ${title}`,
-                        `**${title} - ${author}**`,
-                        `${progressBar}`,
-                        `-# Playing | \`${duration}\``,
-                        `-# ${queueText}`,
+                        `## Currently Playing`,
+                        `**[${title}](${track.uri})**`,
+                        `${track.author} — \`${duration}\``,
                       ].join('\n')
                     }
                   ],
@@ -81,6 +68,11 @@ module.exports = {
                   }
                 },
                 { type: 14 },
+                { type: 10, content: [
+                  `${progressBar}`,
+                  `${queueText}`
+                ].join('\n')
+                },
                 {
                   type: 1,
                   components: [
@@ -113,41 +105,6 @@ module.exports = {
                       type: 2,
                       custom_id: 'queue',
                       emoji: { name: 'queue', id: '1451682061697159310' }
-                    }
-                  ]
-                },
-                {
-                  type: 1,
-                  components: [
-                    {
-                      style: 2,
-                      type: 2,
-                      custom_id: 'shuffle',
-                      emoji: { name: 'shuffle', id: '1449501276131033219' }
-                    },
-                    {
-                      style: 2,
-                      type: 2,
-                      custom_id: 'loop',
-                      emoji: { name: 'loop', id: '1449501269818609876' }
-                    },
-                    {
-                      style: 2,
-                      type: 2,
-                      custom_id: 'volume_down',
-                      emoji: { name: 'volume down', id: '1449501262642020442' }
-                    },
-                    {
-                      style: 2,
-                      type: 2,
-                      custom_id: 'volume_up',
-                      emoji: { name: 'volume up', id: '1449501288869138482' }
-                    },
-                    {
-                      style: 2,
-                      type: 2,
-                      custom_id: 'lyrics',
-                      emoji: { name: 'lyrics', id: '1451697663396413481' }
                     }
                   ]
                 }

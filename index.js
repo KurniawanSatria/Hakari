@@ -132,5 +132,3 @@ process.on('unhandledRejection', (err) => {
 });
 
 start();
-const node = client.manager.node;
-module.exports = { node };

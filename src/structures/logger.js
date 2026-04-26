@@ -1,125 +1,78 @@
 // src/structures/logger.js - Simple colored console logger
 
-const util = require('util');
-const fs = require('fs');
-const path = require('path');
-const moment = require('moment-timezone')
+const moment = require('moment-timezone');
 moment.tz.setDefault('Asia/Jakarta');
 
-// Log configuration
-const LOG_LEVELS = {
-  error: 0,
-  warn: 1,
-  info: 2,
-  debug: 3,
-  sources: 3,
-  started: 3,
-  network: 3
-};
+const DEBUG = process.env.DEBUG === 'true';
+const LOG_ERRORS = process.env.LOG_ERRORS !== 'false';
 
-const currentLevel = (process.env.LOG_LEVEL || 'info').toLowerCase();
-const currentLogLevel = LOG_LEVELS[currentLevel] ?? 2;
-
-// Plain colors (no bold/italic)
-const colors = {
-  INFO: '\x1b[32m',      // green
-  WARN: '\x1b[33m',      // yellow
-  ERROR: '\x1b[31m',     // red
-  DEBUG: '\x1b[35m',     // magenta
-  
-  COMMANDS: '\x1b[38;5;208m', // orange
-  MOONLINK: '\x1b[38;5;129m', // purple
-  EVENTS: '\x1b[38;5;81m',  // cyan
-  WATCHER: '\x1b[38;5;227m', // bright yellow
-  PLAYER: '\x1b[32m',   // green
-  STARTED: '\x1b[34m',   // blue
-  NODE: '\x1b[38m',      // crimson
-  
-  
+// Colors
+const c = {
+  red: '\x1b[31m',
+  yellow: '\x1b[33m',
+  green: '\x1b[32m',
+  cyan: '\x1b[36m',
+  blue: '\x1b[34m',
+  magenta: '\x1b[35m',
+  gray: '\x1b[90m',
+  orange: '\x1b[38;5;208m',
+  purple: '\x1b[38;5;129m',
   reset: '\x1b[0m'
 };
 
-function getColor(label) {
-  return colors[label] || colors.INFO;
+function ts() {
+  return moment().format('HH:mm');
 }
 
-// Log file setup
-let logStream = null;
-const logDir = path.join(__dirname, '../../logs');
-
-function initLogStream() {
-  if (logStream) return;
-  
-  try {
-    if (!fs.existsSync(logDir)) {
-      fs.mkdirSync(logDir, { recursive: true });
-    }
-    
-    const today = new Date().toISOString().slice(0, 10);
-    const logFile = path.join(logDir, `hakari-${today}.log`);
-    logStream = fs.createWriteStream(logFile, { flags: 'a' });
-  } catch (err) {
-    console.error('Failed to create log file:', err.message);
-  }
+function fmt(label, color, ...args) {
+  return `${c.gray}[${ts()}] ${color}[${label}]${c.reset} ${args.join(' ')}`;
 }
 
-// Main logger function
-function logger(label, ...args) {
-  // If first arg is not a known level/category, treat it as message
-  const knownLabels = Object.keys(colors);
-  if (!knownLabels.includes(label)) {
-    args = [label, ...args];
-    label = 'INFO';
+const logger = {
+  error(...args) {
+    if (!LOG_ERRORS) return;
+    console.error(fmt('ERROR', c.red, ...args));
+  },
+  
+  warn(...args) {
+    console.warn(fmt('WARN', c.yellow, ...args));
+  },
+  
+  info(...args) {
+    console.log(fmt('INFO', c.green, ...args));
+  },
+  
+  debug(...args) {
+    if (!DEBUG) return;
+    console.log(fmt('DEBUG', c.magenta, ...args));
+  },
+  
+  commands(...args) {
+    console.log(fmt('COMMANDS', c.orange, ...args));
+  },
+  
+  moonlink(...args) {
+    if (!DEBUG) return;
+    console.log(fmt('MOONLINK', c.purple, ...args));
+  },
+  
+  events(...args) {
+    if (!DEBUG) return;
+    console.log(fmt('EVENTS', c.cyan, ...args));
+  },
+  
+  player(...args) {
+    console.log(fmt('PLAYER', c.green, ...args));
+  },
+  
+  started(...args) {
+    console.log(fmt('STARTED', c.blue, ...args));
+  },
+  
+  node(...args) {
+    if (!DEBUG) return;
+    console.log(fmt('NODE', c.red, ...args));
   }
-  
-  const levelIndex = LOG_LEVELS[label.toLowerCase()];
-  if (levelIndex === undefined || levelIndex < currentLogLevel) return;
-  
-  // Get color
-  const color = getColor(label);
-  
-  // Format timestamp (HH:mm:ss)
-  const time = '[ \x1b[1;37m' + moment().format('HH:mm:ss') + '\x1b[0m ]';
-  
-  // Format message args
-  const formattedArgs = args.map((arg) => {
-    if (arg instanceof Error) {
-      return arg.stack || arg.message;
-    }
-    if (typeof arg === 'object' && arg !== null) {
-      return util.inspect(arg, { depth: null, colors: false });
-    }
-    return String(arg);
-  });
-  
-  const msg = util.format(...formattedArgs);
-  
-  // Console output
-  console.log(`${time} ${color}[ ${label} ]${colors.reset} ${msg}`);
-  
-  // Write to file (no colors)
-  if (logStream) {
-    logStream.write(`[${new Date().toISOString()}] [${label}] ${msg}\n`);
-  }
-}
-
-// Shortcut methods
-logger.info = (...args) => logger('INFO', ...args);
-logger.warn = (...args) => logger('WARN', ...args);
-logger.error = (...args) => logger('ERROR', ...args);
-logger.debug = (...args) => logger('DEBUG', ...args);
-
-// Named loggers
-logger.commands = (...args) => logger('COMMANDS', ...args);
-logger.moonlink = (...args) => logger('MOONLINK', ...args);
-logger.events = (...args) => logger('EVENTS', ...args);
-logger.watcher = (...args) => logger('WATCHER', ...args);
-logger.player = (...args) => logger('PLAYER', ...args);
-logger.started = (...args) => logger('STARTED', ...args);
-logger.node = (...args) => logger('NODE', ...args);
-
-
-// Initialize log file
-initLogStream();
+};
 
 module.exports = logger;
