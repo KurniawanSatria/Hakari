@@ -43,8 +43,8 @@ function buildLyricsDisplay(lines, currentIdx, lineText) {
       return `-# ${t}`;
     }).filter(Boolean);
 
-    const prefix = start > 0 ? `-# ··· ${start} baris sebelumnya\n` : '';
-    const suffix = end < lines.length ? `\n-# ··· ${lines.length - end}` : '';
+    const prefix = start > 0 ? `-# ··· ${start} lines earlier\n` : '';
+    const suffix = end < lines.length ? `\n-# ··· ${lines.length - end} lines later` : '';
 
     return prefix + parts.join('\n') + suffix || '♪';
   }
