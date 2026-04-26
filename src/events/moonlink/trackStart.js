@@ -22,32 +22,64 @@ module.exports = {
   register: (client) => {
     client.manager.on('trackStart', async (player, track) => {
       try {
-        if (!player || player.destroyed) return;
+        // Validate player and track
+        if (!player || player.destroyed) {
+          logger.debug('trackStart: Player destroyed or null');
+          return;
+        }
+
+        if (!track) {
+          logger.error('trackStart: No track provided');
+          return;
+        }
         
         // Reset all voting systems for new track
-        player.skipVotes = new Set();
-        player.stopVotes = new Set();
-        player.previousVotes = new Set();
-        player.pauseVotes = new Set();
+        try {
+          player.skipVotes = new Set();
+          player.stopVotes = new Set();
+          player.previousVotes = new Set();
+          player.pauseVotes = new Set();
+        } catch (voteErr) {
+          logger.error(`trackStart: Failed to reset votes: ${voteErr.message}`);
+        }
 
+        // Safely get text channel
         const channel = client.channels?.cache.get(player.textChannelId);
-        if (!channel) return;
-        await player.subscribeLyrics()
+        if (!channel) {
+          logger.warn(`trackStart: Text channel ${player.textChannelId} not found for guild ${player.guildId}`);
+          return;
+        }
+
+        // Subscribe to lyrics (non-blocking)
+        try {
+          await player.subscribeLyrics();
+        } catch (lyricsErr) {
+          logger.warn(`trackStart: Failed to subscribe to lyrics: ${lyricsErr.message}`);
+        }
         
-        // Delete previous track message (Now Playing message)
+        // Delete previous track message safely
         if (player.msg?.delete) {
-          player.msg.delete().catch(() => { });
+          player.msg.delete().catch((err) => {
+            logger.debug(`trackStart: Failed to delete previous message: ${err.message}`);
+          });
         }
         
-        // Clean up queue messages - delete messages for tracks that have been played
-        // Queue messages are added when tracks are queued, and should be deleted when track starts playing
+        // Clean up queue messages safely
         if (player.queueMsgs && player.queueMsgs.length > 0) {
-          for (const msg of player.queueMsgs) {
-            msg.delete().catch(() => { });
-          }
+          const msgsToDelete = [...player.queueMsgs];
           player.queueMsgs = [];
+          
+          for (const msg of msgsToDelete) {
+            if (msg?.delete) {
+              msg.delete().catch((err) => {
+                logger.debug(`trackStart: Failed to delete queue message: ${err.message}`);
+              });
+            }
+          }
         }
-        const title = track.title.slice(0, 32) || 'Unknown';
+
+        // Safely extract track info with fallbacks
+        const title = track.title ? track.title.slice(0, 32) : 'Unknown';
         const author = track.author || 'Unknown';
         const thumb = track.thumbnail || 'https://files.catbox.moe/fnlch5.jpg';
         const duration = track.duration ? msToTime(track.duration) : '0:00';
@@ -55,31 +87,41 @@ module.exports = {
         const queueSize = player.queue?.size ?? player.queue?.length ?? 0;
         const progressBar = buildProgressBar(0, track.duration ?? 0);
         
-        logger.info(`playing: ${title} by ${author} in ${channel.name} ${channel.guild.name}`);
+        // Log with safe guild/channel name access
+        const guildName = channel.guild?.name || 'Unknown';
+        const channelName = channel.name || 'Unknown';
+        logger.info(`Playing: ${title} by ${author} in ${channelName} (${guildName})`);
+        
         const queueText = queueSize > 0 ? `${queueSize} song${queueSize !== 1 ? 's' : ''} in queue` : 'No songs in queue';
         const sectionContent = [
           `### <a:hakari:1497764150099574904> Now Playing`,
-          `**[${title}](${track.uri})**`,
-          `${track.author} — \`${duration}\``,
+          `**[${title}](${track.uri || '#'})**`,
+          `${author} — \`${duration}\``,
         ].join('\n');
         const bodyContent = [
           `${progressBar}`,
           `-# ${queueText}`
         ].join('\n');
         
+        // Send message with error handling
         const sent = await channel.send(hakariPlayerCard({
           sectionContent,
           bodyContent,
           thumbnailURL: thumb,
         })).catch(e => {
-          logger.error(`Send failed: ${e.message}`);
+          logger.error(`trackStart: Failed to send now playing message: ${e.message}`, { stack: e.stack });
           return null;
         });
 
-        if (sent) player.msg = sent;
+        if (sent) {
+          player.msg = sent;
+          logger.debug('trackStart: Now playing message sent successfully');
+        } else {
+          logger.warn('trackStart: Could not send now playing message');
+        }
 
       } catch (err) {
-        logger.error(`trackStart error: ${err.message}`, { stack: err.stack });
+        logger.error(`trackStart handler error: ${err.message}`, { stack: err.stack });
       }
     });
   }

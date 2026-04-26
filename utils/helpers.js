@@ -1,6 +1,6 @@
-// utils/helpers.js
+// utils/helpers.js - Error handling and utility functions
 
-const logger = require('../logging');
+const logger = require('../src/structures/logger');
 
 /**
  * Sanitize error message for user-facing responses
@@ -83,11 +83,163 @@ async function safeReply(message, options) {
     }
 }
 
+/**
+ * Safely get channel with validation
+ * @param {Client} client - Discord client
+ * @param {string} channelId - Channel ID
+ * @returns {Channel|null} - Channel or null
+ */
+function getSafeChannel(client, channelId) {
+    try {
+        if (!client || !channelId) return null;
+        return client.channels?.cache.get(channelId) || null;
+    } catch (err) {
+        logger.debug(`getSafeChannel: ${err.message}`);
+        return null;
+    }
+}
+
+/**
+ * Safely get guild with validation
+ * @param {Client} client - Discord client
+ * @param {string} guildId - Guild ID
+ * @returns {Guild|null} - Guild or null
+ */
+function getSafeGuild(client, guildId) {
+    try {
+        if (!client || !guildId) return null;
+        return client.guilds?.cache.get(guildId) || null;
+    } catch (err) {
+        logger.debug(`getSafeGuild: ${err.message}`);
+        return null;
+    }
+}
+
+/**
+ * Check if bot has required permissions in a channel
+ * @param {Channel} channel - Discord channel
+ * @param {Client} client - Discord client
+ * @param {Array<string>} permissions - Required permissions
+ * @returns {boolean} - Whether bot has all permissions
+ */
+function hasRequiredPermissions(channel, client, permissions = ['Connect', 'Speak', 'ViewChannel']) {
+    try {
+        if (!channel || !client?.user) return false;
+        const perms = channel.permissionsFor(client.user);
+        if (!perms) return false;
+        return permissions.every(perm => perms.has(perm));
+    } catch (err) {
+        logger.debug(`hasRequiredPermissions: ${err.message}`);
+        return false;
+    }
+}
+
+/**
+ * Safely destroy a player with cleanup
+ * @param {Player} player - MoonLink player
+ * @param {string} reason - Reason for destruction
+ */
+async function safeDestroyPlayer(player, reason = 'cleanup') {
+    try {
+        if (!player || player.destroyed) {
+            logger.debug(`safeDestroyPlayer: Player already destroyed or null`);
+            return;
+        }
+
+        logger.info(`safeDestroyPlayer: Destroying player in guild ${player.guildId} - Reason: ${reason}`);
+
+        // Clean up messages
+        if (player.msg?.delete) {
+            await player.msg.delete().catch(() => {});
+            player.msg = null;
+        }
+
+        if (player.lyricsMsg?.delete) {
+            await player.lyricsMsg.delete().catch(() => {});
+            player.lyricsMsg = null;
+        }
+
+        // Clean up queue messages
+        if (player.queueMsgs && player.queueMsgs.length > 0) {
+            for (const msg of player.queueMsgs) {
+                if (msg?.delete) {
+                    await msg.delete().catch(() => {});
+                }
+            }
+            player.queueMsgs = [];
+        }
+
+        // Destroy player
+        player.destroy(reason);
+    } catch (err) {
+        logger.error(`safeDestroyPlayer: Error destroying player: ${err.message}`);
+    }
+}
+
+/**
+ * Check if a node is available and healthy
+ * @param {Manager} manager - MoonLink manager
+ * @returns {boolean} - Whether any node is available
+ */
+function isNodeAvailable(manager) {
+    try {
+        if (!manager || !manager.nodes) return false;
+        // Use NodeManager API properties
+        return manager.nodes.hasReady || manager.nodes.hasOnlineNodes || false;
+    } catch (err) {
+        logger.debug(`isNodeAvailable: ${err.message}`);
+        return false;
+    }
+}
+
+/**
+ * Get the best available node
+ * @param {Manager} manager - MoonLink manager
+ * @returns {Node|null} - Best node or null
+ */
+function getBestNode(manager) {
+    try {
+        if (!manager || !manager.nodes) return null;
+        // Use NodeManager's built-in leastUsedNode or get from ready nodes
+        return manager.nodes.leastUsedNode || 
+               (manager.nodes.ready && manager.nodes.ready.length > 0 ? manager.nodes.ready[0] : null);
+    } catch (err) {
+        logger.debug(`getBestNode: ${err.message}`);
+        return null;
+    }
+}
+
+/**
+ * Safely execute an async operation with timeout
+ * @param {Function} fn - Async function to execute
+ * @param {number} timeoutMs - Timeout in milliseconds
+ * @param {string} operationName - Name of the operation for logging
+ * @returns {Promise<any>} - Result or null on timeout
+ */
+async function withTimeout(fn, timeoutMs = 15000, operationName = 'operation') {
+    try {
+        const timeout = new Promise((_, reject) =>
+            setTimeout(() => reject(new Error(`${operationName} timed out after ${timeoutMs}ms`)), timeoutMs)
+        );
+        return await Promise.race([fn(), timeout]);
+    } catch (err) {
+        logger.error(`${operationName} error: ${err.message}`);
+        throw err;
+    }
+}
+
 module.exports = {
     sanitizeError,
     logError,
     formatDuration,
     withRetry,
     safeReply,
+    getSafeChannel,
+    getSafeGuild,
+    hasRequiredPermissions,
+    safeDestroyPlayer,
+    isNodeAvailable,
+    getBestNode,
+    withTimeout,
     logger
 };

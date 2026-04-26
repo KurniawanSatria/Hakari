@@ -32,39 +32,59 @@ const client = new Client({
 });
 
 function initMoonlink() {
-  client.manager = new Manager({
-    nodes: config.nodes,
-    source: {
-      default: 'spotify',
-      youtube: 'ytsearch',
-      youtubeMusic: 'ytmsearch',
-      soundcloud: 'scsearch',
-      spotify: 'spsearch'
-    },
-    options: {
-      debug: true,
-      clientName: 'Hakari/v2.0',
-      node: {
-        selectionStrategy: 'leastLoad',
-        avoidUnhealthyNodes: true,
-        autoMovePlayers: true,
-        retryAmount: 3,
-        retryDelay: 2000
+  try {
+    client.manager = new Manager({
+      nodes: config.nodes,
+      options: {
+        debug: false, // Set to true only for development
+        clientName: 'Hakari',
+        node: {
+          selectionStrategy: 'leastLoad',
+          avoidUnhealthyNodes: true,
+          autoMovePlayers: true,
+          maxCpuLoad: 75,
+          maxMemoryUsage: 0.7,
+          retryAmount: 5, // Increased retry attempts
+          retryDelay: 3000, // Increased retry delay
+          resumeTimeout: 60000, // Timeout for resume attempts
+          heartBeatInterval: 10000 // Heartbeat to detect dead connections
+        },
       },
-      playerHealth: {
-        enabled: false,
-        staleTime: 10000,
-        maxBufferDiff: 1000
+      send: (guildId, payload) => {
+        try {
+          const guild = client.guilds.cache.get(guildId);
+          if (guild && guild.shard) {
+            guild.shard.send(payload);
+          } else {
+            logger.warn(`Guild ${guildId} not found for voice payload`);
+          }
+        } catch (err) {
+          logger.error(`Error sending voice payload: ${err.message}`);
+        }
       }
-    },
-    send: (guildId, payload) => {
-      const guild = client.guilds.cache.get(guildId);
-      if (guild) guild.shard?.send(payload);
-    }
-  });
+    });
 
-  client.manager.use(new Connectors.DiscordJs(), client);
-  return client.manager;
+    client.manager.use(new Connectors.DiscordJs(), client);
+    
+    // Add manager-level error handlers
+    client.manager.on('error', (error, payload) => {
+      logger.error(`Manager error: ${error.message}`, { payload });
+    });
+
+    client.manager.on('nodeDisconnect', (node, reason) => {
+      logger.warn(`Node ${node.identifier} disconnected: ${reason}`);
+    });
+
+    client.manager.on('nodeReconnect', (node) => {
+      logger.info(`Node ${node.identifier} reconnecting...`);
+    });
+
+    logger.info('MoonLink manager initialized successfully');
+    return client.manager;
+  } catch (err) {
+    logger.error(`Failed to initialize MoonLink manager: ${err.message}`, { stack: err.stack });
+    throw err;
+  }
 }
 
 function loadHandlers() {
@@ -83,7 +103,7 @@ function loadHandlers() {
       }
     }
   }
-  
+
   const clientEvents = path.join(eventsPath, 'client');
   if (fs.existsSync(clientEvents)) {
     for (const file of fs.readdirSync(clientEvents).filter(f => f.endsWith('.js'))) {
@@ -105,7 +125,7 @@ function loadCommands() {
   const commandsPath = path.join(__dirname, 'src/commands');
   client.commands = new Map();
   client.aliases = new Map();
-  
+
   if (fs.existsSync(commandsPath)) {
     for (const file of fs.readdirSync(commandsPath).filter(f => f.endsWith('.js'))) {
       try {
@@ -113,7 +133,7 @@ function loadCommands() {
         if (cmd.execute) {
           client.commands.set(file.replace('.js', ''), cmd);
           logger.info(`Command Loaded: ${file.replace('.js', '')}`);
-          
+
           if (cmd.aliases) {
             for (const alias of cmd.aliases) {
               client.aliases.set(alias, file.replace('.js', ''));
@@ -152,7 +172,7 @@ async function start() {
     initMoonlink();
     loadHandlers();
     loadCommands();
-    
+
     await Promise.race([
       client.login(config.token),
       new Promise((_, reject) =>

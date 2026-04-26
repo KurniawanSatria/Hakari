@@ -2,13 +2,13 @@
   "op": "event",
   "type": "LyricsLineEvent",
   "guildId": "1388204556005019770",
-  "lineIndex": 53,
+  "lineIndex": 14,
   "line": {
-    "timestamp": 0,
-    "duration": 0,
-    "line": "Cursa, pera, eu te invitar",
+    "timestamp": 72710,
+    "duration": 20870,
+    "line": "",
     "words": [],
     "plugin": {}
   },
-  "skipped": true
+  "skipped": false
 }

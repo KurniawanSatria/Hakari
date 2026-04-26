@@ -21,35 +21,90 @@ module.exports = {
     register: (client) => {
         client.manager.on('playerUpdate', async (player, track, payload) => {
             try {
-                if (!player || player.destroyed) return;
-                if (!player.playing && !player.paused) return;
-                const msg = player.msg;
-                if (!msg || !msg.editable) return;
-                if (player.HandleByLyrics) return;
+                // Validate player state
+                if (!player || player.destroyed) {
+                    return;
+                }
 
+                // Only update if playing or paused
+                if (!player.playing && !player.paused) {
+                    return;
+                }
+
+                // Check if there's a message to update
+                const msg = player.msg;
+                if (!msg || !msg.editable) {
+                    return;
+                }
+
+                // Skip if lyrics are being displayed
+                if (player.HandleByLyrics) {
+                    return;
+                }
+
+                // Validate track exists
+                if (!track) {
+                    logger.debug('playerUpdate: No track data available');
+                    return;
+                }
+
+                // Safely extract position and duration with fallbacks
                 const position = payload?.state?.position ?? player.position ?? 0;
                 const trackDuration = track?.duration ?? 0;
+                
+                // Validate duration is reasonable
+                if (trackDuration <= 0 && position <= 0) {
+                    return;
+                }
+
                 const progressBar = buildProgressBar(position, trackDuration);
                 const currentTime = msToTime(position);
-                const queueSize = player.queue?.size ?? player.queue?.length ?? 0;
                 const duration = msToTime(trackDuration);
+                const queueSize = player.queue?.size ?? player.queue?.length ?? 0;
                 const status = player.paused ? 'Paused' : 'Playing';
-                const pauseEmoji = player.paused ? { name: 'play', id: '1449501267847151707' } : { name: 'pause', id: '1449501265720774656' };
-                                
+                const pauseEmoji = player.paused 
+                    ? { name: 'play', id: '1449501267847151707' } 
+                    : { name: 'pause', id: '1449501265720774656' };
+                
+                // Safely get track title with fallback
+                const trackTitle = track?.title ? track.title.slice(0, 32) : 'Unknown';
+                const trackUri = track?.uri || '#';
+                const trackAuthor = track?.author || 'Unknown';
+                const trackThumbnail = track?.thumbnail || 'https://files.catbox.moe/fnlch5.jpg';
+                
                 const sectionContent = [
                   `### <a:hakari:1497764150099574904> Now Playing`,
-                  `**[${track?.title.slice(0, 32) || 'Unknown'}](${track?.uri})**`,
-                  `${track?.author} — \`${duration}\``,
+                  `**[${trackTitle}](${trackUri})**`,
+                  `${trackAuthor} — \`${duration}\``,
                 ].join('\n');
+                
                 const bodyContent = `${progressBar} \`${currentTime} / ${duration}\`\n-# ${queueSize > 0 ? `${queueSize} song${queueSize !== 1 ? 's' : ''} in queue` : 'No songs in queue'}`;
                                 
+                // Update message with error handling
                 await msg.edit(hakariPlayerCard({
                   sectionContent,
                   bodyContent,
-                  thumbnailURL: track?.thumbnail || 'https://files.catbox.moe/fnlch5.jpg',
-                }));
+                  thumbnailURL: trackThumbnail,
+                })).catch(err => {
+                    // Only log if it's not a known Discord API error
+                    if (!err.message?.includes('Unknown Message') && 
+                        !err.message?.includes('Missing Access')) {
+                        logger.debug(`playerUpdate: Message edit failed: ${err.message}`);
+                    }
+                    // If message is no longer editable, clear reference
+                    if (err.message?.includes('Unknown Message')) {
+                        player.msg = null;
+                    }
+                });
+
             } catch (err) {
-                logger.error(`in playerUpdate: ${err.message}`)
+                // Don't log common errors too verbosely
+                if (!err.message?.includes('Unknown Message') && 
+                    !err.message?.includes('Missing Access')) {
+                    logger.error(`playerUpdate error: ${err.message}`, { stack: err.stack });
+                } else {
+                    logger.debug(`playerUpdate: Expected error: ${err.message}`);
+                }
             }
         });
     }

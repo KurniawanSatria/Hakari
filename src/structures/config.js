@@ -51,15 +51,37 @@ module.exports = {
     clientSecret: process.env.SPOTIFY_CLIENT_SECRET
   },
   
-  // Lavalink/NodeLink nodes
+  // Lavalink/NodeLink nodes (primary + backups)
   nodes: [
     {
       identifier: 'Hakari Main',
       host: process.env.LAVALINK_HOST,
       password: process.env.LAVALINK_PASSWORD,
       port: parseIntDefault(process.env.LAVALINK_PORT, 2333),
-      secure: parseBool(process.env.LAVALINK_SECURE, false)
-    }
+      secure: parseBool(process.env.LAVALINK_SECURE, false),
+      priority: 0
+    },
+    // Backup nodes (optional - will be added if env vars are set)
+    ...(process.env.LAVALINK_HOST_1 && process.env.LAVALINK_PASSWORD_1 ? [
+      {
+        identifier: 'Hakari Backup 1',
+        host: process.env.LAVALINK_HOST_1,
+        password: process.env.LAVALINK_PASSWORD_1,
+        port: parseIntDefault(process.env.LAVALINK_PORT_1, 2333),
+        secure: parseBool(process.env.LAVALINK_SECURE_1, false),
+        priority: 1
+      }
+    ] : []),
+    ...(process.env.LAVALINK_HOST_2 && process.env.LAVALINK_PASSWORD_2 ? [
+      {
+        identifier: 'Hakari Backup 2',
+        host: process.env.LAVALINK_HOST_2,
+        password: process.env.LAVALINK_PASSWORD_2,
+        port: parseIntDefault(process.env.LAVALINK_PORT_2, 2333),
+        secure: parseBool(process.env.LAVALINK_SECURE_2, false),
+        priority: 2
+      }
+    ] : [])
   ],
   
   // Bot settings
