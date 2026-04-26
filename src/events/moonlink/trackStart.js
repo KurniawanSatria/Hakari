@@ -22,22 +22,45 @@ module.exports = {
     client.manager.on('trackStart', async (player, track) => {
       try {
         if (!player || player.destroyed) return;
-        
+
         const channel = client.channels?.cache.get(player.textChannelId);
         if (!channel) return;
         await player.subscribeLyrics()
         if (player.msg?.delete) {
-          player.msg.delete().catch(() => {});
+          player.msg.delete().catch(() => { });
         }
         const queueMsgs = player.queueMsgs || [];
         for (const msg of queueMsgs) {
-          msg.delete().catch(() => {});
+          msg.delete().catch(() => { });
         }
+        const removeSpecialChars = (str) => {
+          return str.replace(/[^\p{L}\p{N}\s]/gu, "");
+        };
+        const cleanTitle = (str) => {
+          let output = removeSpecialChars(str);
+
+          output = output.toLowerCase();
+          output = output.replace(
+            /\b(copyright(-free)?|non-copyright|no copyright(?: song| music)?|copyright free|official|music|video|lyrics|audio|animated|amv|omv|m\/v|a?m\s*v)\b|\bofficial\s*(audio|music|lyrics\s*video|lyrics)?\b/gi,
+            ""
+          );
+          output = output.replace(/- Topic$/gi, "");
+          output = output.replace(/s+/g, " ");
+          output = output.replace(/\s{2,}/g, " ");
+          output = output.replace(/^\s+|\s+$/g, "");
+          output = output.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+          output = output.trim();
+
+          output = output.slice(0, 255);
+
+          return output;
+        };
         player.queueMsgs = [];
-        const title     = track.title     || 'Unknown';
-        const author    = track.author    || 'Unknown';
-        const thumb     = track.thumbnail || 'https://files.catbox.moe/fnlch5.jpg';
-        const duration  = track.duration ? msToTime(track.duration) : '0:00';
+        const title = track.title || 'Unknown';
+        track.title = cleanTitle(title);
+        const author = track.author || 'Unknown';
+        const thumb = track.thumbnail || 'https://files.catbox.moe/fnlch5.jpg';
+        const duration = track.duration ? msToTime(track.duration) : '0:00';
         const requester = track.requester?.username || 'Unknown';
         const queueSize = player.queue?.size ?? player.queue?.length ?? 0;
         const progressBar = buildProgressBar(0, track.duration ?? 0);
@@ -56,8 +79,8 @@ module.exports = {
                     {
                       type: 10,
                       content: [
-                        `## Currently Playing`,
-                        `**[${title}](${track.uri})**`,
+                        `## <a:hakari:1497764150099574904> Now Playing`,
+                        `### [${title}](${track.uri})`,
                         `${track.author} — \`${duration}\``,
                       ].join('\n')
                     }
@@ -68,10 +91,11 @@ module.exports = {
                   }
                 },
                 { type: 14 },
-                { type: 10, content: [
-                  `${progressBar}`,
-                  `${queueText}`
-                ].join('\n')
+                {
+                  type: 10, content: [
+                    `${progressBar}`,
+                    `${queueText}`
+                  ].join('\n')
                 },
                 {
                   type: 1,
@@ -86,13 +110,13 @@ module.exports = {
                       style: 2,
                       type: 2,
                       custom_id: 'previous',
-                      emoji: { name: 'previous', id:'1449501284272181309' }
+                      emoji: { name: 'previous', id: '1449501284272181309' }
                     },
                     {
                       style: 2,
                       type: 2,
                       custom_id: 'pause_resume',
-                      emoji: { name: 'pause', id:'1449501265720774656' }
+                      emoji: { name: 'pause', id: '1449501265720774656' }
                     },
                     {
                       style: 2,

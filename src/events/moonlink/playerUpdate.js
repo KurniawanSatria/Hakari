@@ -46,7 +46,7 @@ module.exports = {
                                         {
                                             type: 10,
                                             content: [
-                                                `## <a:hakari:1497764150099574904> Currently Playing`,
+                                                `## <a:hakari:1497764150099574904> Now Playing`,
                                                 `### [${track.title}](${track.uri})`,
                                                 `${track.author} — \`${duration}\``,
                                             ].join('\n')
@@ -55,7 +55,7 @@ module.exports = {
                                     accessory: { type: 11, media: { url: track?.thumbnail || 'https://files.catbox.moe/fnlch5.jpg' } }
                                 },
                                 { type: 14 },
-                                { type: 10, content: `#- ${progressBar} \`[${currentTime} / ${duration}]\`\n#- ${queueSize > 0 ? `${queueSize} song${queueSize !== 1 ? 's' : ''} in queue` : 'No songs in queue'}` },
+                                { type: 10, content: `${progressBar} \`[${currentTime} / ${duration}]\`\n-# ${queueSize > 0 ? `${queueSize} song${queueSize !== 1 ? 's' : ''} in queue` : 'No songs in queue'}` },
                                 {
                                     type: 1,
                                     components: [

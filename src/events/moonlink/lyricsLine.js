@@ -126,7 +126,7 @@ module.exports = {
                     {
                       type: 10,
                       content: [
-                        `## <a:hakari:1497764150099574904> Currently Playing`,
+                        `## <a:hakari:1497764150099574904> Now Playing`,
                         `### [${title}](${track.uri})`,
                         `${track.author} — \`${duration}\``,
                       ].join('\n')

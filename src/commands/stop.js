@@ -20,7 +20,7 @@ module.exports = {
       if (!player) {
         return message.channel.send(errorMsg('No Player', 'No active player in this server.'));
       }
-
+      await message.delete().catch(() => {});
       if (player.lyricsMsg) {
         player.lyricsMsg.delete().catch(() => {});
         player.lyricsMsg = null;

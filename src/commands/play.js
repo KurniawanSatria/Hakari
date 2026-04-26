@@ -35,8 +35,9 @@ module.exports = {
         voiceChannelId: message.member.voice.channel.id,
         textChannelId: message.channel.id,
         deaf: true,
-        autoplay: config.autoplay
+        autoplay: true
       });
+      player.setAutoPlay(true)
 
       if (!player.connected) await player.connect();
 
