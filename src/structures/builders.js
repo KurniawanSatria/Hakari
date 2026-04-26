@@ -77,7 +77,7 @@ function hakariPlayerCard({ sectionContent, bodyContent, thumbnailURL = FALLBACK
     .addTextDisplayComponents(td => td.setContent(bodyContent))
     .addActionRowComponents(playbackButtons());
 
-  return { components: [container], flags: MessageFlags.IsComponentsV2 };
+  return { components: [container], flags: 36864 };
 }
 
 /**
