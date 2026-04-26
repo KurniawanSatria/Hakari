@@ -1,10 +1,4 @@
-const msg = (content) => ({
-    flags: 32768,
-    components: [{
-        type: 17,
-        components: [{ type: 10, content }],
-    }]
-})
+const { hakariMessage } = require('../structures/builders');
 
 module.exports = {
     name: 'shuffle',
@@ -14,13 +8,13 @@ module.exports = {
             const player = client.manager?.players.get(message.guild.id)
 
             if (!player || !player.queue || player.queue.length === 0) {
-                return message.channel.send(msg('### No Queue\nQueue is empty.'))
+                return message.reply(hakariMessage('### No Queue\nQueue is empty.'))
             }
             player.shuffle();
-            message.reply(msg('### Shuffled\nQueue has been shuffled.'))
+            message.reply(hakariMessage('### Shuffled\nQueue has been shuffled.'))
 
         } catch (err) {
-            message.reply(msg('### Error\nError shuffling queue.'))
+            message.reply(hakariMessage('### Error\nError shuffling queue.'))
         }
     }
 }

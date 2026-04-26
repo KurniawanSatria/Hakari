@@ -1,10 +1,54 @@
-const msg = (content) => ({
-  flags: 32768,
-  components: [{
-    type: 17,
-    components: [{ type: 10, content }],
-  }]
-})
+const { hakariMessage } = require('../structures/builders');
+
+// Helper: Check if requester is still in voice channel
+function isRequesterInVoice(player, message) {
+    const requester = player.current?.requester;
+    if (!requester) return false;
+
+    const voiceChannel = message.guild.channels.cache.get(player.voiceChannelId);
+    if (!voiceChannel) return false;
+
+    return voiceChannel.members.has(requester.id);
+}
+
+// Helper: Handle voting system
+async function handleVoting(player, message, action) {
+    const userVoice = message.member.voice.channel;
+    if (!userVoice || userVoice.id !== player.voiceChannelId) {
+        return { allowed: false, reason: "You must be in the voice channel to use this command." };
+    }
+
+    // Check if requester is in voice
+    const requesterInVoice = isRequesterInVoice(player, message);
+    const isRequester = player.current?.requester && message.author.id === player.current.requester.id;
+
+    // If requester is in voice and this is not the requester, trigger voting
+    if (requesterInVoice && !isRequester) {
+        const voteKey = `${action}Votes`;
+        player[voteKey] = player[voteKey] || new Set();
+
+        if (player[voteKey].has(message.author.id)) {
+            return { allowed: false, reason: `You have already voted to ${action}.` };
+        }
+
+        player[voteKey].add(message.author.id);
+
+        const voiceChannel = message.guild.channels.cache.get(player.voiceChannelId);
+        const totalUsers = voiceChannel.members.filter(m => !m.user.bot).size;
+        const required = Math.ceil(totalUsers / 2);
+
+        if (player[voteKey].size < required) {
+            return { allowed: false, reason: `Vote to ${action} added! (${player[voteKey].size}/${required} votes needed)` };
+        }
+
+        // Voting passed
+        player[voteKey] = new Set();
+        return { allowed: true };
+    }
+
+    // Requester or requester not in voice - allow immediately
+    return { allowed: true };
+}
 
 module.exports = {
   name: 'pause',
@@ -14,19 +58,25 @@ module.exports = {
       const player = client.manager?.players.get(message.guild.id)
 
       if (!player || !player.current) {
-        return message.channel.send(msg('### No Track\nNo track currently playing.'))
+        return message.reply(hakariMessage('### No Track\nNo track currently playing.'))
       }
 
       if (player.paused) {
-        return message.reply(msg('### Already Paused\nTrack is already paused.'))
+        return message.reply(hakariMessage('### Already Paused\nTrack is already paused.'))
+      }
+
+      // Check voting system
+      const voteResult = await handleVoting(player, message, 'pause');
+      if (!voteResult.allowed) {
+        return message.reply(hakariMessage(voteResult.reason));
       }
 
       player.pause(true)
 
-      message.reply(msg('### Paused\nPlayback has been paused.'))
+      message.reply(hakariMessage('### Paused\nPlayback has been paused.'))
 
     } catch (err) {
-      message.reply(msg('### Error\nError pausing track.'))
+      message.reply(hakariMessage('### Error\nError pausing track.'))
     }
   }
 }

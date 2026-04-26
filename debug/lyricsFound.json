@@ -1,317 +1,387 @@
 {
   "op": "event",
   "type": "LyricsFoundEvent",
-  "guildId": "1420854984865611830",
+  "guildId": "1388204556005019770",
   "lyrics": {
     "sourceName": "spotify",
-    "provider": "musixmatch",
-    "text": "Breathing in the dark, lying on its side\n\nThe ruins of the day painted with a scar\n\nAnd the more I straighten out, the less it wants to try\n\n\nThe feelings start to rot, one wink at a time\nOh-oh, forgiving who you are, for what you stand to gain\nJust know that if you hide, it doesn't go away\nWhen you get out of bed, don't end up stranded\nHorrified with each stone on the stage, my little dark age\n\nPicking through the cards, knowing what's nearby\n\nThe carvings on the face say they find it hard\nAnd the engine's failed again, all limits of disguise\n\nThe humor's not the same, coming from denial\nOh-oh, I grieve in stereo, the stereo sounds strange\nI know that if you hide, it doesn't go away\nIf you get out of bed and find me standing all alone\nOpen-eyed, burn the page, my little dark age\n\nI grieve in stereo, the stereo sounds strange\nYou know that if it hides, it doesn't go away\nIf I get out of bed, you'll see me standing all alone\nHorrified on the stage, my little dark age\n\nGiddy with delight, seeing what's to come\n\nThe image of the dead, dead ends in my mind\n\nPolicemen swear to God, love seeping from their guns\nI know my friends and I would probably turn and run\nIf you get out of bed, come find us heading for the bridge\nBring a stone, all the rage, my little dark age\nI grieve in stereo, the stereo sounds strange\nI know that if you hide, it doesn't go away\nIf you get out of bed and find me standing all alone\nOpen-eyed, burn the page, my little dark age\n\nAll alone, open-eyed, burn the page, my little dark age\n",
+    "provider": "lrclib",
+    "text": "Vem,vem,vem,vem,vem,vem,vem pra lá balança\nPasseio, mexo devagar\nEu não,vou te provocar!\nVai me conquistar\nSe perde no ritmo\nDeixa me levar\nVem, vem, vem, vem balançar\nVem jogando sem parar\nVai no treino, deixa roubar\nCursa, pera, eu te invitar\nÉ, é, se, é, se, sem fregar\nÉ balanço, eu sou doida\nEssa noite é pra dançar\nVem comigo até virar\nVem, vem, vem, vem balançar\nVem jogando sem parar\nVai no treino, deixa roubar\nCursa, pera, eu te invitar\nÉ, é, se, é, se, sem fregar\nÉ balanço, eu sou doida\nEssa noite é pra dançar\nCheguei na pista, pronto pra curtir\nOlhei pra você, não deu pra resistir\nNo seu balanço, quero me perder\nHoje é sem limite, deixa acontecer\nVem, vem, vem, vem balançar\nVem jogando sem parar\nVai no treino, deixa roubar\nCursa, pera, eu te invitar\nÉ, é, se, é, se, sem fregar\nÉ balanço, eu sou doida\nEssa noite é pra dançar\nVem comigo até de lá\nVem,vem,vem,vem,vem,vem,vem\nVem,vem,vem,vem balançar\nVem jogando sem parar\nVai no treino, deixa roubar\nCursa, pera, eu te invitar\nÉ, é, se, é, se, sem fregar\nÉ balanço, eu sou doida\nEssa noite é pra dançar\nVem comigo até de lá\nVem,vem,vem,vem balançar\nVem jogando sem parar\nVai no treino, deixa roubar\nCursa, pera, eu te invitar\nÉ, é, se, é, se, sem fregar\nÉ balanço, eu sou doida\nEssa noite é pra dançar\nVem comigo até de lá\nVem,vem,vem,vem balançar\nVem jogando sem parar\nVai no treino, deixa roubar\nCursa, pera, eu te invitar",
     "lines": [
       {
-        "timestamp": 20930,
-        "duration": 5760,
-        "line": "Breathing in the dark, lying on its side",
-        "words": [],
-        "plugin": {}
-      },
-      {
-        "timestamp": 26690,
-        "duration": 4070,
-        "line": "",
-        "words": [],
-        "plugin": {}
-      },
-      {
-        "timestamp": 30760,
-        "duration": 6110,
-        "line": "The ruins of the day painted with a scar",
-        "words": [],
-        "plugin": {}
-      },
-      {
-        "timestamp": 36870,
-        "duration": 2190,
-        "line": "",
-        "words": [],
-        "plugin": {}
-      },
-      {
-        "timestamp": 39060,
-        "duration": 5820,
-        "line": "And the more I straighten out, the less it wants to try",
-        "words": [],
-        "plugin": {}
-      },
-      {
-        "timestamp": 44880,
-        "duration": 2200,
-        "line": "",
-        "words": [],
-        "plugin": {}
-      },
-      {
-        "timestamp": 47080,
-        "duration": 3230,
-        "line": "",
-        "words": [],
-        "plugin": {}
-      },
-      {
-        "timestamp": 50310,
-        "duration": 8280,
-        "line": "The feelings start to rot, one wink at a time",
-        "words": [],
-        "plugin": {}
-      },
-      {
-        "timestamp": 58590,
-        "duration": 6540,
-        "line": "Oh-oh, forgiving who you are, for what you stand to gain",
-        "words": [],
-        "plugin": {}
-      },
-      {
-        "timestamp": 65130,
-        "duration": 4890,
-        "line": "Just know that if you hide, it doesn't go away",
-        "words": [],
-        "plugin": {}
-      },
-      {
-        "timestamp": 70020,
-        "duration": 4150,
-        "line": "When you get out of bed, don't end up stranded",
-        "words": [],
-        "plugin": {}
-      },
-      {
-        "timestamp": 74170,
-        "duration": 6500,
-        "line": "Horrified with each stone on the stage, my little dark age",
-        "words": [],
-        "plugin": {}
-      },
-      {
-        "timestamp": 80670,
-        "duration": 9250,
-        "line": "",
-        "words": [],
-        "plugin": {}
-      },
-      {
-        "timestamp": 89920,
-        "duration": 6510,
-        "line": "Picking through the cards, knowing what's nearby",
-        "words": [],
-        "plugin": {}
-      },
-      {
-        "timestamp": 96430,
-        "duration": 3200,
-        "line": "",
-        "words": [],
-        "plugin": {}
-      },
-      {
-        "timestamp": 99630,
-        "duration": 8410,
-        "line": "The carvings on the face say they find it hard",
-        "words": [],
-        "plugin": {}
-      },
-      {
-        "timestamp": 108040,
-        "duration": 8270,
-        "line": "And the engine's failed again, all limits of disguise",
-        "words": [],
-        "plugin": {}
-      },
-      {
-        "timestamp": 116310,
-        "duration": 3120,
-        "line": "",
-        "words": [],
-        "plugin": {}
-      },
-      {
-        "timestamp": 119430,
-        "duration": 8160,
-        "line": "The humor's not the same, coming from denial",
-        "words": [],
-        "plugin": {}
-      },
-      {
-        "timestamp": 127590,
-        "duration": 6300,
-        "line": "Oh-oh, I grieve in stereo, the stereo sounds strange",
-        "words": [],
-        "plugin": {}
-      },
-      {
-        "timestamp": 133890,
-        "duration": 5300,
-        "line": "I know that if you hide, it doesn't go away",
-        "words": [],
-        "plugin": {}
-      },
-      {
-        "timestamp": 139190,
-        "duration": 5070,
-        "line": "If you get out of bed and find me standing all alone",
-        "words": [],
-        "plugin": {}
-      },
-      {
-        "timestamp": 144260,
-        "duration": 5760,
-        "line": "Open-eyed, burn the page, my little dark age",
-        "words": [],
-        "plugin": {}
-      },
-      {
-        "timestamp": 150020,
-        "duration": 18440,
-        "line": "",
-        "words": [],
-        "plugin": {}
-      },
-      {
-        "timestamp": 168460,
-        "duration": 4970,
-        "line": "I grieve in stereo, the stereo sounds strange",
-        "words": [],
-        "plugin": {}
-      },
-      {
-        "timestamp": 173430,
-        "duration": 4910,
-        "line": "You know that if it hides, it doesn't go away",
-        "words": [],
-        "plugin": {}
-      },
-      {
-        "timestamp": 178340,
-        "duration": 5200,
-        "line": "If I get out of bed, you'll see me standing all alone",
-        "words": [],
-        "plugin": {}
-      },
-      {
-        "timestamp": 183540,
-        "duration": 5700,
-        "line": "Horrified on the stage, my little dark age",
-        "words": [],
-        "plugin": {}
-      },
-      {
-        "timestamp": 189240,
-        "duration": 8380,
-        "line": "",
-        "words": [],
-        "plugin": {}
-      },
-      {
-        "timestamp": 197620,
-        "duration": 6950,
-        "line": "Giddy with delight, seeing what's to come",
-        "words": [],
-        "plugin": {}
-      },
-      {
-        "timestamp": 204570,
-        "duration": 3600,
-        "line": "",
-        "words": [],
-        "plugin": {}
-      },
-      {
-        "timestamp": 208170,
-        "duration": 6780,
-        "line": "The image of the dead, dead ends in my mind",
-        "words": [],
-        "plugin": {}
-      },
-      {
-        "timestamp": 214950,
-        "duration": 3030,
-        "line": "",
-        "words": [],
-        "plugin": {}
-      },
-      {
-        "timestamp": 217980,
-        "duration": 4920,
-        "line": "Policemen swear to God, love seeping from their guns",
-        "words": [],
-        "plugin": {}
-      },
-      {
-        "timestamp": 222900,
-        "duration": 4740,
-        "line": "I know my friends and I would probably turn and run",
-        "words": [],
-        "plugin": {}
-      },
-      {
-        "timestamp": 227640,
-        "duration": 5260,
-        "line": "If you get out of bed, come find us heading for the bridge",
-        "words": [],
-        "plugin": {}
-      },
-      {
-        "timestamp": 232900,
-        "duration": 4470,
-        "line": "Bring a stone, all the rage, my little dark age",
-        "words": [],
-        "plugin": {}
-      },
-      {
-        "timestamp": 237370,
-        "duration": 4990,
-        "line": "I grieve in stereo, the stereo sounds strange",
-        "words": [],
-        "plugin": {}
-      },
-      {
-        "timestamp": 242360,
-        "duration": 5010,
-        "line": "I know that if you hide, it doesn't go away",
-        "words": [],
-        "plugin": {}
-      },
-      {
-        "timestamp": 247370,
-        "duration": 5000,
-        "line": "If you get out of bed and find me standing all alone",
-        "words": [],
-        "plugin": {}
-      },
-      {
-        "timestamp": 252370,
-        "duration": 5640,
-        "line": "Open-eyed, burn the page, my little dark age",
-        "words": [],
-        "plugin": {}
-      },
-      {
-        "timestamp": 258010,
-        "duration": 32320,
-        "line": "",
-        "words": [],
-        "plugin": {}
-      },
-      {
-        "timestamp": 290330,
-        "duration": 4830,
-        "line": "All alone, open-eyed, burn the page, my little dark age",
-        "words": [],
-        "plugin": {}
-      },
-      {
-        "timestamp": 295160,
+        "timestamp": 0,
         "duration": 0,
-        "line": "",
+        "line": "Vem,vem,vem,vem,vem,vem,vem pra lá balança",
+        "words": [],
+        "plugin": {}
+      },
+      {
+        "timestamp": 0,
+        "duration": 0,
+        "line": "Passeio, mexo devagar",
+        "words": [],
+        "plugin": {}
+      },
+      {
+        "timestamp": 0,
+        "duration": 0,
+        "line": "Eu não,vou te provocar!",
+        "words": [],
+        "plugin": {}
+      },
+      {
+        "timestamp": 0,
+        "duration": 0,
+        "line": "Vai me conquistar",
+        "words": [],
+        "plugin": {}
+      },
+      {
+        "timestamp": 0,
+        "duration": 0,
+        "line": "Se perde no ritmo",
+        "words": [],
+        "plugin": {}
+      },
+      {
+        "timestamp": 0,
+        "duration": 0,
+        "line": "Deixa me levar",
+        "words": [],
+        "plugin": {}
+      },
+      {
+        "timestamp": 0,
+        "duration": 0,
+        "line": "Vem, vem, vem, vem balançar",
+        "words": [],
+        "plugin": {}
+      },
+      {
+        "timestamp": 0,
+        "duration": 0,
+        "line": "Vem jogando sem parar",
+        "words": [],
+        "plugin": {}
+      },
+      {
+        "timestamp": 0,
+        "duration": 0,
+        "line": "Vai no treino, deixa roubar",
+        "words": [],
+        "plugin": {}
+      },
+      {
+        "timestamp": 0,
+        "duration": 0,
+        "line": "Cursa, pera, eu te invitar",
+        "words": [],
+        "plugin": {}
+      },
+      {
+        "timestamp": 0,
+        "duration": 0,
+        "line": "É, é, se, é, se, sem fregar",
+        "words": [],
+        "plugin": {}
+      },
+      {
+        "timestamp": 0,
+        "duration": 0,
+        "line": "É balanço, eu sou doida",
+        "words": [],
+        "plugin": {}
+      },
+      {
+        "timestamp": 0,
+        "duration": 0,
+        "line": "Essa noite é pra dançar",
+        "words": [],
+        "plugin": {}
+      },
+      {
+        "timestamp": 0,
+        "duration": 0,
+        "line": "Vem comigo até virar",
+        "words": [],
+        "plugin": {}
+      },
+      {
+        "timestamp": 0,
+        "duration": 0,
+        "line": "Vem, vem, vem, vem balançar",
+        "words": [],
+        "plugin": {}
+      },
+      {
+        "timestamp": 0,
+        "duration": 0,
+        "line": "Vem jogando sem parar",
+        "words": [],
+        "plugin": {}
+      },
+      {
+        "timestamp": 0,
+        "duration": 0,
+        "line": "Vai no treino, deixa roubar",
+        "words": [],
+        "plugin": {}
+      },
+      {
+        "timestamp": 0,
+        "duration": 0,
+        "line": "Cursa, pera, eu te invitar",
+        "words": [],
+        "plugin": {}
+      },
+      {
+        "timestamp": 0,
+        "duration": 0,
+        "line": "É, é, se, é, se, sem fregar",
+        "words": [],
+        "plugin": {}
+      },
+      {
+        "timestamp": 0,
+        "duration": 0,
+        "line": "É balanço, eu sou doida",
+        "words": [],
+        "plugin": {}
+      },
+      {
+        "timestamp": 0,
+        "duration": 0,
+        "line": "Essa noite é pra dançar",
+        "words": [],
+        "plugin": {}
+      },
+      {
+        "timestamp": 0,
+        "duration": 0,
+        "line": "Cheguei na pista, pronto pra curtir",
+        "words": [],
+        "plugin": {}
+      },
+      {
+        "timestamp": 0,
+        "duration": 0,
+        "line": "Olhei pra você, não deu pra resistir",
+        "words": [],
+        "plugin": {}
+      },
+      {
+        "timestamp": 0,
+        "duration": 0,
+        "line": "No seu balanço, quero me perder",
+        "words": [],
+        "plugin": {}
+      },
+      {
+        "timestamp": 0,
+        "duration": 0,
+        "line": "Hoje é sem limite, deixa acontecer",
+        "words": [],
+        "plugin": {}
+      },
+      {
+        "timestamp": 0,
+        "duration": 0,
+        "line": "Vem, vem, vem, vem balançar",
+        "words": [],
+        "plugin": {}
+      },
+      {
+        "timestamp": 0,
+        "duration": 0,
+        "line": "Vem jogando sem parar",
+        "words": [],
+        "plugin": {}
+      },
+      {
+        "timestamp": 0,
+        "duration": 0,
+        "line": "Vai no treino, deixa roubar",
+        "words": [],
+        "plugin": {}
+      },
+      {
+        "timestamp": 0,
+        "duration": 0,
+        "line": "Cursa, pera, eu te invitar",
+        "words": [],
+        "plugin": {}
+      },
+      {
+        "timestamp": 0,
+        "duration": 0,
+        "line": "É, é, se, é, se, sem fregar",
+        "words": [],
+        "plugin": {}
+      },
+      {
+        "timestamp": 0,
+        "duration": 0,
+        "line": "É balanço, eu sou doida",
+        "words": [],
+        "plugin": {}
+      },
+      {
+        "timestamp": 0,
+        "duration": 0,
+        "line": "Essa noite é pra dançar",
+        "words": [],
+        "plugin": {}
+      },
+      {
+        "timestamp": 0,
+        "duration": 0,
+        "line": "Vem comigo até de lá",
+        "words": [],
+        "plugin": {}
+      },
+      {
+        "timestamp": 0,
+        "duration": 0,
+        "line": "Vem,vem,vem,vem,vem,vem,vem",
+        "words": [],
+        "plugin": {}
+      },
+      {
+        "timestamp": 0,
+        "duration": 0,
+        "line": "Vem,vem,vem,vem balançar",
+        "words": [],
+        "plugin": {}
+      },
+      {
+        "timestamp": 0,
+        "duration": 0,
+        "line": "Vem jogando sem parar",
+        "words": [],
+        "plugin": {}
+      },
+      {
+        "timestamp": 0,
+        "duration": 0,
+        "line": "Vai no treino, deixa roubar",
+        "words": [],
+        "plugin": {}
+      },
+      {
+        "timestamp": 0,
+        "duration": 0,
+        "line": "Cursa, pera, eu te invitar",
+        "words": [],
+        "plugin": {}
+      },
+      {
+        "timestamp": 0,
+        "duration": 0,
+        "line": "É, é, se, é, se, sem fregar",
+        "words": [],
+        "plugin": {}
+      },
+      {
+        "timestamp": 0,
+        "duration": 0,
+        "line": "É balanço, eu sou doida",
+        "words": [],
+        "plugin": {}
+      },
+      {
+        "timestamp": 0,
+        "duration": 0,
+        "line": "Essa noite é pra dançar",
+        "words": [],
+        "plugin": {}
+      },
+      {
+        "timestamp": 0,
+        "duration": 0,
+        "line": "Vem comigo até de lá",
+        "words": [],
+        "plugin": {}
+      },
+      {
+        "timestamp": 0,
+        "duration": 0,
+        "line": "Vem,vem,vem,vem balançar",
+        "words": [],
+        "plugin": {}
+      },
+      {
+        "timestamp": 0,
+        "duration": 0,
+        "line": "Vem jogando sem parar",
+        "words": [],
+        "plugin": {}
+      },
+      {
+        "timestamp": 0,
+        "duration": 0,
+        "line": "Vai no treino, deixa roubar",
+        "words": [],
+        "plugin": {}
+      },
+      {
+        "timestamp": 0,
+        "duration": 0,
+        "line": "Cursa, pera, eu te invitar",
+        "words": [],
+        "plugin": {}
+      },
+      {
+        "timestamp": 0,
+        "duration": 0,
+        "line": "É, é, se, é, se, sem fregar",
+        "words": [],
+        "plugin": {}
+      },
+      {
+        "timestamp": 0,
+        "duration": 0,
+        "line": "É balanço, eu sou doida",
+        "words": [],
+        "plugin": {}
+      },
+      {
+        "timestamp": 0,
+        "duration": 0,
+        "line": "Essa noite é pra dançar",
+        "words": [],
+        "plugin": {}
+      },
+      {
+        "timestamp": 0,
+        "duration": 0,
+        "line": "Vem comigo até de lá",
+        "words": [],
+        "plugin": {}
+      },
+      {
+        "timestamp": 0,
+        "duration": 0,
+        "line": "Vem,vem,vem,vem balançar",
+        "words": [],
+        "plugin": {}
+      },
+      {
+        "timestamp": 0,
+        "duration": 0,
+        "line": "Vem jogando sem parar",
+        "words": [],
+        "plugin": {}
+      },
+      {
+        "timestamp": 0,
+        "duration": 0,
+        "line": "Vai no treino, deixa roubar",
+        "words": [],
+        "plugin": {}
+      },
+      {
+        "timestamp": 0,
+        "duration": 0,
+        "line": "Cursa, pera, eu te invitar",
         "words": [],
         "plugin": {}
       }

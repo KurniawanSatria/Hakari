@@ -6,9 +6,20 @@ const { Client, GatewayIntentBits } = require('discord.js');
 const { Manager, Connectors } = require('moonlink.js');
 const logger = require('./src/structures/logger');
 const config = require('./src/structures/config');
+const { validateConfig } = require('./src/structures/config');
+const langManager = require('./src/structures/langManager');
 const figlet = require('figlet');
 const chalk = require('chalk');
 
+
+try {
+  validateConfig();
+} catch (err) {
+  logger.error(err.message);
+  process.exit(1);
+}
+
+langManager.init();
 
 const client = new Client({
   intents: [
@@ -23,6 +34,13 @@ const client = new Client({
 function initMoonlink() {
   client.manager = new Manager({
     nodes: config.nodes,
+    source: {
+      default: 'spotify',
+      youtube: 'ytsearch',
+      youtubeMusic: 'ytmsearch',
+      soundcloud: 'scsearch',
+      spotify: 'spsearch'
+    },
     options: {
       debug: true,
       clientName: 'Hakari/v2.0',
@@ -135,7 +153,12 @@ async function start() {
     loadHandlers();
     loadCommands();
     
-    await client.login(config.token);
+    await Promise.race([
+      client.login(config.token),
+      new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Login timed out after 30 seconds')), 30000)
+      )
+    ]);
     logger.info(`Loaded: ${client.commands.size} commands`);
   } catch (err) {
     logger.error(`Failed to start: ${err.message}`, { stack: err.stack });
@@ -144,13 +167,24 @@ async function start() {
 }
 
 process.on('SIGINT', () => {
-  logger.warn('Received SIGINT, shutting down...');
+  logger.info('Shutting down gracefully...');
+  client.destroy();
+  process.exit(0);
+});
+
+process.on('SIGTERM', () => {
+  logger.info('Shutting down gracefully...');
   client.destroy();
   process.exit(0);
 });
 
 process.on('unhandledRejection', (err) => {
   logger.error(`Unhandled rejection: ${err.message}`, { stack: err.stack });
+});
+
+process.on('uncaughtException', (err) => {
+  logger.error(`Uncaught exception: ${err.message}`, { stack: err.stack });
+  process.exit(1);
 });
 
 start();

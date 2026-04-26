@@ -1,4 +1,5 @@
 const logger = require('../../structures/logger');
+const { rejectMessage } = require('../../structures/builders');
 
 module.exports = {
     name: 'queueEnd',
@@ -46,14 +47,7 @@ module.exports = {
                     if (player && !player.destroyed && !player.playing && player.queue.size === 0) {
                         logger.info(`QueueEnd No new tracks, destroying player`);
                         if (channel) {
-                            channel.send({
-                                flags: 32768, components: [{
-                                    type: 17, components: [{ type: 10, content: "**<:hakari:1482121759330275400> Hakari Music**" }, { type: 14, ndivider: true, spacing: 1 }, {
-                                        type: 10, content: `Nothing left in the queue.
-Player stopped.
--# Tip: enable autoplay`}], accent_color: 16687280
-                                }]
-                            })
+                            channel.send(rejectMessage(`Nothing left in the queue.\nPlayer stopped.\n-# Tip: enable autoplay`))
                         }
                         player.destroy('queue empty');
                     }

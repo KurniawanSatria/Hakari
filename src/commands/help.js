@@ -1,118 +1,75 @@
 const logger = require('../structures/logger');
-const config = require('../structures/config');
+const langManager = require('../structures/langManager');
+const { hakariMessage, hakariHelpCard, HAKARI_EMOJI } = require('../structures/builders');
 
 module.exports = {
   name: 'help',
   aliases: ['h'],
   execute: async (client, message, args) => {
     try {
-      const commands = [
-        { name: 'play', aliases: ['p'], description: 'Memutar musik dari query atau URL' },
-        { name: 'pause', aliases: [], description: 'Menjeda musik yang sedang diputar' },
-        { name: 'resume', aliases: [], description: 'Melanjutkan musik yang dijeda' },
-        { name: 'stop', aliases: [], description: 'Menghentikan pemutaran dan membersihkan antrian' },
-        { name: 'skip', aliases: ['s'], description: 'Melewati lagu saat ini' },
-        { name: 'queue', aliases: ['q'], description: 'Menampilkan antrian lagu' },
-        { name: 'loop', aliases: ['l'], description: 'Mengatur mode loop (off/track/queue)' },
-        { name: 'shuffle', aliases: [], description: 'Mengacak antrian lagu' },
-        { name: 'autoplay', aliases: [], description: 'Mengatur mode autoplay' },
-        { name: 'lyrics', aliases: ['ly'], description: 'Menampilkan lirik lagu yang sedang diputar' }
-      ];
+      const t = langManager.get(message.guild.id);
+      const cmdDefs = t.help.commands;
 
-      const embed = {
-        author: {
-          name: '🎵 Hakari Music Bot',
-          icon_url: client.user.displayAvatarURL({ dynamic: true })
-        },
-        title: '📋 Daftar Perintah',
-        description: 'Berikut adalah semua perintah yang tersedia untuk bot musik Hakari:',
-        color: 16687280,
-        fields: commands.map(cmd => ({
-          name: `\`${cmd.name}${cmd.aliases.length > 0 ? ` (${cmd.aliases.join(', ')})` : ''}\``,
-          value: cmd.description,
-          inline: false
-        })),
-        footer: {
-          text: 'Gunakan .help [nama perintah] untuk informasi lebih detail',
-          icon_url: 'https://cdn-icons-png.flaticon.com/512/2108/2108689.png'
-        }
+      // Build commands array from language file
+      const commandAliases = {
+        play: ['p'],
+        pause: [],
+        resume: [],
+        stop: [],
+        skip: ['s'],
+        queue: ['q'],
+        loop: ['l'],
+        shuffle: [],
+        autoplay: [],
+        lyrics: ['ly'],
+        help: ['h'],
+        lang: ['language']
       };
 
-      const row = {
-        type: 1,
-        components: [
-          {
-            type: 2,
-            style: 1,
-            label: '🎵 Musik',
-            custom_id: 'help_music',
-            emoji: { name: 'musical_note', id: '1482113385486352586' }
-          },
-          {
-            type: 2,
-            style: 1,
-            label: '🎚️ Kontrol',
-            custom_id: 'help_control',
-            emoji: { name: 'sliders', id: '1451682056927973476' }
-          },
-          {
-            type: 2,
-            style: 1,
-            label: '🔧 Lainnya',
-            custom_id: 'help_other',
-            emoji: { name: 'settings', id: '1451682056927973476' }
-          }
-        ]
-      };
+      const commands = Object.entries(cmdDefs).map(([name, cmd]) => ({
+        name,
+        aliases: commandAliases[name] || [],
+        description: cmd.description,
+        usage: cmd.usage,
+        permission: cmd.permission
+      }));
 
-      await message.channel.send({
-  "flags": 32768,
-  "components": [
-    {
-      "type": 17,
-      "components": [
-        {
-          "type": 9,
-          "components": [
-            {
-              "type": 10,
-              "content": "<:hakari:1482121759330275400> **Hakari Music**\n\n"
-            }
-          ],
-          "accessory": {
-            "type": 11,
-            "media": {
-              "url": "https://i.pinimg.com/736x/0b/10/35/0b103568ea4ff4be76d73c44102e697e.jpg"
-            }
-          }
-        },
-        {
-          "type": 14
-        },
-        {
-          "type": 10,
-          "content": `## <:icons8command100:1497903456067780698> Daftar Perintah\n-# Berikut adalah semua perintah yang tersedia untuk bot musik Hakari:\n${commands.map(cmd => `- \`.${cmd.name}\`\n  - ${cmd.description}\n`,).join('\n')}`
-        },
-        {
-          "type": 12,
-          "items": [
-            {
-              "media": {
-                "url": "https://i.ibb.co.com/F4kMkZj4/hakari-1.gif"
-              }
-            }
-          ]
+      // Per-command detail view
+      if (args[0]) {
+        const query = args[0].toLowerCase();
+        const cmd = commands.find(c => c.name === query || c.aliases.includes(query));
+
+        if (!cmd) {
+          return message.reply(hakariMessage(`${HAKARI_EMOJI} **Hakari Music**\n\n-# ${t.help.commandNotFound.replace('{cmd}', args[0])}`));
         }
-      ],
-      "accent_color": 15176859,
-      "spoiler": false
-    }
-  ]
-});
+
+        const aliasLine = cmd.aliases.length > 0
+          ? `\n> **${t.help.detailAliases}:** ${cmd.aliases.map(a => `\`${a}\``).join(', ')}`
+          : '';
+
+        return message.reply(hakariHelpCard({
+          headerContent: `${HAKARI_EMOJI} **Hakari Music**\n\n`,
+          bodyContent: `## <:icons8command100:1497903456067780698> ${t.help.detailTitle}: \`.${cmd.name}\`\n> **${t.help.detailDescription}:** ${cmd.description}${aliasLine}\n> **${t.help.detailUsage}:** \`${cmd.usage}\`\n> **${t.help.detailPermission}:** ${cmd.permission}`,
+          thumbnailURL: 'https://i.pinimg.com/736x/0b/10/35/0b103568ea4ff4be76d73c44102e697e.jpg',
+        }));
+      }
+
+      // Full command list view
+      const commandList = commands.map(cmd => {
+        const aliasText = cmd.aliases.length > 0 ? ` *(${cmd.aliases.join(', ')})*` : '';
+        return `- \`${cmd.usage}\`${aliasText}\n  - ${cmd.description}`;
+      }).join('\n\n');
+
+      await message.reply(hakariHelpCard({
+        headerContent: `${HAKARI_EMOJI} **Hakari Music**\n\n`,
+        bodyContent: `## <:icons8command100:1497903456067780698> ${t.help.title}\n-# ${t.help.subtitle}\n${commandList}\n\n-# ${t.help.footer}`,
+        thumbnailURL: 'https://i.pinimg.com/736x/0b/10/35/0b103568ea4ff4be76d73c44102e697e.jpg',
+        galleryURLs: ['https://i.ibb.co.com/F4kMkZj4/hakari-1.gif'],
+      }));
 
     } catch (err) {
-      logger.error(`Help: ${err.message}`);
-      message.channel.send('Terjadi kesalahan saat menampilkan bantuan.');
+      logger.error(`Help: ${err.stack || err}`);
+      message.reply(hakariMessage('### Error\nAn error occurred.'));
     }
   }
 };

@@ -1,5 +1,6 @@
 const logger = require('../../structures/logger');
 const fs = require('fs');
+const { hakariPlayerCard } = require('../../structures/builders');
 
 
 const WINDOW = 5;
@@ -25,7 +26,7 @@ function buildProgressBar(current = 0, total = 0, length = 12) {
   if (!total || total <= 0) return '●───────────────────';
   const filled = Math.round((current / total) * length);
   const empty = length - filled;
-  return '▬'.repeat(Math.max(filled - 1, 0)) + '<:hakari:1482121759330275400>' + '─'.repeat(Math.max(empty, 0));
+  return '▬'.repeat(Math.max(filled - 1, 0)) + '<:dot:1498023441649897503>' + '─'.repeat(Math.max(empty, 0));
 }
 
 function buildLyricsDisplay(lines, currentIdx, lineText) {
@@ -67,7 +68,7 @@ module.exports = {
         if (!msg || !msg.editable) return;
 
         const thumb = track?.thumbnail || 'https://files.catbox.moe/fnlch5.jpg';
-        const title = track?.title.slice(0, 30) || 'Unknown';
+        const title = track?.title.slice(0, 32) || 'Unknown';
         const duration = formatTime(track?.duration);
 
         const queueSize = player.queue?.size ?? player.queue?.length ?? 0;
@@ -92,60 +93,26 @@ module.exports = {
         const lyricsDisplay = buildLyricsDisplay(lines, currentIdx, lineText);
         const currentMs = lineTime ?? player.position ?? 0;
         const totalMs = track?.duration ?? 0;
-
+        
         const progressBar = buildProgressBar(currentMs, totalMs);
         const currentTime = formatTime(currentMs);
-
-        await msg.edit({
-          flags: 32768,
-          components: [
-            {
-              type: 17,
-              components: [
-                {
-                  type: 9,
-                  components: [
-                    {
-                      type: 10,
-                      content: [
-                        `## <a:hakari:1497764150099574904> Now Playing`,
-                        `### [${title}](${track.uri})`,
-                        `${track.author} — \`${duration}\``,
-                      ].join('\n')
-                    }
-                  ],
-                  accessory: {
-                    type: 11,
-                    media: { url: thumb }
-                  }
-                },
-                { type: 14 },
-                {
-                  type: 10,
-                  content: `## <:lyrics:1451697663396413481> Lyrics\n${lyricsDisplay}`
-                },
-                { type: 14 },
-                {
-                  type: 10,
-                  content: [
-                    `${progressBar} \`[${currentTime} / ${duration}]\``,
-                    `-# ${queueText}`,
-                  ].join('\n')
-                },
-                {
-                  type: 1,
-                  components: [
-                    { style: 4, type: 2, custom_id: 'stop', emoji: { id: '1449501286360944853', name: 'stop' } },
-                    { style: 2, type: 2, custom_id: 'previous', emoji: { name: 'previous', id: '1449501284272181309' } },
-                    { style: 2, type: 2, custom_id: 'pause_resume', emoji: { name: 'pause', id: '1449501265720774656' } },
-                    { style: 2, type: 2, custom_id: 'skip', emoji: { id: '1449501258791518370', name: 'skip' } },
-                    { style: 2, type: 2, custom_id: 'queue', emoji: { name: 'queue', id: '1451682061697159310' } }
-                  ]
-                }
-              ]
-            }
-          ]
-        });
+        
+        const sectionContent = [
+          `### <a:hakari:1497764150099574904> Now Playing`,
+          `**[${title}](${track.uri})**`,
+          `${track.author} — \`${duration}\``,
+        ].join('\n');
+        const bodyContent = [
+          `### <:lyrics:1451697663396413481> Lyrics\n${lyricsDisplay}`,
+          `${progressBar} \`${currentTime} / ${duration}\``,
+          `-# ${queueText}`,
+        ].join('\n');
+        
+        await msg.edit(hakariPlayerCard({
+          sectionContent,
+          bodyContent,
+          thumbnailURL: thumb,
+        }));
 
       } catch (err) {
         logger.error(`in lyricsLine:${err.message}`);

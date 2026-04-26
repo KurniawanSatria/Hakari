@@ -1,5 +1,6 @@
 const logger = require('../../structures/logger');
 const fs = require('fs');
+const { hakariPlayerCard, rejectMessage } = require('../../structures/builders');
 
 function getLineText(line) {
   if (!line) return '';
@@ -22,7 +23,7 @@ function buildProgressBar(current = 0, total = 0, length = 12) {
   if (!total || total <= 0) return '●───────────────────';
   const filled = Math.round((current / total) * length);
   const empty = length - filled;
-  return '▬'.repeat(Math.max(filled - 1, 0)) + '<:hakari:1482121759330275400>' + '─'.repeat(Math.max(empty, 0));
+  return '▬'.repeat(Math.max(filled - 1, 0)) + '<:dot:1498023441649897503>' + '─'.repeat(Math.max(empty, 0));
 }
 
 function buildAllLyricsDimmed(lines) {
@@ -65,18 +66,7 @@ module.exports = {
 
         // Notif pendingLyricsMsg dulu
         if (player.pendingLyricsMsg) {
-          const msg = await player.pendingLyricsMsg.edit({
-            flags: 32768,
-            components: [{
-              type: 17,
-              components: [
-                { type: 10, content: "**<:hakari:1482121759330275400> Hakari Music**" },
-                { type: 14, divider: true, spacing: 1 },
-                { type: 10, content: `Found lyrics for **${title}** from \`${player.current.lyrics_provider}\`` }
-              ],
-              accent_color: 16687280
-            }]
-          });
+          const msg = await player.pendingLyricsMsg.edit(rejectMessage(`Found lyrics for **${title}** from \`${player.current.lyrics_provider}\``));
           setTimeout(() => msg.delete().catch(() => {}), 3000);
         }
 
@@ -85,7 +75,7 @@ module.exports = {
         if (!playerMsg || !playerMsg.editable) return;
 
         const thumb = track?.thumbnail || 'https://files.catbox.moe/fnlch5.jpg';
-        const titleShort = title.slice(0, 30);
+        const titleShort = title.slice(0, 32);
         const duration = formatTime(track?.duration);
         const totalMs = track?.duration ?? 0;
 
@@ -95,56 +85,22 @@ module.exports = {
         const lyricsDisplay = buildAllLyricsDimmed(player.lyricsLines);
         const progressBar = buildProgressBar(0, totalMs);
 
-        await playerMsg.edit({
-          flags: 32768,
-          components: [
-            {
-              type: 17,
-              components: [
-                {
-                  type: 9,
-                  components: [
-                    {
-                      type: 10,
-                      content: [
-                        `## <a:hakari:1497764150099574904> Now Playing`,
-                        `### [${titleShort}](${track.uri})`,
-                        `${track.author} — \`${duration}\``,
-                      ].join('\n')
-                    }
-                  ],
-                  accessory: {
-                    type: 11,
-                    media: { url: thumb }
-                  }
-                },
-                { type: 14 },
-                {
-                  type: 10,
-                  content: `## <:lyrics:1451697663396413481> Lyrics\n${lyricsDisplay}`
-                },
-                { type: 14 },
-                {
-                  type: 10,
-                  content: [
-                    `${progressBar} \`[0:00 / ${duration}]\``,
-                    `-# ${queueText}`,
-                  ].join('\n')
-                },
-                {
-                  type: 1,
-                  components: [
-                    { style: 4, type: 2, custom_id: 'stop', emoji: { id: '1449501286360944853', name: 'stop' } },
-                    { style: 2, type: 2, custom_id: 'previous', emoji: { name: 'previous', id: '1449501284272181309' } },
-                    { style: 2, type: 2, custom_id: 'pause_resume', emoji: { name: 'pause', id: '1449501265720774656' } },
-                    { style: 2, type: 2, custom_id: 'skip', emoji: { id: '1449501258791518370', name: 'skip' } },
-                    { style: 2, type: 2, custom_id: 'queue', emoji: { name: 'queue', id: '1451682061697159310' } }
-                  ]
-                }
-              ]
-            }
-          ]
-        });
+        const sectionContent = [
+          `### <a:hakari:1497764150099574904> Now Playing`,
+          `**[${titleShort}](${track.uri})**`,
+          `${track.author} — \`${duration}\``,
+        ].join('\n');
+        const bodyContent = [
+          `### <:lyrics:1451697663396413481> Lyrics\n${lyricsDisplay}`,
+          `${progressBar} \`${formatTime(0)} / ${duration}\``,
+          `-# ${queueText}`,
+        ].join('\n');
+
+        await playerMsg.edit(hakariPlayerCard({
+          sectionContent,
+          bodyContent,
+          thumbnailURL: thumb,
+        }));
 
       } catch (err) {
         logger.error(`in lyricsFound: ${err.message}`);

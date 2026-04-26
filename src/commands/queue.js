@@ -1,6 +1,6 @@
 // src/commands/queue.js - Queue command
 
-const { ACCENT_COLOR, FALLBACK_THUMB } = require('../structures/components');
+const { hakariCard, FALLBACK_THUMB } = require('../structures/builders');
 
 function formatDuration(ms) {
   if (!ms || isNaN(ms)) return 'Unknown';
@@ -12,17 +12,6 @@ function formatDuration(ms) {
   return `${m}:${String(s).padStart(2, '0')}`;
 }
 
-const msg = (content, thumb) => ({
-  flags: 32768,
-  components: [{
-    type: 17,
-    components: [
-      { type: 9, components: [{ type: 10, content }], accessory: { type: 11, media: { url: thumb || FALLBACK_THUMB }, description: 'Album thumbnail' } }
-    ],
-    accent_color: ACCENT_COLOR
-  }]
-});
-
 module.exports = {
   name: 'queue',
   aliases: ['q', 'list'],
@@ -30,13 +19,13 @@ module.exports = {
     try {
       const player = client.manager?.players.get(message.guild.id);
       if (!player) {
-        return message.channel.send(msg('### No Player\nNo active player in this server.'));
+        return message.reply(hakariCard({ content: '### No Player\nNo active player in this server.' }));
       }
 
       const queue = player.queue.tracks || [];
       const current = player.current;
       if (!current && queue.length === 0) {
-        return message.channel.send(msg('### Empty Queue\nQueue is empty.', FALLBACK_THUMB));
+        return message.reply(hakariCard({ content: '### Empty Queue\nQueue is empty.', thumbnailURL: FALLBACK_THUMB }));
       }
 
       const totalDuration = queue.reduce((a, t) => a + (t.duration || 0), 0);
@@ -46,10 +35,10 @@ module.exports = {
       desc += queue.slice(0, 10).map((t, i) => `${i + 1}. [${t.title} - ${t.author}](${t.uri})`).join('\n');
       if (queue.length > 10) desc += `\n... and ${queue.length - 10} more`;
 
-      await message.channel.send(msg(`### Music Queue\n\n${desc}\n\n-# Total: ${queue.length} tracks`, current?.thumbnail));
+      await message.reply(hakariCard({ content: `### Music Queue\n\n${desc}\n\n-# Total: ${queue.length} tracks`, thumbnailURL: current?.thumbnail }));
 
     } catch (err) {
-      message.channel.send(msg('### Error\nError displaying queue.'));
+      message.reply(hakariCard({ content: '### Error\nError displaying queue.' }));
     }
   }
 };

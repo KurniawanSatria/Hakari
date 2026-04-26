@@ -1,10 +1,38 @@
 // src/structures/config.js - Configuration management
 
 require('dotenv').config();
+const logger = require('./logger');
 
 function parseBool(value, defaultVal = false) {
   if (value === undefined || value === null || value === '') return defaultVal;
   return value.toLowerCase() === 'true';
+}
+
+function validateConfig() {
+  const required = [
+    'DISCORD_TOKEN',
+    'CLIENT_ID',
+    'LAVALINK_HOST',
+    'LAVALINK_PORT',
+    'LAVALINK_PASSWORD'
+  ];
+
+  const missing = required.filter(key => {
+    const value = process.env[key];
+    return value === undefined || value === null || value.trim() === '';
+  });
+
+  if (missing.length > 0) {
+    throw new Error(`Missing required environment variables: ${missing.join(', ')}`);
+  }
+
+  const optional = ['PREFIX', 'AUTOPLAY', 'TWENTY_FOUR_SEVEN'];
+  for (const key of optional) {
+    const value = process.env[key];
+    if (value === undefined || value === null || value === '') {
+      logger.warn(`Optional environment variable ${key} is not set, using default value.`);
+    }
+  }
 }
 
 function parseIntDefault(value, defaultVal = 0) {
@@ -26,24 +54,18 @@ module.exports = {
   // Lavalink/NodeLink nodes
   nodes: [
     {
-      identifier: 'Hakari',
-      host: 'node.saturia.codes',
-      password: 'youshallnotpass',
-      port: 1235,
-      secure: false
-    },
-    // {
-    //   identifier: 'Hakari Backup',
-    //   host: process.env.LAVALINK_HOST || 'localhost',
-    //   password: process.env.LAVALINK_PASSWORD || 'youshallnotpass',
-    //   port: parseIntDefault(process.env.LAVALINK_PORT, 2333),
-    //   secure: parseBool(process.env.LAVALINK_SECURE, false)
-    // }
+      identifier: 'Hakari Main',
+      host: process.env.LAVALINK_HOST,
+      password: process.env.LAVALINK_PASSWORD,
+      port: parseIntDefault(process.env.LAVALINK_PORT, 2333),
+      secure: parseBool(process.env.LAVALINK_SECURE, false)
+    }
   ],
   
   // Bot settings
   prefix: process.env.PREFIX || '.',
   autoplay: parseBool(process.env.AUTOPLAY, true),
   cleanTimeout: parseIntDefault(process.env.CLEAN_TIMEOUT, 15000),
-  twentyFourSeven: parseBool(process.env.TWENTY_FOUR_SEVEN, false)
+  twentyFourSeven: parseBool(process.env.TWENTY_FOUR_SEVEN, false),
+  validateConfig
 };

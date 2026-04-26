@@ -1,5 +1,6 @@
 const logger = require('../structures/logger');
 const config = require('../structures/config');
+const { hakariMessage, hakariCard } = require('../structures/builders');
 
 function formatDuration(ms) {
   if (!ms || isNaN(ms)) return 'Unknown';
@@ -12,10 +13,10 @@ function formatDuration(ms) {
 }
 
 function getSourceInfo(uri) {
-  if (uri?.includes('spotify')) return { name: 'Spotify', icon: 'https://cdn-icons-png.flaticon.com/512/2111/2111624.png' };
-  if (uri?.includes('youtube')) return { name: 'YouTube', icon: 'https://cdn-icons-png.flaticon.com/512/1384/1384060.png' };
-  if (uri?.includes('soundcloud')) return { name: 'SoundCloud', icon: 'https://cdn-icons-png.flaticon.com/512/145/145809.png' };
-  return { name: 'Unknown', icon: null };
+  if (uri?.includes('spotify')) return { name: 'Spotify', emoji: '<:spy:1481718391847915631>' };
+  if (uri?.includes('youtube')) return { name: 'YouTube', emoji: '<:yt:1481718394075222248>' };
+  if (uri?.includes('soundcloud')) return { name: 'SoundCloud', emoji: '<:sc:1481718389226602506>' };
+  return { name: 'Unknown', emoji: null };
 }
 
 module.exports = {
@@ -24,9 +25,9 @@ module.exports = {
   execute: async (client, message, args) => {
     try {
       const query = args.join(' ').trim();
-      if (!query) return message.reply('Please provide a song name or URL.');
-      if (!message.member.voice.channel) return message.reply('You must be in a voice channel.');
-      if (!client.manager) return message.reply('Music manager not initialized.');
+      if (!query) return message.reply(hakariMessage('Please provide a song name or URL.'));
+      if (!message.member.voice.channel) return message.reply(hakariMessage('You must be in a voice channel.'));
+      if (!client.manager) return message.reply(hakariMessage('Music manager not initialized.'));
       const player = client.manager.players.create({
         guildId: message.guild.id,
         voiceChannelId: message.member.voice.channel.id,
@@ -38,13 +39,22 @@ module.exports = {
 
       if (!player.connected) await player.connect();
 
-      const result = await client.manager.search({ query, requester: message.author });
+      // Determine search source based on query type
+      let searchQuery = query;
+      const isURL = /^(https?:\/\/)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(:\d+)?(\/.*)?$/i.test(query);
+      
+      // If not a URL, use Spotify search prefix
+      if (!isURL && !query.startsWith('spsearch:') && !query.startsWith('ytsearch:') && !query.startsWith('ytmsearch:') && !query.startsWith('scsearch:')) {
+        searchQuery = `spsearch:${query}`;
+      }
+
+      const result = await client.manager.search({ query: searchQuery, requester: message.author });
       const { loadType, tracks, playlistInfo } = result;
 
       if (!tracks || tracks.length === 0) {
-        return message.reply('No results found.');
+        return message.reply(hakariMessage('No results found.'));
       }
-          message.delete().catch(() => { });
+      //message.delete().catch(() => { });
 
       if (loadType === 'playlist') {
           const queueStart = player.queue.tracks?.length || 0;
@@ -56,28 +66,10 @@ module.exports = {
 
           const totalDuration = tracks.reduce((a, t) => a + (t.duration || 0), 0);
           const source = getSourceInfo(tracks[0].uri);
-          await message.channel.send({
-            embeds: [{
-              author: {
-                name: message.author.username,
-                icon_url: message.author.displayAvatarURL({ dynamic: true })
-              },
-              title: 'Playlist Added to Queue',
-              description: `**${playlistInfo.name}**\n`,
-                fields: [
-                { name: 'Tracks', value: `**${tracks.length}**`, inline: true },
-                { name: 'Duration', value: `\`${formatDuration(playlistInfo.duration) || formatDuration(totalDuration)}\`\n`, inline: true },
-              ],
-              thumbnail: {
-                url: tracks[0]?.thumbnail
-              },
-              color: 16687280,
-              footer: {
-                text: source.name,
-                icon_url: source.icon
-              }
-            }]
-          });
+          await message.reply(hakariCard({
+            content: `### Playlist Added to Queue\n**${playlistInfo.name}**\n\n> **Tracks:** ${tracks.length}\n> **Duration:** \`${formatDuration(playlistInfo.duration) || formatDuration(totalDuration)}\`\n\n-# ${source.name}`,
+            thumbnailURL: tracks[0]?.thumbnail,
+          }));
 
         } else {
           const track = tracks[0];
@@ -88,20 +80,10 @@ module.exports = {
           const position = queueSize - 1;
           const source = getSourceInfo(track.uri);
 
-          let queueMsg = await message.channel.send({
-            embeds: [{
-              author: { name: message.author.username, icon_url: message.author.displayAvatarURL({ dynamic: true }) },
-              title: 'Added to queue',
-              description: `**${track.title}** - **${track.author}**`,
-              thumbnail: { url: track.thumbnail },
-              fields: [
-                { name: 'Duration', value: '`' + formatDuration(track.duration) + '`', inline: true },
-                { name: 'Position', value: `\`#${position + 1}/${queueSize}\``, inline: true }
-              ],
-              color: 16687280,
-              footer: { text: source.name, icon_url: source.icon }
-            }]
-          });
+          let queueMsg = await message.reply(hakariCard({
+            content: `### Added to queue\n**[${track.title}](${track.uri})**\n${track.author} — \`${formatDuration(track.duration)}\`\n\`#${position + 1}/${queueSize}\`\n\n-# ${source.emoji} ${source.name}`,
+            thumbnailURL: track.thumbnail,
+          }));
           if (queueMsg) {
             player.queueMsgs = player.queueMsgs || [];
             player.queueMsgs.push(queueMsg);
@@ -115,10 +97,10 @@ module.exports = {
         const msg = err.message;
         logger.error(`Play: ${msg}`);
         if (msg.includes('disconnected') || msg.includes('Connection')) {
-          message.channel.send('Voice connection issue. Try again in a moment.');
+          message.reply(hakariMessage('### Connection Error\nVoice connection issue. Try again in a moment.'));
         } else {
           player?.destroy();
-          message.channel.send('An error occurred.');
+          message.reply(hakariMessage('### Error\nAn error occurred.'));
         }
       }
     }
