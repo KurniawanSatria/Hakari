@@ -40,7 +40,7 @@ async function handleVoting(player, message, action) {
         const required = Math.ceil(totalUsers / 2);
 
         if (player[voteKey].size < required) {
-            return { allowed: false, reason: `Vote to ${action} added! (${player[voteKey].size}/${required} votes needed)` };
+            return { allowed: false, reason: `${action}ing ${player[voteKey].size}/${required} (${required - player[voteKey].size} votes needed)` };
         }
 
         // Voting passed

@@ -135,7 +135,7 @@ module.exports = {
           const totalDuration = tracks.reduce((a, t) => a + (t.duration || 0), 0);
           const source = getSourceInfo(tracks[0].uri);
           await message.reply(hakariCard({
-            content: `### Playlist Added to Queue\n**${playlistInfo?.name || 'Unknown Playlist'}**\n\n> **Tracks:** ${tracks.length}\n> **Duration:** \`${formatDuration(playlistInfo?.duration) || formatDuration(totalDuration)}\`\n\n-# ${source.name}`,
+            content: `### Playlist Loaded\n**[${playlistInfo?.name || 'Unknown Playlist'}](${query})**\n\n> **Tracks:** ${tracks.length}\n> **Duration:** \`${formatDuration(playlistInfo?.duration) || formatDuration(totalDuration)}\`\n\n-# ${source.emoji || ''} ${source.name}`,
             thumbnailURL: tracks[0]?.thumbnail || FALLBACK_THUMB,
           }));
         } catch (err) {

@@ -1,13 +1,44 @@
 {
   "op": "event",
   "type": "LyricsLineEvent",
-  "guildId": "1388204556005019770",
-  "lineIndex": 14,
+  "guildId": "1420854984865611830",
+  "lineIndex": 2,
   "line": {
-    "timestamp": 72710,
-    "duration": 20870,
-    "line": "",
-    "words": [],
+    "timestamp": 16800,
+    "duration": 4112,
+    "line": "I'm not wearing my usual lipstick",
+    "words": [
+      {
+        "text": "I'm",
+        "timestamp": 16800,
+        "duration": 300
+      },
+      {
+        "text": "not",
+        "timestamp": 17275,
+        "duration": 475
+      },
+      {
+        "text": "wearing",
+        "timestamp": 17825,
+        "duration": 450
+      },
+      {
+        "text": "my",
+        "timestamp": 18412,
+        "duration": 75
+      },
+      {
+        "text": "usual",
+        "timestamp": 18975,
+        "duration": 825
+      },
+      {
+        "text": "lipstick",
+        "timestamp": 19825,
+        "duration": 1087
+      }
+    ],
     "plugin": {}
   },
   "skipped": false

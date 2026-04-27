@@ -1,7 +1,7 @@
 // src/events/client/interactionCreate.js - Button interactions
 
 const logger = require('../../structures/logger');
-const { rejectMessage, hakariCard } = require('../../structures/builders');
+const { rejectMessage, hakariCard, hakariMessage } = require('../../structures/builders');
 const { ActionRowBuilder, ButtonBuilder, ButtonStyle, ContainerBuilder, MessageFlags, SeparatorBuilder } = require('discord.js');
 
 module.exports = {
@@ -39,10 +39,7 @@ module.exports = {
             // Safe reply helper
             async function safeReply(content, ephemeral = false) {
                 try {
-                    if (interaction.replied || interaction.deferred) {
-                        return await interaction.followUp({ content, ephemeral });
-                    }
-                    return await interaction.reply({ content, ephemeral });
+                    return await interaction.reply(hakariMessage(content));
                 } catch (err) {
                     logger.debug(`interactionCreate safeReply: ${err.message}`);
                     return null;
@@ -50,7 +47,7 @@ module.exports = {
             }
 
             async function reject(reason) {
-                const msg = await safeReply(rejectMessage(reason), true);
+                const msg = await safeReply(rejectMessage(reason), false);
                 if (msg) {
                     setTimeout(() => msg.delete().catch(() => {}), 60000);
                 }
@@ -88,10 +85,17 @@ module.exports = {
                     // If requester is in voice and this is not the requester, trigger voting
                     if (requesterInVoice && !isRequester) {
                         const voteKey = `${action}Votes`;
-                        player[voteKey] = player[voteKey] || new Set();
+                        
+                        // Ensure vote set exists and is a Set
+                        if (!(player[voteKey] instanceof Set)) {
+                            player[voteKey] = new Set();
+                        }
 
                         if (player[voteKey].has(interaction.user.id)) {
-                            await reject(`You have already voted to ${action}.`);
+                            const voiceChannel = interaction.guild?.channels?.cache.get(player.voiceChannelId);
+                            const totalUsers = voiceChannel ? voiceChannel.members.filter(m => !m.user.bot).size : 2;
+                            const required = Math.ceil(totalUsers / 2);
+                            await interaction.reply(hakariMessage(`You already voted! (${player[voteKey].size}/${required} votes needed)`));
                             return false;
                         }
 
@@ -107,7 +111,7 @@ module.exports = {
                         const required = Math.ceil(totalUsers / 2);
 
                         if (player[voteKey].size < required) {
-                            await reject(`Vote to ${action} added! (${player[voteKey].size}/${required} votes needed)`);
+                            await interaction.reply(hakariMessage(`Vote added! (${player[voteKey].size}/${required} votes needed)`));
                             return false;
                         }
 
@@ -124,6 +128,12 @@ module.exports = {
                     return false;
                 }
             }
+
+            // Initialize vote sets if they don't exist
+            if (!player.skipVotes) player.skipVotes = new Set();
+            if (!player.stopVotes) player.stopVotes = new Set();
+            if (!player.previousVotes) player.previousVotes = new Set();
+            if (!player.pauseVotes) player.pauseVotes = new Set();
 
             // Reset votes when track changes (called from trackStart event)
             player.resetVotes = function () {
@@ -293,6 +303,11 @@ module.exports = {
                     break;
 
                 case 'queue': {
+                    // Defer interaction first
+                    if (!interaction.deferred && !interaction.replied) {
+                        await interaction.deferReply({ ephemeral: true }).catch(() => {});
+                    }
+
                     const userVoice = interaction.member?.voice?.channel;
                     if (!userVoice || userVoice.id !== player.voiceChannelId) {
                         await reject("You must be in the voice channel to use this.");

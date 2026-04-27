@@ -37,7 +37,7 @@ module.exports = {
   execute: async (client, message) => {
     if (message.author.bot) return;
     if (!message.content.startsWith(config.prefix)) return;
-    message.suppressEmbeds().catch(() => { });
+    //message.suppressEmbeds().catch(() => { });
     const args = message.content.slice(config.prefix.length).trim().split(/ +/);
     const commandName = args.shift().toLowerCase();
     if (!global.__hakariCommands) {
@@ -55,7 +55,7 @@ module.exports = {
 
     async function sendRejection(reason) {
       const msg = await message.channel.send(rejectMessage(reason));
-      setTimeout(() => msg.delete().catch(() => {}), 3000);
+      // setTimeout(() => msg.delete().catch(() => {}), 3000);
     }
 
     const VOICE_REQUIRED = ['skip', 'pause', 'resume', 'stop', 'loop', 'shuffle', 'autoplay', 'play', 'queue', 'lyrics'];
@@ -88,7 +88,7 @@ module.exports = {
           player.skipVotes.add(message.author.id);
           const required = Math.ceil(userVoice.members.filter(m => !m.user.bot).size / 2);
           if (player.skipVotes.size < required) {
-            return sendRejection(`Vote to skip added! (${player.skipVotes.size}/${required})`);
+            return sendRejection(`Skipping, ${player.skipVotes.size}/${required} (${required - player.skipVotes.size} votes needed)`);
           }
           player.skipVotes = new Set();
         }

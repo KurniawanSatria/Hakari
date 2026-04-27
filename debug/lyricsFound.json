@@ -1,280 +1,210 @@
 {
   "op": "event",
   "type": "LyricsFoundEvent",
-  "guildId": "1388204556005019770",
+  "guildId": "1420854984865611830",
   "lyrics": {
     "sourceName": "spotify",
     "provider": "musixmatch",
-    "text": "Ketika senja datang\nKu merasa setengah diriku menghilang\n\nBagaikan tak berdosa\n\nKau hancurkan rasa yang selama ini kutanam\n\nSaat semuanya telah pergi\n\nBayangmu kembali mengisi\n\nEntah apa yang kau mau\n\nKu tak berhak lagi 'tuk mengungkit kembali\n\nMenghapus tinta yang pernah kau lukis di kanvas hatiku\nMerobek semua bayangan yang tampak di relung sukmaku\n\nEgo t'lah menghasutku\n'Tuk kembali padamu\nNamun logika berkata\nBaiknya 'ku menjauh\nJauh\nJauh\nJauh\nJauh\nEgo t'lah menghasutku\n'Tuk kembali padamu\nPerang tak membawaku\nUntuk pergi menjauh\nMenghapus tinta yang pernah kau lukis di kanvas hatiku\nMerobek semua bayangan yang tampak di relung sukmaku\nEgo telah menghasutku 'tuk kembali padamu\nNamun logika berkata baiknya ku menjauh\nJauh\nJauh\nJauh\nJauh\n",
+    "text": "It's just a cigarette and it cannot be that bad\nHoney, don't you love me and you know it makes me sad?\nIt's just a cigarette like you always used to do\nI was different then, I don't need them to be cool\n\nIt's just a cigarette and it harms your pretty lungs\nWell, it's only twice a week so there's not much of a chance\nIt's just a cigarette, it'll soon be only ten\nHoney, can't you trust me? When I want to stop, I can\n\nIt's just a cigarette and it's just a Marlboro Light\nMaybe, but is it worth it if we fight?\nIt's just a cigarette that I got from Jamie-Lee\nOh, she's gonna get a smack and I'm gonna give you three\nIt's just a cigarette and I only did it once (it's just a cigarette, it'll soon be only ten)\nIt's only twice a week so there's not much of a chance (it'll make you sick girl there's not much of a chance)\nIt's just a cigarette and I'm sorry that I did it (it's just a cigarette, you'll be sorry that you did it)\nHoney, can't you trust me? When I want to stop, I can\n\n\nLa la, la-la-la-la-la-la\nLa la, la-la-la-la-la-la\nLa la, la-la-la-la-la-la\nLa la, la-la-la-la-la-la\nLa la, la-la-la-la-la-la\nLa la, la-la-la-la-la-la\nLa la, la-la-la-la-la-la\nLa la, la-la-la-la-la-la\n",
     "lines": [
       {
-        "timestamp": 26690,
-        "duration": 5590,
-        "line": "Ketika senja datang",
+        "timestamp": 56500,
+        "duration": 5070,
+        "line": "It's just a cigarette and it cannot be that bad",
         "words": [],
         "plugin": {}
       },
       {
-        "timestamp": 32280,
-        "duration": 3010,
-        "line": "Ku merasa setengah diriku menghilang",
+        "timestamp": 61570,
+        "duration": 4410,
+        "line": "Honey, don't you love me and you know it makes me sad?",
         "words": [],
         "plugin": {}
       },
       {
-        "timestamp": 35290,
-        "duration": 2450,
-        "line": "",
+        "timestamp": 65980,
+        "duration": 4730,
+        "line": "It's just a cigarette like you always used to do",
         "words": [],
         "plugin": {}
       },
       {
-        "timestamp": 37740,
-        "duration": 2990,
-        "line": "Bagaikan tak berdosa",
-        "words": [],
-        "plugin": {}
-      },
-      {
-        "timestamp": 40730,
-        "duration": 2730,
-        "line": "",
-        "words": [],
-        "plugin": {}
-      },
-      {
-        "timestamp": 43460,
-        "duration": 4050,
-        "line": "Kau hancurkan rasa yang selama ini kutanam",
-        "words": [],
-        "plugin": {}
-      },
-      {
-        "timestamp": 47510,
-        "duration": 2190,
-        "line": "",
-        "words": [],
-        "plugin": {}
-      },
-      {
-        "timestamp": 49700,
-        "duration": 3180,
-        "line": "Saat semuanya telah pergi",
-        "words": [],
-        "plugin": {}
-      },
-      {
-        "timestamp": 52880,
-        "duration": 2290,
-        "line": "",
-        "words": [],
-        "plugin": {}
-      },
-      {
-        "timestamp": 55170,
-        "duration": 3080,
-        "line": "Bayangmu kembali mengisi",
-        "words": [],
-        "plugin": {}
-      },
-      {
-        "timestamp": 58250,
-        "duration": 2540,
-        "line": "",
-        "words": [],
-        "plugin": {}
-      },
-      {
-        "timestamp": 60790,
-        "duration": 3180,
-        "line": "Entah apa yang kau mau",
-        "words": [],
-        "plugin": {}
-      },
-      {
-        "timestamp": 63970,
-        "duration": 2440,
-        "line": "",
-        "words": [],
-        "plugin": {}
-      },
-      {
-        "timestamp": 66410,
-        "duration": 6300,
-        "line": "Ku tak berhak lagi 'tuk mengungkit kembali",
-        "words": [],
-        "plugin": {}
-      },
-      {
-        "timestamp": 72710,
-        "duration": 20870,
-        "line": "",
-        "words": [],
-        "plugin": {}
-      },
-      {
-        "timestamp": 93580,
-        "duration": 11320,
-        "line": "Menghapus tinta yang pernah kau lukis di kanvas hatiku",
-        "words": [],
-        "plugin": {}
-      },
-      {
-        "timestamp": 104900,
-        "duration": 11470,
-        "line": "Merobek semua bayangan yang tampak di relung sukmaku",
-        "words": [],
-        "plugin": {}
-      },
-      {
-        "timestamp": 116370,
-        "duration": 23780,
-        "line": "",
-        "words": [],
-        "plugin": {}
-      },
-      {
-        "timestamp": 140150,
-        "duration": 3600,
-        "line": "Ego t'lah menghasutku",
-        "words": [],
-        "plugin": {}
-      },
-      {
-        "timestamp": 143750,
-        "duration": 7210,
-        "line": "'Tuk kembali padamu",
-        "words": [],
-        "plugin": {}
-      },
-      {
-        "timestamp": 150960,
-        "duration": 4320,
-        "line": "Namun logika berkata",
-        "words": [],
-        "plugin": {}
-      },
-      {
-        "timestamp": 155280,
-        "duration": 7290,
-        "line": "Baiknya 'ku menjauh",
-        "words": [],
-        "plugin": {}
-      },
-      {
-        "timestamp": 162570,
-        "duration": 5770,
-        "line": "Jauh",
-        "words": [],
-        "plugin": {}
-      },
-      {
-        "timestamp": 168340,
-        "duration": 5730,
-        "line": "Jauh",
-        "words": [],
-        "plugin": {}
-      },
-      {
-        "timestamp": 174070,
+        "timestamp": 70710,
         "duration": 5700,
-        "line": "Jauh",
+        "line": "I was different then, I don't need them to be cool",
         "words": [],
         "plugin": {}
       },
       {
-        "timestamp": 179770,
-        "duration": 7110,
-        "line": "Jauh",
+        "timestamp": 76410,
+        "duration": 16560,
+        "line": "",
         "words": [],
         "plugin": {}
       },
       {
-        "timestamp": 186880,
-        "duration": 11260,
-        "line": "Ego t'lah menghasutku",
+        "timestamp": 92970,
+        "duration": 4630,
+        "line": "It's just a cigarette and it harms your pretty lungs",
         "words": [],
         "plugin": {}
       },
       {
-        "timestamp": 198140,
-        "duration": 11700,
-        "line": "'Tuk kembali padamu",
+        "timestamp": 97600,
+        "duration": 4850,
+        "line": "Well, it's only twice a week so there's not much of a chance",
         "words": [],
         "plugin": {}
       },
       {
-        "timestamp": 209840,
-        "duration": 11440,
-        "line": "Perang tak membawaku",
+        "timestamp": 102450,
+        "duration": 4790,
+        "line": "It's just a cigarette, it'll soon be only ten",
         "words": [],
         "plugin": {}
       },
       {
-        "timestamp": 221280,
-        "duration": 10480,
-        "line": "Untuk pergi menjauh",
+        "timestamp": 107240,
+        "duration": 5980,
+        "line": "Honey, can't you trust me? When I want to stop, I can",
         "words": [],
         "plugin": {}
       },
       {
-        "timestamp": 231760,
-        "duration": 11470,
-        "line": "Menghapus tinta yang pernah kau lukis di kanvas hatiku",
+        "timestamp": 113220,
+        "duration": 16430,
+        "line": "",
         "words": [],
         "plugin": {}
       },
       {
-        "timestamp": 243230,
-        "duration": 11650,
-        "line": "Merobek semua bayangan yang tampak di relung sukmaku",
+        "timestamp": 129650,
+        "duration": 5720,
+        "line": "It's just a cigarette and it's just a Marlboro Light",
         "words": [],
         "plugin": {}
       },
       {
-        "timestamp": 254880,
-        "duration": 11440,
-        "line": "Ego telah menghasutku 'tuk kembali padamu",
+        "timestamp": 135370,
+        "duration": 3800,
+        "line": "Maybe, but is it worth it if we fight?",
         "words": [],
         "plugin": {}
       },
       {
-        "timestamp": 266320,
-        "duration": 11450,
-        "line": "Namun logika berkata baiknya ku menjauh",
+        "timestamp": 139170,
+        "duration": 4370,
+        "line": "It's just a cigarette that I got from Jamie-Lee",
         "words": [],
         "plugin": {}
       },
       {
-        "timestamp": 277770,
-        "duration": 5740,
-        "line": "Jauh",
+        "timestamp": 143540,
+        "duration": 4630,
+        "line": "Oh, she's gonna get a smack and I'm gonna give you three",
         "words": [],
         "plugin": {}
       },
       {
-        "timestamp": 283510,
-        "duration": 5760,
-        "line": "Jauh",
+        "timestamp": 148170,
+        "duration": 4700,
+        "line": "It's just a cigarette and I only did it once (it's just a cigarette, it'll soon be only ten)",
         "words": [],
         "plugin": {}
       },
       {
-        "timestamp": 289270,
-        "duration": 5760,
-        "line": "Jauh",
+        "timestamp": 152870,
+        "duration": 4610,
+        "line": "It's only twice a week so there's not much of a chance (it'll make you sick girl there's not much of a chance)",
         "words": [],
         "plugin": {}
       },
       {
-        "timestamp": 295030,
-        "duration": 5130,
-        "line": "Jauh",
+        "timestamp": 157480,
+        "duration": 4650,
+        "line": "It's just a cigarette and I'm sorry that I did it (it's just a cigarette, you'll be sorry that you did it)",
         "words": [],
         "plugin": {}
       },
       {
-        "timestamp": 300160,
+        "timestamp": 162130,
+        "duration": 5240,
+        "line": "Honey, can't you trust me? When I want to stop, I can",
+        "words": [],
+        "plugin": {}
+      },
+      {
+        "timestamp": 167370,
+        "duration": 1700,
+        "line": "",
+        "words": [],
+        "plugin": {}
+      },
+      {
+        "timestamp": 169070,
+        "duration": 34560,
+        "line": "",
+        "words": [],
+        "plugin": {}
+      },
+      {
+        "timestamp": 203630,
+        "duration": 4750,
+        "line": "La la, la-la-la-la-la-la",
+        "words": [],
+        "plugin": {}
+      },
+      {
+        "timestamp": 208380,
+        "duration": 4580,
+        "line": "La la, la-la-la-la-la-la",
+        "words": [],
+        "plugin": {}
+      },
+      {
+        "timestamp": 212960,
+        "duration": 4460,
+        "line": "La la, la-la-la-la-la-la",
+        "words": [],
+        "plugin": {}
+      },
+      {
+        "timestamp": 217420,
+        "duration": 4650,
+        "line": "La la, la-la-la-la-la-la",
+        "words": [],
+        "plugin": {}
+      },
+      {
+        "timestamp": 222070,
+        "duration": 4550,
+        "line": "La la, la-la-la-la-la-la",
+        "words": [],
+        "plugin": {}
+      },
+      {
+        "timestamp": 226620,
+        "duration": 4540,
+        "line": "La la, la-la-la-la-la-la",
+        "words": [],
+        "plugin": {}
+      },
+      {
+        "timestamp": 231160,
+        "duration": 4440,
+        "line": "La la, la-la-la-la-la-la",
+        "words": [],
+        "plugin": {}
+      },
+      {
+        "timestamp": 235600,
+        "duration": 3380,
+        "line": "La la, la-la-la-la-la-la",
+        "words": [],
+        "plugin": {}
+      },
+      {
+        "timestamp": 238980,
         "duration": 0,
         "line": "",
         "words": [],

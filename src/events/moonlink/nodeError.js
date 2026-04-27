@@ -8,12 +8,6 @@ module.exports = {
       
       // Try to transfer all players to backup nodes
       try {
-        const players = client.manager.players;
-        if (!players || players.size === 0) {
-          logger.debug('No active players to transfer');
-          return;
-        }
-
         // Get available nodes using NodeManager API
         let availableNodes = [];
         try {
@@ -34,14 +28,43 @@ module.exports = {
         
         // Use the highest priority backup node
         const backupNode = availableNodes[0];
-        logger.info(`Attempting to transfer ${players.size} player(s) to backup node: ${backupNode.identifier}`);
+        logger.info(`Attempting to transfer players to backup node: ${backupNode.identifier}`);
+
+        // Get all players using PlayerManager API
+        // Players might be stored differently in v5
+        let playersToTransfer = [];
+        try {
+          const playerManager = client.manager.players;
+          
+          // Try different methods to get players
+          if (playerManager instanceof Map) {
+            playersToTransfer = Array.from(playerManager.values());
+          } else if (playerManager.players instanceof Map) {
+            playersToTransfer = Array.from(playerManager.players.values());
+          } else if (Array.isArray(playerManager)) {
+            playersToTransfer = playerManager;
+          } else if (typeof playerManager.forEach === 'function') {
+            playerManager.forEach(player => playersToTransfer.push(player));
+          }
+          
+          logger.debug(`Found ${playersToTransfer.length} players to potentially transfer`);
+        } catch (err) {
+          logger.debug(`nodeError: Could not access players: ${err.message}`);
+        }
+
+        if (playersToTransfer.length === 0) {
+          logger.debug('No active players to transfer');
+          return;
+        }
 
         // Transfer each player to backup node
-        for (const player of players.values()) {
+        let transferredCount = 0;
+        for (const player of playersToTransfer) {
           try {
-            if (player && !player.destroyed) {
+            if (player && !player.destroyed && player.node?.identifier === node.identifier) {
               await player.transferNode(backupNode);
-              logger.info(`Successfully transferred player from ${player.guildId} to ${backupNode.identifier}`);
+              transferredCount++;
+              logger.info(`Successfully transferred player from guild ${player.guildId} to ${backupNode.identifier}`);
             }
           } catch (transferError) {
             logger.error(`Failed to transfer player ${player.guildId}: ${transferError.message}`);
@@ -49,7 +72,7 @@ module.exports = {
           }
         }
 
-        logger.info(`Failover complete. Transferred players to ${backupNode.identifier}`);
+        logger.info(`Failover complete. Transferred ${transferredCount} player(s) to ${backupNode.identifier}`);
       } catch (err) {
         logger.error(`Failover error: ${err.message}`, { stack: err.stack });
       }
