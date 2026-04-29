@@ -1,10 +1,10 @@
 # 🎶 Hakari Discord Music Bot
 
 
-<img width="1983" height="793" alt="Hakari Icon" src="https://github.com/user-attachments/assets/ba966c51-2174-4b94-beaf-0afca3746b2f" />
+<img width="1983" height="793" alt="Hakari Icon" src="https://github.com/user-attachments/assets/ba966c51-2174-4b94-beaf-0afca3746b2f" /><br>
 
 
-A modern, high-performance Discord music bot powered by Lavalink, built with clean architecture, strong error handling, and modular design.
+**A modern, high-performance Discord music bot powered by Lavalink, built with clean architecture, strong error handling, and modular design.**
 
 ---
 
