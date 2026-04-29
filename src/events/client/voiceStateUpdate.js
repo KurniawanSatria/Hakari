@@ -1,4 +1,5 @@
 const logger = require('../../structures/logger');
+const { rejectMessage } = require('../../structures/builders');
 
 module.exports = {
   name: 'voiceStateUpdate',
@@ -22,9 +23,11 @@ module.exports = {
         return;
       }
 
-      const guildName = client.guilds?.cache.get(guildId)?.name || 'Unknown';
+      const guild = client.guilds?.cache.get(guildId);
+      const guildName = guild?.name || 'Unknown';
       const oldChannelName = oldState.channelId ? (client.channels?.cache.get(oldState.channelId)?.name || 'Unknown') : 'None';
       const newChannelName = newState.channelId ? (client.channels?.cache.get(newState.channelId)?.name || 'Unknown') : 'None';
+      const player = client.manager?.players.get(guildId);
       
       // Bot joined a channel
       if (!oldState.channelId && newState.channelId) {
@@ -32,15 +35,15 @@ module.exports = {
         return;
       }
       
-      // Bot was disconnected or left a channel
+      // Bot was kicked/disconnected from voice channel
       if (oldState.channelId && !newState.channelId) {
-        logger.info(`Bot Left Voice Channel: ${oldChannelName} in ${guildName}`);
+        logger.warn(`Bot was kicked/disconnected from Voice Channel: ${oldChannelName} in ${guildName}`);
         
-        // Clean up player if exists
+        // Clean up player and notify text channel
         try {
-          const player = client.manager?.players.get(guildId);
           if (player && !player.destroyed) {
-            logger.info(`voiceStateUpdate: Destroying player for guild ${guildName} after bot left voice`);
+            // Find text channel to send notification
+            const textChannel = guild?.channels?.cache.get(player.textChannelId);
             
             // Clean up messages
             if (player.msg?.delete) {
@@ -53,27 +56,107 @@ module.exports = {
               player.lyricsMsg = null;
             }
             
-            player.destroy('bot left voice channel');
+            // Clear queue and destroy player
+            player.queue?.clear();
+            await player.destroy('bot kicked from voice channel');
+            
+            // Notify in text channel
+            if (textChannel) {
+              await textChannel.send(
+                rejectMessage('I have been kicked from the voice channel <a:sad:1498882453883060294>')
+              ).catch(() => {});
+            }
+            
+            logger.info(`voiceStateUpdate: Player destroyed after bot was kicked from voice in ${guildName}`);
           }
         } catch (err) {
-          logger.error(`voiceStateUpdate: Error cleaning up player: ${err.message}`);
+          logger.error(`voiceStateUpdate: Error cleaning up after kick: ${err.message}`);
         }
         return;
       }
       
-      // Bot switched voice channels
+      // Bot was moved to another voice channel
       if (oldState.channelId && newState.channelId && oldState.channelId !== newState.channelId) {
-        logger.info(`Bot Switched Voice Channel: ${oldChannelName} -> ${newChannelName} in ${guildName}`);
+        logger.info(`Bot was moved: ${oldChannelName} -> ${newChannelName} in ${guildName}`);
         
         try {
-          // Update player voice channel
-          const player = client.manager?.players.get(guildId);
           if (player && !player.destroyed) {
-            player.setVoiceChannelId(newState.channelId);
+            // Update player voice channel ID
+            if (typeof player.setVoiceChannelId === 'function') {
+              player.setVoiceChannelId(newState.channelId);
+            } else {
+              // Fallback: manually update the property
+              player.voiceChannelId = newState.channelId;
+            }
+            
+            // Notify in text channel
+            const textChannel = guild?.channels?.cache.get(player.textChannelId);
+            if (textChannel) {
+              await textChannel.send(
+                rejectMessage(`I’ve been moved to ${newChannelName}. Alright, continuing playback there.`)
+              ).catch(() => {});
+            }
+            
             logger.debug(`voiceStateUpdate: Updated player voice channel to ${newChannelName}`);
           }
         } catch (err) {
-          logger.error(`voiceStateUpdate: Error updating player voice channel: ${err.message}`);
+          logger.error(`voiceStateUpdate: Error handling voice channel move: ${err.message}`);
+        }
+        return;
+      }
+      
+      // Check if all humans left the voice channel (bot alone)
+      if (newState.channelId && player && !player.destroyed) {
+        const voiceChannel = guild?.channels?.cache.get(newState.channelId);
+        if (voiceChannel) {
+          const humanMembers = voiceChannel.members.filter(m => !m.user.bot);
+          
+          if (humanMembers.size === 0) {
+            logger.info(`Bot is alone in voice channel ${newChannelName}, waiting before disconnect...`);
+            
+            // Set a timeout to auto-disconnect after 30 seconds if still alone
+            player.aloneTimeout = setTimeout(async () => {
+              try {
+                const currentVoiceChannel = guild?.channels?.cache.get(player.voiceChannelId);
+                const currentHumanMembers = currentVoiceChannel?.members.filter(m => !m.user.bot);
+                
+                if (currentHumanMembers?.size === 0) {
+                  logger.info(`Bot still alone, disconnecting from ${newChannelName}`);
+                  
+                  const textChannel = guild?.channels?.cache.get(player.textChannelId);
+                  
+                  // Clean up messages
+                  if (player.msg?.delete) {
+                    player.msg.delete().catch(() => {});
+                    player.msg = null;
+                  }
+                  
+                  if (player.lyricsMsg?.delete) {
+                    player.lyricsMsg.delete().catch(() => {});
+                    player.lyricsMsg = null;
+                  }
+                  
+                  player.queue?.clear();
+                  await player.destroy('left alone in voice channel');
+                  
+                  if (textChannel) {
+                    await textChannel.send(
+                      rejectMessage('No one’s here anymore... I guess I’ll leave too.')
+                    ).catch(() => {});
+                  }
+                }
+              } catch (err) {
+                logger.error(`voiceStateUpdate: Error in alone timeout: ${err.message}`);
+              }
+            }, 30000); // 30 seconds
+          } else {
+            // Someone joined, clear the timeout
+            if (player.aloneTimeout) {
+              clearTimeout(player.aloneTimeout);
+              player.aloneTimeout = null;
+              logger.debug('Cleared alone timeout - users are present');
+            }
+          }
         }
       }
       
