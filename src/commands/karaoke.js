@@ -24,7 +24,8 @@ module.exports = {
           filterWidth: 100
         });
       } else {
-        player.filters.clear();
+        player.filters.setKaraoke({});
+        player._karaoke = false;
       }
 
       await player.filters.apply();

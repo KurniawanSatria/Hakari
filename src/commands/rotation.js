@@ -21,7 +21,8 @@ module.exports = {
           rotationHz: 0.2
         });
       } else {
-        player.filters.clear();
+        player.filters.setRotation({});
+        player._rotation = false;
       }
 
       await player.filters.apply();

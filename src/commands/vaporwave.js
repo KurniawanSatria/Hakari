@@ -23,7 +23,8 @@ module.exports = {
           rate: 1.0
         });
       } else {
-        player.filters.clear();
+        player.filters.setTimescale({});
+        player._vaporwave = false;
       }
 
       await player.filters.apply();

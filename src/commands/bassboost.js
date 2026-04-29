@@ -18,14 +18,15 @@ module.exports = {
 
       if (newState) {
         player.filters.setEqualizer([
-          { band: 0, gain: 0.6 },
-          { band: 1, gain: 0.7 },
-          { band: 2, gain: 0.8 },
-          { band: 3, gain: 0.5 },
-          { band: 4, gain: 0.3 }
+          { band: 0, gain: 0.3 },
+          { band: 1, gain: 0.25 },
+          { band: 2, gain: 0.2 },
+          { band: 3, gain: 0.15 },
+          { band: 4, gain: 0.1 }
         ]);
       } else {
-        player.filters.clear();
+        player.filters.setEqualizer([]);
+        player._bassboost = false;
       }
 
       await player.filters.apply();

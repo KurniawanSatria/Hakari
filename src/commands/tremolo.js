@@ -22,7 +22,8 @@ module.exports = {
           depth: 0.5
         });
       } else {
-        player.filters.clear();
+        player.filters.setTremolo({});
+        player._tremolo = false;
       }
 
       await player.filters.apply();

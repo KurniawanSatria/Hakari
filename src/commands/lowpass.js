@@ -21,7 +21,8 @@ module.exports = {
           smoothing: 20
         });
       } else {
-        player.filters.clear();
+        player.filters.setLowPass({});
+        player._lowpass = false;
       }
 
       await player.filters.apply();

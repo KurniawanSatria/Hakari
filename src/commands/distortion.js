@@ -28,7 +28,8 @@ module.exports = {
           scale: 1
         });
       } else {
-        player.filters.clear();
+        player.filters.setDistortion({});
+        player._distortion = false;
       }
 
       await player.filters.apply();

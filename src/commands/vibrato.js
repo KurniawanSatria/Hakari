@@ -22,7 +22,8 @@ module.exports = {
           depth: 0.5
         });
       } else {
-        player.filters.clear();
+        player.filters.setVibrato({});
+        player._vibrato = false;
       }
 
       await player.filters.apply();
