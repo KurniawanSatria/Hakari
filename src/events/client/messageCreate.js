@@ -53,6 +53,14 @@ module.exports = {
     }
     if (!command) return;
 
+    // Check owner-only commands
+    if (command.ownerOnly) {
+      const ownerId = process.env.OWNER_ID;
+      if (!ownerId || message.author.id !== ownerId) {
+        return message.channel.send(rejectMessage('Only bot owner can use this command.'));
+      }
+    }
+
     async function sendRejection(reason) {
       const msg = await message.channel.send(rejectMessage(reason));
       // setTimeout(() => msg.delete().catch(() => {}), 3000);

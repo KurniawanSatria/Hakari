@@ -7,7 +7,6 @@ const { Manager, Connectors } = require('moonlink.js');
 const logger = require('./src/structures/logger');
 const config = require('./src/structures/config');
 const { validateConfig } = require('./src/structures/config');
-const langManager = require('./src/structures/langManager');
 const figlet = require('figlet');
 const chalk = require('chalk');
 
@@ -18,8 +17,6 @@ try {
   logger.error(err.message);
   process.exit(1);
 }
-
-langManager.init();
 
 const client = new Client({
   intents: [

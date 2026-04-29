@@ -17,7 +17,55 @@ module.exports = {
                 return;
             }
 
-            // Check if manager is initialized
+            const { customId } = interaction;
+
+            // Handle guild welcome buttons FIRST (no player required)
+            if (customId === 'setup_now' || customId === 'show_commands' || customId === 'show_lang_prefix') {
+                try {
+                    await interaction.deferReply({ ephemeral: true }).catch(() => {});
+
+                    if (customId === 'setup_now') {
+                        await interaction.editReply({
+                            components: [new ContainerBuilder()
+                                .setAccentColor(0x5865F2)
+                                .addTextDisplayComponents(td => td.setContent("## ⚡ Quick Setup\n\nDefault settings applied:\n• Prefix: `.`\n• Language: English\n• Autoplay: Enabled\n• 24/7 Mode: Disabled\n\n### 🎵 Start Playing\nUse `.play <song name or URL>` to start!\n\n-# You can change settings anytime with `.lang` and other commands."))
+                            ],
+                            flags: MessageFlags.IsComponentsV2
+                        });
+                    } else if (customId === 'show_commands') {
+                        const commandList = Array.from(client.commands.values())
+                            .map(cmd => {
+                                const aliases = cmd.aliases && cmd.aliases.length > 0 
+                                    ? ` *(${cmd.aliases.join(', ')})*` 
+                                    : '';
+                                return `- \`.${cmd.name}${aliases}\``;
+                            })
+                            .join('\n');
+
+                        await interaction.editReply({
+                            components: [new ContainerBuilder()
+                                .setAccentColor(0x57F287)
+                                .addTextDisplayComponents(td => td.setContent(`## 📖 Available Commands\n\n${commandList}\n\n-# Use \`.help <command>\` for detailed info`))
+                            ],
+                            flags: MessageFlags.IsComponentsV2
+                        });
+                    } else if (customId === 'show_lang_prefix') {
+                        await interaction.editReply({
+                            components: [new ContainerBuilder()
+                                .setAccentColor(0xFEE75C)
+                                .addTextDisplayComponents(td => td.setContent("## 🌐 Server Settings\n\n### Language\n• Current: English\n• Change: `.lang en` or `.lang id`\n• Available: `en` (English), `id` (Indonesian)\n\n### Command Prefix\n• Current: `.`\n• Change: Update in `.env` file\n\n-# Language requires **Manage Guild** permission"))
+                            ],
+                            flags: MessageFlags.IsComponentsV2
+                        });
+                    }
+                    return;
+                } catch (err) {
+                    logger.error(`Guild welcome button error: ${err.message}`);
+                    return;
+                }
+            }
+
+            // Check if manager is initialized (for music buttons)
             if (!client.manager) {
                 return interaction.reply({
                     ...rejectMessage('Music not initialized.'),
@@ -25,7 +73,7 @@ module.exports = {
                 }).catch(() => {});
             }
 
-            // Safely get player
+            // Safely get player (for music buttons)
             const player = client.manager.players.get(interaction.guildId);
             if (!player || player.destroyed) {
                 return interaction.reply({
@@ -33,8 +81,6 @@ module.exports = {
                     ephemeral: true
                 }).catch(() => {});
             }
-
-            const { customId } = interaction;
 
             // Safe reply helper
             async function safeReply(content, ephemeral = false) {
