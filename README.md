@@ -1,17 +1,24 @@
-# Hakari Discord Music Bot
+# 🎶 Hakari Discord Music Bot
 
-A feature-rich Discord music bot built with modern JavaScript practices and comprehensive error handling.
+A modern, high-performance Discord music bot powered by Lavalink, built with clean architecture, strong error handling, and modular design.
 
-## Features
+---
 
-- Music playback with Lavalink integration
-- Spotify integration
-- Queue management
-- Voice channel controls
-- Comprehensive logging and error handling
-- Environment-based configuration
+## ✨ Features
 
-## Installation
+- 🎵 High-quality music playback via Lavalink
+- 🎧 Spotify support (track, album, playlist)
+- 📜 Smart queue system (add, remove, shuffle, view)
+- 🔊 Voice channel auto-management
+- 🤖 24/7 mode support
+- ⚡ Fast response commands
+- 🧠 Robust error handling & recovery
+- 🪵 Advanced logging system (Winston)
+- 🔧 Fully environment-based configuration
+
+---
+
+## 🚀 Installation
 
 1. **Clone the repository:**
    ```bash
@@ -55,7 +62,7 @@ A feature-rich Discord music bot built with modern JavaScript practices and comp
    npm start
    ```
 
-## Configuration
+## ⚙️ Configuration Overview
 
 The bot uses environment variables for configuration. Key settings include:
 
@@ -79,20 +86,17 @@ The bot uses environment variables for configuration. Key settings include:
   - `CLEAN_TIMEOUT`: Message cleanup timeout in ms
   - `TWENTY_FOUR_SEVEN`: 24/7 mode (true/false)
 
-## Commands
+## 🎮 Commands
 
 - `.play <song>`: Play a song
-- `.join`: Join voice channel
-- `.leave`: Leave voice channel
 - `.queue`: Show queue
 - `.skip`: Skip current track
 - `.stop`: Stop playback
 - `.shuffle`: Shuffle queue
-- `.seek <time>`: Seek to time
-- `.filter <filter>`: Apply audio filter
-- `.clean`: Clean messages
+- `.pause`: Pause current track
+- `.resume`: Resume current track
 
-## Logging
+## 🪵 Logging System
 
 The bot uses Winston for comprehensive logging:
 
@@ -101,41 +105,46 @@ The bot uses Winston for comprehensive logging:
   - `logs/error.log`: Error logs
   - `logs/combined.log`: All logs
 
-## Error Handling
+## 🧠 Error Handling
 
 The bot includes comprehensive error handling:
 
-- Graceful shutdown on process signals
-- Proper cleanup of resources
-- Detailed error logging
-- Configuration validation
+- Automatic recovery from voice disconnects
+- Safe player destruction
+- Queue cleanup protection
+- Graceful shutdown handling (SIGINT, SIGTERM)
+- Null-safe state validation everywhere
 
-## Development
+## 🛠 Development
 
-### Environment Variables
-
-For development, you can set environment variables:
-
+### Dev mode
 ```bash
-export NODE_ENV=development
-export LOG_LEVEL=debug
+NODE_ENV=development LOG_LEVEL=debug npm run dev
 ```
 
-### Testing
+### Run tests
 
 Run tests with:
 ```bash
 npm test
 ```
 
-## Security
+## 🔐 Security
 
-- All sensitive credentials are stored in environment variables
-- No hardcoded secrets in code
-- Input validation and sanitization
-- Secure logging practices
+- No hardcoded secrets
+- Environment-based credentials
+- Input validation on commands
+- Safe logging (no token leaks)
+- Controlled Lavalink connection handling
 
-## Contributing
+# 📦 Project Architecture
+- Modular command system
+- Event-driven design
+- Separated structures (logger, builders, handlers)
+- Lavalink-based audio engine
+- Stateless command execution
+
+## 🤝 Contributing
 
 1. Fork the repository
 2. Create a feature branch
@@ -143,10 +152,10 @@ npm test
 4. Add tests if applicable
 5. Submit a pull request
 
-## License
+## 📄 License
 
 ISC License
 
-## Support
+## 🧩 Support
 
 For support, please open an issue in the repository.
