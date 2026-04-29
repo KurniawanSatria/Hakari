@@ -2,6 +2,7 @@
 
 const logger = require('../../structures/logger');
 const { rejectMessage, hakariCard, hakariMessage } = require('../../structures/builders');
+const { EMOJIS } = require('../../structures/emojis');
 const { ActionRowBuilder, ButtonBuilder, ButtonStyle, ContainerBuilder, MessageFlags, SeparatorBuilder } = require('discord.js');
 
 module.exports = {
@@ -19,8 +20,50 @@ module.exports = {
 
             const { customId } = interaction;
 
-            // Handle guild welcome buttons FIRST (no player required)
-            if (customId === 'setup_now' || customId === 'show_commands' || customId === 'show_lang_prefix') {
+            // Handle help buttons (no player required)
+            if (customId === 'help_playback' || customId === 'help_filters' || customId === 'help_utility' || customId === 'help_owner') {
+                try {
+                    if (!interaction.deferred && !interaction.replied) {
+                        await interaction.deferReply({ ephemeral: true }).catch(() => {});
+                    }
+
+                    const response = {
+                        components: [new ContainerBuilder()],
+                        flags: MessageFlags.IsComponentsV2
+                    };
+
+                    if (customId === 'help_playback') {
+                        response.components[0]
+                            .setAccentColor(0x5865F2)
+                            .addTextDisplayComponents(td => td.setContent(`## ${EMOJIS.help_sections.playback} Playback Commands\n\n• \`.play <query or URL>\` - Play music\n• \`.pause\` - Pause music\n• \`.resume\` - Resume music\n• \`.stop\` - Stop and clear queue\n• \`.skip\` - Skip current song\n• \`.queue\` - View queue\n• \`.loop <off/track/queue>\` - Set loop mode\n• \`.shuffle\` - Shuffle queue\n• \`.autoplay <on/off>\` - Toggle autoplay\n\n-# Most commands require you to be in a voice channel`));
+                    } else if (customId === 'help_filters') {
+                        response.components[0]
+                            .setAccentColor(0x57F287)
+                            .addTextDisplayComponents(td => td.setContent(`## ${EMOJIS.help_sections.filters} Audio Filters\n\n• \`.bassboost\` - Toggle bass boost\n• \`.nightcore\` - Faster & higher pitch\n• \`.vaporwave\` - Slower & lower pitch\n• \`.karaoke\` - Vocal removal\n• \`.tremolo\` - Volume oscillation\n• \`.vibrato\` - Pitch oscillation\n• \`.rotation\` - 8D audio effect\n• \`.distortion\` - Distortion filter\n• \`.lowpass\` - Muffle high frequencies\n\n-# Toggle filters on/off with the same command`));
+                    } else if (customId === 'help_utility') {
+                        response.components[0]
+                            .setAccentColor(0xFEE75C)
+                            .addTextDisplayComponents(td => td.setContent(`## ${EMOJIS.help_sections.utility} Utility Commands\n\n• \`.lyrics\` - Display current song lyrics\n• \`.help [command]\` - Get command details\n\n-# Lyrics requires the song to have lyrics available`));
+                    } else if (customId === 'help_owner') {
+                        response.components[0]
+                            .setAccentColor(0xED4245)
+                            .addTextDisplayComponents(td => td.setContent(`## ${EMOJIS.help_sections.owner} Owner Commands\n\n• \`.eval <code>\` - Execute JavaScript code\n• \`.emit <event-name>\` - Emit events for testing\n\n-# These commands are restricted to the bot owner only`));
+                    }
+
+                    if (interaction.deferred || interaction.replied) {
+                        await interaction.editReply(response).catch(() => {});
+                    } else {
+                        await interaction.reply(response).catch(() => {});
+                    }
+                    return;
+                } catch (err) {
+                    logger.error(`Help button error: ${err.message}`);
+                    return;
+                }
+            }
+
+            // Handle guild welcome buttons (no player required)
+            if (customId === 'setup_now' || customId === 'show_commands') {
                 try {
                     await interaction.deferReply({ ephemeral: true }).catch(() => {});
 
@@ -28,7 +71,7 @@ module.exports = {
                         await interaction.editReply({
                             components: [new ContainerBuilder()
                                 .setAccentColor(0x5865F2)
-                                .addTextDisplayComponents(td => td.setContent("## ⚡ Quick Setup\n\nDefault settings applied:\n• Prefix: `.`\n• Language: English\n• Autoplay: Enabled\n• 24/7 Mode: Disabled\n\n### 🎵 Start Playing\nUse `.play <song name or URL>` to start!\n\n-# You can change settings anytime with `.lang` and other commands."))
+                                .addTextDisplayComponents(td => td.setContent(`## ${EMOJIS.welcome.setup} Quick Setup\n\nDefault settings applied:\n• Prefix: \`.\`\n• Language: English\n• Autoplay: Enabled\n• 24/7 Mode: Disabled\n\n### ${EMOJIS.welcome.playing} Start Playing\nUse \`.play <song name or URL>\` to start!\n\n-# You can change settings anytime with \`.lang\` and other commands.`))
                             ],
                             flags: MessageFlags.IsComponentsV2
                         });
@@ -45,15 +88,7 @@ module.exports = {
                         await interaction.editReply({
                             components: [new ContainerBuilder()
                                 .setAccentColor(0x57F287)
-                                .addTextDisplayComponents(td => td.setContent(`## 📖 Available Commands\n\n${commandList}\n\n-# Use \`.help <command>\` for detailed info`))
-                            ],
-                            flags: MessageFlags.IsComponentsV2
-                        });
-                    } else if (customId === 'show_lang_prefix') {
-                        await interaction.editReply({
-                            components: [new ContainerBuilder()
-                                .setAccentColor(0xFEE75C)
-                                .addTextDisplayComponents(td => td.setContent("## 🌐 Server Settings\n\n### Language\n• Current: English\n• Change: `.lang en` or `.lang id`\n• Available: `en` (English), `id` (Indonesian)\n\n### Command Prefix\n• Current: `.`\n• Change: Update in `.env` file\n\n-# Language requires **Manage Guild** permission"))
+                                .addTextDisplayComponents(td => td.setContent(`## ${EMOJIS.welcome.commands} Available Commands\n\n${commandList}\n\n-# Use \`.help <command>\` for detailed info`))
                             ],
                             flags: MessageFlags.IsComponentsV2
                         });
@@ -209,7 +244,7 @@ module.exports = {
                         return `\`${globalIndex}.\` **[${title}](${uri})** - ${author}`;
                     }).join('\n');
 
-                    const header = `### <:queue:1451682061697159310> Music Queue`;
+                    const header = `### ${EMOJIS.music.queue} Music Queue`;
                     const body = `${queueList}\n\n-# Total: ${totalTracks} tracks`
                     
                     // Create navigation buttons
@@ -219,7 +254,7 @@ module.exports = {
                         new ButtonBuilder()
                             .setCustomId(`queue_prev_${page}`)
                             .setStyle(ButtonStyle.Secondary)
-                            .setEmoji('<:left:1498024952849498385>')
+                            .setEmoji(EMOJIS.navigation.left)
                             .setDisabled(page === 0)
                     );
 
@@ -235,7 +270,7 @@ module.exports = {
                         new ButtonBuilder()
                             .setCustomId(`queue_next_${page}`)
                             .setStyle(ButtonStyle.Secondary)
-                            .setEmoji('<:right:1465814301787820178>')
+                            .setEmoji(EMOJIS.navigation.right)
                             .setDisabled(page >= totalPages - 1)
                     );
 

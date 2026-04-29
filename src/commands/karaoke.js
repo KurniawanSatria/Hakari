@@ -1,4 +1,5 @@
 const { hakariMessage } = require('../structures/builders');
+const { EMOJIS } = require('../structures/emojis');
 
 module.exports = {
   name: 'karaoke',
@@ -26,17 +27,17 @@ module.exports = {
       } else {
         player.filters.setKaraoke({});
         player._karaoke = false;
-      }
+      } 
 
       await player.filters.apply();
 
-      const status = newState ? '**enabled**' : '**disabled**';
+      const status = newState ? `${EMOJIS.toggle.on} Enabled` : `${EMOJIS.toggle.off} Disabled`;
 
-      message.channel.send(
-        hakariMessage(`### <:karaoke:1451682056927973479> Karaoke\nKaraoke is now ${status}`)
+      message.reply(
+        hakariMessage(`### ${EMOJIS.music_filters.karaoke} Karaoke\nKaraoke is now ${status}`)
       );
     } catch (err) {
-      message.channel.send(
+      message.reply(
         hakariMessage('### Error\nFilter rusak. Bukan lag, ini emang kamu yang maksa 😝')
       );
     }

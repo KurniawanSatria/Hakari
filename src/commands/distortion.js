@@ -1,4 +1,5 @@
 const { hakariMessage } = require('../structures/builders');
+const { EMOJIS } = require('../structures/emojis');
 
 module.exports = {
   name: 'distortion',
@@ -34,13 +35,13 @@ module.exports = {
 
       await player.filters.apply();
 
-      const status = newState ? '**enabled**' : '**disabled**';
+      const status = newState ? `${EMOJIS.toggle.on} Enabled` : `${EMOJIS.toggle.off} Disabled`;
 
-      message.channel.send(
-        hakariMessage(`### <:distortion:1451682056927973484> Distortion\nDistortion is now ${status}`)
+      message.reply(
+        hakariMessage(`### ${EMOJIS.music_filters.distortion} Distortion\nDistortion is now ${status}`)
       );
     } catch (err) {
-      message.channel.send(
+      message.reply(
         hakariMessage('### Error\nFilter rusak. Bukan lag, ini emang kamu yang maksa 😝')
       );
     }

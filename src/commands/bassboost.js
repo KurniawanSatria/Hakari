@@ -1,4 +1,5 @@
 const { hakariMessage } = require('../structures/builders');
+const { EMOJIS } = require('../structures/emojis');
 
 module.exports = {
   name: 'bassboost',
@@ -31,13 +32,13 @@ module.exports = {
 
       await player.filters.apply();
 
-      const status = newState ? '**enabled**' : '**disabled**';
+      const status = newState ? `${EMOJIS.toggle.on} Enabled` : `${EMOJIS.toggle.off} Disabled`;
 
-      message.channel.send(
-        hakariMessage(`### <:bassboost:1451682056927973476> BassBoost\nBassboost is now ${status}`)
+      message.reply(
+        hakariMessage(`### ${EMOJIS.music_filters.bassboost} BassBoost\nBassboost is now ${status}`)
       );
     } catch (err) {
-      message.channel.send(
+      message.reply(
         hakariMessage('### Error\nFilter rusak. Bukan lag, ini emang kamu yang maksa 😝')
       );
     }

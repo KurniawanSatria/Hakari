@@ -1,6 +1,7 @@
 // src/commands/autoplay.js - Toggle autoplay
 
 const { hakariMessage } = require('../structures/builders');
+const { EMOJIS } = require('../structures/emojis');
 
 module.exports = {
   name: 'autoplay',
@@ -21,12 +22,13 @@ module.exports = {
 
       if (player) {
         player.setAutoPlay(newState);
-        const status = newState ? '**enabled**' : '**disabled**';
-        message.channel.send(hakariMessage(`### <:autoplay:1451682056927973476> AutoPlay\nAutoplay is now ${status}`));
+        const status = newState ? `${EMOJIS.toggle.on} Enabled` : `${EMOJIS.toggle.off} Disabled`;
+        message.channel.send(hakariMessage(`### ${EMOJIS.music_filters.autoplay} AutoPlay\nAutoplay is now ${status}`));
       } else {
         const config = require('../structures/config');
         const defaultState = config.autoplay;
-        message.channel.send(hakariMessage(`### <:autoplay:1451682056927973476> AutoPlay\nDefault autoplay: ${defaultState ? '**enabled**' : '**disabled**'}\n\nUse \`.autoplay on/off\` when a player is active.`));
+        const status = defaultState ? `${EMOJIS.toggle.on} Enabled` : `${EMOJIS.toggle.off} Disabled`;
+        message.channel.send(hakariMessage(`### ${EMOJIS.music_filters.autoplay} AutoPlay\nDefault autoplay: ${status}\n\nUse \`.autoplay on/off\` when a player is active.`));
       }
 
     } catch (err) {

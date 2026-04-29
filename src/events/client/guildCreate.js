@@ -9,6 +9,7 @@ const {
     ActionRowBuilder,
     MessageFlags
 } = require('discord.js');
+const { EMOJIS } = require('../../structures/emojis');
 
 module.exports = {
     name: 'guildCreate',
@@ -54,7 +55,7 @@ module.exports = {
                         .addSeparatorComponents(sep => sep.setDivider(true))
                         .addSectionComponents(section =>
                             section
-                                .addTextDisplayComponents(td => td.setContent('## ⚡ Quick Setup\n-# Get started in seconds with default configuration.'))
+                                .addTextDisplayComponents(td => td.setContent(`## ${EMOJIS.welcome.setup} Quick Setup\n-# Get started in seconds with default configuration.`))
                                 .setButtonAccessory(
                                     new ButtonBuilder()
                                         .setCustomId('setup_now')
@@ -64,26 +65,13 @@ module.exports = {
                         )
                         .addSectionComponents(section =>
                             section
-                                .addTextDisplayComponents(td => td.setContent('## 📖 Commands\n-# Explore all available music commands and features.'))
+                                .addTextDisplayComponents(td => td.setContent(`## ${EMOJIS.welcome.commands} Commands\n-# Explore all available music commands and features.`))
                                 .setButtonAccessory(
                                     new ButtonBuilder()
                                         .setCustomId('show_commands')
                                         .setLabel('View Commands')
                                         .setStyle(ButtonStyle.Success)
                                 )
-                        )
-                        .addSectionComponents(section =>
-                            section
-                                .addTextDisplayComponents(td => td.setContent('## 🌐 Settings\n-# Configure language and command prefix to match your server.'))
-                                .setButtonAccessory(
-                                    new ButtonBuilder()
-                                        .setCustomId('show_lang_prefix')
-                                        .setLabel('Open Settings')
-                                        .setStyle(ButtonStyle.Success)
-                                )
-                        )
-                        .addMediaGalleryComponents(gallery =>
-                            gallery.addItems(item => item.setURL('https://i.ibb.co.com/Zztkcpbj/hakari.gif'))
                         )
                 ]
             };

@@ -1,5 +1,6 @@
 const logger = require('../../structures/logger');
 const { hakariPlayerCard } = require('../../structures/builders');
+const { EMOJIS } = require('../../structures/emojis');
 
 function msToTime(ms) {
     if (!ms || ms < 0) return '00:00';
@@ -13,7 +14,7 @@ function buildProgressBar(current = 0, total = 0, length = 12) {
     if (!total || total <= 0) return '●───────────────────';
     const filled = Math.round((current / total) * length);
     const empty = length - filled;
-    return '▬'.repeat(Math.max(filled - 1, 0)) + '<:dot:1498023441649897503>' + '─'.repeat(Math.max(empty, 0));
+    return '▬'.repeat(Math.max(filled - 1, 0)) + EMOJIS.progressbar.dot + '─'.repeat(Math.max(empty, 0));
 }
 
 module.exports = {
@@ -63,8 +64,8 @@ module.exports = {
                 const queueSize = player.queue?.size ?? player.queue?.length ?? 0;
                 const status = player.paused ? 'Paused' : 'Playing';
                 const pauseEmoji = player.paused 
-                    ? { name: 'play', id: '1449501267847151707' } 
-                    : { name: 'pause', id: '1449501265720774656' };
+                    ? EMOJIS.music.play 
+                    : EMOJIS.music.pause;
                 
                 // Safely get track title with fallback
                 const trackTitle = track?.title ? track.title.slice(0, 32) : 'Unknown';
@@ -73,7 +74,7 @@ module.exports = {
                 const trackThumbnail = track?.thumbnail || 'https://files.catbox.moe/fnlch5.jpg';
                 
                 const sectionContent = [
-                  `### <a:hakari:1497764150099574904> Now Playing`,
+                  `### ${EMOJIS.bot.hakariAnimated} Now Playing`,
                   `**[${trackTitle}](${trackUri})**`,
                   `${trackAuthor} — \`${duration}\``,
                 ].join('\n');

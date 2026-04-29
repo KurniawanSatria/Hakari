@@ -1,5 +1,6 @@
 const logger = require('../../structures/logger');
 const { rejectMessage } = require('../../structures/builders');
+const { EMOJIS } = require('../../structures/emojis');
 
 module.exports = {
   name: 'voiceStateUpdate',
@@ -63,7 +64,7 @@ module.exports = {
             // Notify in text channel
             if (textChannel) {
               await textChannel.send(
-                rejectMessage('I have been kicked from the voice channel <a:sad:1498882453883060294>')
+                rejectMessage(`I have been kicked from the voice channel ${EMOJIS.emotions.sad}`)
               ).catch(() => {});
             }
             

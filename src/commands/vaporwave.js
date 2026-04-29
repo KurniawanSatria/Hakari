@@ -1,4 +1,5 @@
 const { hakariMessage } = require('../structures/builders');
+const { EMOJIS } = require('../structures/emojis');
 
 module.exports = {
   name: 'vaporwave',
@@ -29,13 +30,13 @@ module.exports = {
 
       await player.filters.apply();
 
-      const status = newState ? '**enabled**' : '**disabled**';
+      const status = newState ? `${EMOJIS.toggle.on} Enabled` : `${EMOJIS.toggle.off} Disabled`;
 
-      message.channel.send(
-        hakariMessage(`### <:vaporwave:1451682056927973478> Vaporwave\nVaporwave is now ${status}`)
+      message.reply(
+        hakariMessage(`### ${EMOJIS.music_filters.vaporwave} Vaporwave\nVaporwave is now ${status}`)
       );
     } catch (err) {
-      message.channel.send(
+      message.reply(
         hakariMessage('### Error\nFilter rusak. Bukan lag, ini emang kamu yang maksa 😝')
       );
     }

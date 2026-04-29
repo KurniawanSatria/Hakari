@@ -1,6 +1,7 @@
 const logger = require('../structures/logger');
 const config = require('../structures/config');
 const { hakariMessage, hakariCard } = require('../structures/builders');
+const { EMOJIS } = require('../structures/emojis');
 const FALLBACK_THUMB = 'https://files.catbox.moe/fnlch5.jpg';
 
 function formatDuration(ms) {
@@ -14,9 +15,9 @@ function formatDuration(ms) {
 }
 
 function getSourceInfo(uri) {
-  if (uri?.includes('spotify')) return { name: 'Spotify', emoji: '<:spy:1481718391847915631>' };
-  if (uri?.includes('youtube')) return { name: 'YouTube', emoji: '<:yt:1481718394075222248>' };
-  if (uri?.includes('soundcloud')) return { name: 'SoundCloud', emoji: '<:sc:1481718389226602506>' };
+  if (uri?.includes('spotify')) return { name: 'Spotify', emoji: EMOJIS.platforms.spotify };
+  if (uri?.includes('youtube')) return { name: 'YouTube', emoji: EMOJIS.platforms.youtube };
+  if (uri?.includes('soundcloud')) return { name: 'SoundCloud', emoji: EMOJIS.platforms.soundcloud };
   return { name: 'Unknown', emoji: null };
 }
 

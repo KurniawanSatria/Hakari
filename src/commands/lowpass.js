@@ -1,4 +1,5 @@
 const { hakariMessage } = require('../structures/builders');
+const { EMOJIS } = require('../structures/emojis');
 
 module.exports = {
   name: 'lowpass',
@@ -27,13 +28,13 @@ module.exports = {
 
       await player.filters.apply();
 
-      const status = newState ? '**enabled**' : '**disabled**';
+      const status = newState ? `${EMOJIS.toggle.on} Enabled` : `${EMOJIS.toggle.off} Disabled`;
 
-      message.channel.send(
-        hakariMessage(`### <:lowpass:1451682056927973483> Low Pass\nLow Pass is now ${status}`)
+      message.reply(
+        hakariMessage(`### ${EMOJIS.music_filters.lowpass} Low Pass\nLow Pass is now ${status}`)
       );
     } catch (err) {
-      message.channel.send(
+      message.reply(
         hakariMessage('### Error\nFilter rusak. Bukan lag, ini emang kamu yang maksa 😝')
       );
     }

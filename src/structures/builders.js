@@ -10,23 +10,22 @@ const {
   MediaGalleryBuilder,
   MessageFlags,
 } = require('discord.js');
+const { getEmoji, EMOJIS } = require('./emojis');
 
 // Constants
 const ACCENT_COLOR = 0xE7B88B;
 const HELP_ACCENT = 0xE7B88B;
-const HAKARI_EMOJI = '<:hakari:1482121759330275400>';
-const HAKARI_ANIMATED = '<a:hakari:1497764150099574904>';
 const FALLBACK_THUMB = 'https://files.catbox.moe/fnlch5.jpg';
 const NOW_PLAYING_GIF = 'https://i.ibb.co.com/ksXKzFg1/Now-Playing.gif';
 
 // Playback buttons (reusable)
 function playbackButtons() {
   return new ActionRowBuilder().addComponents(
-    new ButtonBuilder().setCustomId('stop').setStyle(ButtonStyle.Danger).setEmoji({ id: '1449501286360944853', name: 'stop' }),
-    new ButtonBuilder().setCustomId('previous').setStyle(ButtonStyle.Secondary).setEmoji({ name: 'previous', id: '1449501284272181309' }),
-    new ButtonBuilder().setCustomId('pause_resume').setStyle(ButtonStyle.Secondary).setEmoji({ name: 'pause', id: '1449501265720774656' }),
-    new ButtonBuilder().setCustomId('skip').setStyle(ButtonStyle.Secondary).setEmoji({ id: '1449501258791518370', name: 'skip' }),
-    new ButtonBuilder().setCustomId('queue').setStyle(ButtonStyle.Secondary).setEmoji({ name: 'queue', id: '1451682061697159310' }),
+    new ButtonBuilder().setCustomId('stop').setStyle(ButtonStyle.Danger).setEmoji(EMOJIS.music.stop),
+    new ButtonBuilder().setCustomId('previous').setStyle(ButtonStyle.Secondary).setEmoji(EMOJIS.music.previous),
+    new ButtonBuilder().setCustomId('pause_resume').setStyle(ButtonStyle.Secondary).setEmoji(EMOJIS.music.pause),
+    new ButtonBuilder().setCustomId('skip').setStyle(ButtonStyle.Secondary).setEmoji(EMOJIS.music.skip),
+    new ButtonBuilder().setCustomId('queue').setStyle(ButtonStyle.Secondary).setEmoji(EMOJIS.music.queue),
   );
 }
 
@@ -37,7 +36,7 @@ function playbackButtons() {
 function hakariMessage(content) {
   const container = new ContainerBuilder()
     .setAccentColor(ACCENT_COLOR)
-    .addTextDisplayComponents(td => td.setContent(`**${HAKARI_EMOJI} Hakari Music**`))
+    .addTextDisplayComponents(td => td.setContent(`**${EMOJIS.bot.hakari} Hakari Music**`))
     .addSeparatorComponents(sep => sep.setDivider(true).setSpacing(SeparatorSpacingSize.Small))
     .addTextDisplayComponents(td => td.setContent(content));
 
@@ -87,7 +86,7 @@ function hakariPlayerCard({ sectionContent, bodyContent, thumbnailURL = FALLBACK
 function rejectMessage(content) {
   const container = new ContainerBuilder()
     .setAccentColor(ACCENT_COLOR)
-    .addTextDisplayComponents(td => td.setContent(`**${HAKARI_EMOJI} Hakari Music**`))
+    .addTextDisplayComponents(td => td.setContent(`**${EMOJIS.bot.hakari} Hakari Music**`))
     .addSeparatorComponents(sep => sep.setDivider(true).setSpacing(SeparatorSpacingSize.Small))
     .addTextDisplayComponents(td => td.setContent(content));
 
@@ -130,8 +129,6 @@ module.exports = {
   playbackButtons,
   ACCENT_COLOR,
   HELP_ACCENT,
-  HAKARI_EMOJI,
-  HAKARI_ANIMATED,
   FALLBACK_THUMB,
   NOW_PLAYING_GIF,
   MessageFlags,

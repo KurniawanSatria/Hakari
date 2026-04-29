@@ -1,6 +1,7 @@
 const logger = require('../../structures/logger');
 const fs = require('fs');
 const { hakariPlayerCard } = require('../../structures/builders');
+const { EMOJIS } = require('../../structures/emojis');
 
 
 const WINDOW = 5;
@@ -26,7 +27,7 @@ function buildProgressBar(current = 0, total = 0, length = 12) {
   if (!total || total <= 0) return '●───────────────────';
   const filled = Math.round((current / total) * length);
   const empty = length - filled;
-  return '▬'.repeat(Math.max(filled - 1, 0)) + '<:dot:1498023441649897503>' + '─'.repeat(Math.max(empty, 0));
+  return '▬'.repeat(Math.max(filled - 1, 0)) + EMOJIS.progressbar.dot + '─'.repeat(Math.max(empty, 0));
 }
 
 function buildLyricsDisplay(lines, currentIdx, lineText) {
@@ -98,12 +99,12 @@ module.exports = {
         const currentTime = formatTime(currentMs);
         
         const sectionContent = [
-          `### <a:hakari:1497764150099574904> Now Playing`,
+          `### ${EMOJIS.bot.hakariAnimated} Now Playing`,
           `**[${title}](${track.uri})**`,
           `${track.author} — \`${duration}\``,
         ].join('\n');
         const bodyContent = [
-          `### <:lyrics:1451697663396413481> Lyrics\n${lyricsDisplay}`,
+          `### ${EMOJIS.lyrics.lyrics} Lyrics\n${lyricsDisplay}`,
           `${progressBar} \`${currentTime} / ${duration}\``,
           `-# ${queueText}`,
         ].join('\n');

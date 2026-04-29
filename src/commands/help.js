@@ -1,5 +1,16 @@
 const logger = require('../structures/logger');
-const { hakariMessage, hakariHelpCard, HAKARI_EMOJI } = require('../structures/builders');
+const { hakariMessage } = require('../structures/builders');
+const { EMOJIS } = require('../structures/emojis');
+const {
+    ContainerBuilder,
+    TextDisplayBuilder,
+    MediaGalleryBuilder,
+    SectionBuilder,
+    ButtonBuilder,
+    ButtonStyle,
+    ActionRowBuilder,
+    MessageFlags
+} = require('discord.js');
 
 // Command definitions (English only)
 const commandDefinitions = {
@@ -145,32 +156,88 @@ module.exports = {
         const cmd = commands.find(c => c.name === query || c.aliases.includes(query));
 
         if (!cmd) {
-          return message.reply(hakariMessage(`${HAKARI_EMOJI} **Hakari Music**\n\n-# Command \`${args[0]}\` not found. Use \`.help\` to see the command list.`));
+          return message.reply(hakariMessage(`${EMOJIS.bot.hakari} **Hakari Music**\n\n-# Command \`${args[0]}\` not found. Use \`.help\` to see the command list.`));
         }
 
         const aliasLine = cmd.aliases.length > 0
           ? `\n> **Aliases:** ${cmd.aliases.map(a => `\`${a}\``).join(', ')}`
           : '';
 
-        return message.reply(hakariHelpCard({
-          headerContent: `${HAKARI_EMOJI} **Hakari Music**\n\n`,
-          bodyContent: `## <:icons8command100:1497903456067780698> Command Detail: \`.${cmd.name}\`\n> **Description:** ${cmd.description}${aliasLine}\n> **Usage:** \`${cmd.usage}\`\n> **Permission:** ${cmd.permission}`,
-          thumbnailURL: 'https://i.pinimg.com/736x/0b/10/35/0b103568ea4ff4be76d73c44102e697e.jpg',
-        }));
+        const helpMessage = {
+          flags: MessageFlags.IsComponentsV2,
+          components: [
+            new ContainerBuilder()
+              .setAccentColor(0xE7B88B)
+              .addTextDisplayComponents(td => 
+                td.setContent(`${EMOJIS.bot.hakari} **Hakari Music**\n\n## ${EMOJIS.ui.command} Command Detail: \`.${cmd.name}\``)
+              )
+              .addSeparatorComponents(sep => sep.setDivider(true))
+              .addTextDisplayComponents(td => 
+                td.setContent(`> **Description:** ${cmd.description}${aliasLine}\n> **Usage:** \`${cmd.usage}\`\n> **Permission:** ${cmd.permission}`)
+              )
+          ]
+        };
+
+        return message.reply(helpMessage);
       }
 
-      // Full command list view
-      const commandList = commands.map(cmd => {
-        const aliasText = cmd.aliases.length > 0 ? ` *(${cmd.aliases.join(', ')})*` : '';
-        return `- \`${cmd.usage}\`${aliasText}\n  - ${cmd.description}`;
-      }).join('\n\n');
+      // Build help message with sections matching guildCreate style
+      const helpMessage = {
+        flags: MessageFlags.IsComponentsV2,
+        components: [
+          new ContainerBuilder()
+            .setAccentColor(0xE7B88B)
+            .addMediaGalleryComponents(gallery =>
+              gallery.addItems(item => item.setURL('https://raw.githubusercontent.com/KurniawanSatria/Hakari/refs/heads/main/assets/banner.png'))
+            )
+            .addTextDisplayComponents(td => 
+              td.setContent("### Hakari Music - Command Guide\n-# Get everything ready in a few clicks.")
+            )
+            .addSeparatorComponents(sep => sep.setDivider(true))
+            .addSectionComponents(section =>
+              section
+                .addTextDisplayComponents(td => td.setContent(`## ${EMOJIS.help_sections.playback} Playback\n-# Control music playback and queue management.`))
+                .setButtonAccessory(
+                  new ButtonBuilder()
+                    .setCustomId('help_playback')
+                    .setLabel('View Commands')
+                    .setStyle(ButtonStyle.Secondary)
+                )
+            )
+            .addSectionComponents(section =>
+              section
+                .addTextDisplayComponents(td => td.setContent(`## ${EMOJIS.help_sections.filters} Audio Filters\n-# Enhance your music with audio effects.`))
+                .setButtonAccessory(
+                  new ButtonBuilder()
+                    .setCustomId('help_filters')
+                    .setLabel('View Commands')
+                    .setStyle(ButtonStyle.Secondary)
+                )
+            )
+            .addSectionComponents(section =>
+              section
+                .addTextDisplayComponents(td => td.setContent(`## ${EMOJIS.help_sections.utility} Utility\n-# Additional helpful features.`))
+                .setButtonAccessory(
+                  new ButtonBuilder()
+                    .setCustomId('help_utility')
+                    .setLabel('View Commands')
+                    .setStyle(ButtonStyle.Secondary)
+                )
+            )
+            .addSectionComponents(section =>
+              section
+                .addTextDisplayComponents(td => td.setContent(`## ${EMOJIS.help_sections.owner} Owner\n-# Bot owner exclusive commands.`))
+                .setButtonAccessory(
+                  new ButtonBuilder()
+                    .setCustomId('help_owner')
+                    .setLabel('View Commands')
+                    .setStyle(ButtonStyle.Secondary)
+                )
+            )
+        ]
+      };
 
-      await message.reply(hakariHelpCard({
-        headerContent: `${HAKARI_EMOJI} **Hakari Music**\n\n`,
-        bodyContent: `## <:icons8command100:1497903456067780698> Command List\n-# Here are all available commands for the Hakari music bot:\n${commandList}\n\n-# Use \`.help [command name]\` for more details`,
-        thumbnailURL: 'https://i.pinimg.com/736x/0b/10/35/0b103568ea4ff4be76d73c44102e697e.jpg',
-        galleryURLs: ['https://i.ibb.co.com/F4kMkZj4/hakari-1.gif'],
-      }));
+      await message.reply(helpMessage);
 
     } catch (err) {
       logger.error(`Help: ${err.stack || err}`);

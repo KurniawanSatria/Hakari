@@ -47,3 +47,4 @@ temp/
 *.swo
 *.moonlink/
 data/*.json
+.qoder
