@@ -70,6 +70,51 @@ module.exports = {
         description: 'Change the bot language for this server',
         usage: '.lang [language code]',
         permission: 'Admin only (Manage Guild)'
+      },
+      bassboost: {
+        description: 'Toggle bass boost audio filter',
+        usage: '.bassboost',
+        permission: 'Requires voice channel'
+      },
+      nightcore: {
+        description: 'Toggle nightcore audio filter (faster & higher pitch)',
+        usage: '.nightcore',
+        permission: 'Requires voice channel'
+      },
+      vaporwave: {
+        description: 'Toggle vaporwave audio filter (slower & lower pitch)',
+        usage: '.vaporwave',
+        permission: 'Requires voice channel'
+      },
+      karaoke: {
+        description: 'Toggle karaoke filter (vocal removal)',
+        usage: '.karaoke',
+        permission: 'Requires voice channel'
+      },
+      tremolo: {
+        description: 'Toggle tremolo filter (volume oscillation)',
+        usage: '.tremolo',
+        permission: 'Requires voice channel'
+      },
+      vibrato: {
+        description: 'Toggle vibrato filter (pitch oscillation)',
+        usage: '.vibrato',
+        permission: 'Requires voice channel'
+      },
+      rotation: {
+        description: 'Toggle rotation filter (8D audio effect)',
+        usage: '.rotation',
+        permission: 'Requires voice channel'
+      },
+      distortion: {
+        description: 'Toggle distortion audio filter',
+        usage: '.distortion',
+        permission: 'Requires voice channel'
+      },
+      lowpass: {
+        description: 'Toggle low pass filter (muffle high frequencies)',
+        usage: '.lowpass',
+        permission: 'Requires voice channel'
       }
     }
   },

@@ -10,29 +10,24 @@ module.exports = {
       const t = langManager.get(message.guild.id);
       const cmdDefs = t.help.commands;
 
-      // Build commands array from language file
-      const commandAliases = {
-        play: ['p'],
-        pause: [],
-        resume: [],
-        stop: [],
-        skip: ['s'],
-        queue: ['q'],
-        loop: ['l'],
-        shuffle: [],
-        autoplay: [],
-        lyrics: ['ly'],
-        help: ['h'],
-        lang: ['language']
-      };
+      // Build commands array from client.commands (auto-loaded)
+      const commands = [];
+      
+      client.commands.forEach((cmd, name) => {
+        const langData = cmdDefs[name];
+        if (langData) {
+          commands.push({
+            name,
+            aliases: cmd.aliases || [],
+            description: langData.description,
+            usage: langData.usage,
+            permission: langData.permission
+          });
+        }
+      });
 
-      const commands = Object.entries(cmdDefs).map(([name, cmd]) => ({
-        name,
-        aliases: commandAliases[name] || [],
-        description: cmd.description,
-        usage: cmd.usage,
-        permission: cmd.permission
-      }));
+      // Sort commands alphabetically
+      commands.sort((a, b) => a.name.localeCompare(b.name));
 
       // Per-command detail view
       if (args[0]) {

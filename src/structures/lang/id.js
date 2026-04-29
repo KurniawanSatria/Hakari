@@ -70,6 +70,51 @@ module.exports = {
         description: 'Mengubah bahasa bot untuk server ini',
         usage: '.lang [kode bahasa]',
         permission: 'Hanya admin (Manage Guild)'
+      },
+      bassboost: {
+        description: 'Toggle filter bass boost',
+        usage: '.bassboost',
+        permission: 'Membutuhkan voice channel'
+      },
+      nightcore: {
+        description: 'Toggle filter nightcore (lebih cepat & pitch tinggi)',
+        usage: '.nightcore',
+        permission: 'Membutuhkan voice channel'
+      },
+      vaporwave: {
+        description: 'Toggle filter vaporwave (lebih lambat & pitch rendah)',
+        usage: '.vaporwave',
+        permission: 'Membutuhkan voice channel'
+      },
+      karaoke: {
+        description: 'Toggle filter karaoke (hapus vokal)',
+        usage: '.karaoke',
+        permission: 'Membutuhkan voice channel'
+      },
+      tremolo: {
+        description: 'Toggle filter tremolo (osilasi volume)',
+        usage: '.tremolo',
+        permission: 'Membutuhkan voice channel'
+      },
+      vibrato: {
+        description: 'Toggle filter vibrato (osilasi pitch)',
+        usage: '.vibrato',
+        permission: 'Membutuhkan voice channel'
+      },
+      rotation: {
+        description: 'Toggle filter rotation (efek audio 8D)',
+        usage: '.rotation',
+        permission: 'Membutuhkan voice channel'
+      },
+      distortion: {
+        description: 'Toggle filter distortion',
+        usage: '.distortion',
+        permission: 'Membutuhkan voice channel'
+      },
+      lowpass: {
+        description: 'Toggle filter low pass (redam frekuensi tinggi)',
+        usage: '.lowpass',
+        permission: 'Membutuhkan voice channel'
       }
     }
   },
