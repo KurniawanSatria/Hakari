@@ -1,81 +1,98 @@
 const logger = require('../../structures/logger');
 
+/**
+ * Attempts to transfer all players from a failed node to an available backup.
+ * Uses moonlink.js v5 API: NodeManager.findNode(), PlayerManager.filter(), player.transferNode()
+ */
+async function failoverPlayers(client, failedNode, reason) {
+  const manager = client.manager;
+
+  // 1. Find a backup node (exclude the failed one)
+  const backupNode = manager.nodes.findNode({ exclude: [failedNode.identifier] });
+
+  if (!backupNode) {
+    logger.error(`[Failover] No backup nodes available. Failed node: ${failedNode.identifier}`);
+    return { transferred: 0, failed: 0, total: 0 };
+  }
+
+  logger.info(`[Failover] Using backup node: ${backupNode.identifier}`);
+
+  // 2. Get all players on the failed node
+  const affectedPlayers = manager.players.filter(
+    player => !player.destroyed && player.node?.identifier === failedNode.identifier
+  );
+
+  if (affectedPlayers.length === 0) {
+    logger.info('[Failover] No active players to transfer');
+    return { transferred: 0, failed: 0, total: 0 };
+  }
+
+  logger.warn(`[Failover] ${affectedPlayers.length} player(s) affected by ${failedNode.identifier} failure`);
+
+  // 3. Transfer each player with retry
+  let transferred = 0;
+  let failed = 0;
+
+  for (const player of affectedPlayers) {
+    let success = false;
+
+    // Retry up to 3 times with backoff
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      try {
+        await player.transferNode(backupNode);
+        transferred++;
+        success = true;
+
+        const guildName = client.guilds?.cache.get(player.guildId)?.name || player.guildId;
+        logger.info(`[Failover] ✅ Transferred player in "${guildName}" to ${backupNode.identifier} (attempt ${attempt})`);
+
+        // Notify the text channel
+        try {
+          const channel = client.channels?.cache.get(player.textChannelId);
+          if (channel?.send) {
+            await channel.send({
+              content: `⚠️ Server musik terjadi masalah, otomatis pindah ke server cadangan. Musik tetap berjalan!`
+            }).catch(() => {});
+          }
+        } catch (_) {}
+
+        break; // Success, stop retrying
+      } catch (err) {
+        logger.warn(`[Failover] Attempt ${attempt}/3 failed for guild ${player.guildId}: ${err.message}`);
+
+        if (attempt < 3) {
+          // Exponential backoff: 1s, 2s
+          await new Promise(resolve => setTimeout(resolve, attempt * 1000));
+        }
+      }
+    }
+
+    if (!success) {
+      failed++;
+      logger.error(`[Failover] ❌ Failed to transfer player in guild ${player.guildId} after 3 attempts`);
+
+      // Notify user about failure
+      try {
+        const channel = client.channels?.cache.get(player.textChannelId);
+        if (channel?.send) {
+          await channel.send({
+            content: `❌ Server musik tidak tersedia. Silakan gunakan perintah play lagi.`
+          }).catch(() => {});
+        }
+      } catch (_) {}
+    }
+  }
+
+  logger.info(`[Failover] Complete: ${transferred} transferred, ${failed} failed, ${affectedPlayers.length} total`);
+  return { transferred, failed, total: affectedPlayers.length };
+}
+
 module.exports = {
   name: 'nodeError',
   register: (client) => {
     client.manager.on('nodeError', async (node, error) => {
       logger.error(`Node ${node.identifier} error: ${error.message}`);
-      
-      // Try to transfer all players to backup nodes
-      try {
-        // Get available nodes using NodeManager API
-        let availableNodes = [];
-        try {
-          // Get ready nodes from NodeManager
-          const readyNodes = client.manager.nodes?.ready || [];
-          availableNodes = readyNodes.filter(n => n.identifier !== node.identifier);
-        } catch (err) {
-          logger.debug(`nodeError: Could not access nodes: ${err.message}`);
-        }
-
-        if (availableNodes.length === 0) {
-          logger.error('No backup nodes available for failover');
-          return;
-        }
-
-        // Sort by priority (lower number = higher priority)
-        availableNodes.sort((a, b) => (a.priority || 0) - (b.priority || 0));
-        
-        // Use the highest priority backup node
-        const backupNode = availableNodes[0];
-        logger.info(`Attempting to transfer players to backup node: ${backupNode.identifier}`);
-
-        // Get all players using PlayerManager API
-        // Players might be stored differently in v5
-        let playersToTransfer = [];
-        try {
-          const playerManager = client.manager.players;
-          
-          // Try different methods to get players
-          if (playerManager instanceof Map) {
-            playersToTransfer = Array.from(playerManager.values());
-          } else if (playerManager.players instanceof Map) {
-            playersToTransfer = Array.from(playerManager.players.values());
-          } else if (Array.isArray(playerManager)) {
-            playersToTransfer = playerManager;
-          } else if (typeof playerManager.forEach === 'function') {
-            playerManager.forEach(player => playersToTransfer.push(player));
-          }
-          
-          logger.debug(`Found ${playersToTransfer.length} players to potentially transfer`);
-        } catch (err) {
-          logger.debug(`nodeError: Could not access players: ${err.message}`);
-        }
-
-        if (playersToTransfer.length === 0) {
-          logger.debug('No active players to transfer');
-          return;
-        }
-
-        // Transfer each player to backup node
-        let transferredCount = 0;
-        for (const player of playersToTransfer) {
-          try {
-            if (player && !player.destroyed && player.node?.identifier === node.identifier) {
-              await player.transferNode(backupNode);
-              transferredCount++;
-              logger.info(`Successfully transferred player from guild ${player.guildId} to ${backupNode.identifier}`);
-            }
-          } catch (transferError) {
-            logger.error(`Failed to transfer player ${player.guildId}: ${transferError.message}`);
-            // Continue with next player even if one fails
-          }
-        }
-
-        logger.info(`Failover complete. Transferred ${transferredCount} player(s) to ${backupNode.identifier}`);
-      } catch (err) {
-        logger.error(`Failover error: ${err.message}`, { stack: err.stack });
-      }
+      await failoverPlayers(client, node, `error: ${error.message}`);
     });
   }
 };

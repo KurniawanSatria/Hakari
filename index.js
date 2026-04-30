@@ -68,13 +68,8 @@ function initMoonlink() {
       logger.error(`Manager error: ${error.message}`, { payload });
     });
 
-    client.manager.on('nodeDisconnect', (node, reason) => {
-      logger.warn(`Node ${node.identifier} disconnected: ${reason}`);
-    });
-
-    client.manager.on('nodeReconnect', (node) => {
-      logger.info(`Node ${node.identifier} reconnecting...`);
-    });
+    // Node disconnect/error/reconnect events are handled in src/events/moonlink/
+    // nodeError.js, nodeDisconnect.js, and nodeConnected.js with automatic failover
 
     logger.info('MoonLink manager initialized successfully');
     return client.manager;
