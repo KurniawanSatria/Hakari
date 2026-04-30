@@ -63,7 +63,9 @@ module.exports = {
           textChannelId: message.channel.id,
           deaf: true,
           autoplay: true,
-          volume: 100 // Default volume
+          volume: 100, // Default volume
+          selfDeaf: true,
+          instaUpdateFilters: true
         });
       } catch (err) {
         logger.error(`Failed to create player: ${err.message}`);
@@ -136,7 +138,7 @@ module.exports = {
           const totalDuration = tracks.reduce((a, t) => a + (t.duration || 0), 0);
           const source = getSourceInfo(tracks[0].uri);
           await message.reply(hakariCard({
-            content: `### Playlist Loaded\n**[${playlistInfo?.name || 'Unknown Playlist'}](${query})**\n\n> **Tracks:** ${tracks.length}\n> **Duration:** \`${formatDuration(playlistInfo?.duration) || formatDuration(totalDuration)}\`\n\n-# ${source.emoji || ''} ${source.name}`,
+            content: `### ${EMOJIS.queue.playlist} Playlist Loaded\n**[${playlistInfo?.name || 'Unknown Playlist'}](${query})**\n\n> **Tracks:** ${tracks.length}\n> **Duration:** \`${formatDuration(playlistInfo?.duration) || formatDuration(totalDuration)}\`\n\n-# ${source.emoji || ''} ${source.name}`,
             thumbnailURL: tracks[0]?.thumbnail || FALLBACK_THUMB,
           }));
         } catch (err) {
@@ -154,7 +156,7 @@ module.exports = {
           const source = getSourceInfo(track.uri);
 
           let queueMsg = await message.reply(hakariCard({
-            content: `### Added to queue\n**[${track.title || 'Unknown'}](${track.uri || ''})**\n${track.author || 'Unknown'} — \`${formatDuration(track.duration)}\`\n\`#${position + 1}/${queueSize}\`\n\n-# ${source.emoji || ''} ${source.name}`,
+            content: `### ${EMOJIS.queue.add} Added to queue\n**[${track.title || 'Unknown'}](${track.uri || ''})**\n${track.author || 'Unknown'} — \`${formatDuration(track.duration)}\`\n\`#${position + 1}/${queueSize}\`\n\n-# ${source.emoji || ''} ${source.name}`,
             thumbnailURL: track.thumbnail || FALLBACK_THUMB,
           }));
           

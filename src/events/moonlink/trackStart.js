@@ -33,7 +33,7 @@ module.exports = {
           logger.error('trackStart: No track provided');
           return;
         }
-        
+
         // Reset all voting systems for new track
         try {
           player.skipVotes = new Set();
@@ -53,23 +53,25 @@ module.exports = {
 
         // Subscribe to lyrics (non-blocking)
         try {
-          await player.subscribeLyrics();
+          player.subscribeLyrics().catch((lyricsErr) => {
+            logger.warn(`trackStart: Failed to subscribe to lyrics: ${lyricsErr.message}`);
+          });
         } catch (lyricsErr) {
           logger.warn(`trackStart: Failed to subscribe to lyrics: ${lyricsErr.message}`);
         }
-        
+
         // Delete previous track message safely
         if (player.msg?.delete) {
           player.msg.delete().catch((err) => {
             logger.debug(`trackStart: Failed to delete previous message: ${err.message}`);
           });
         }
-        
+
         // Clean up queue messages safely
         if (player.queueMsgs && player.queueMsgs.length > 0) {
           const msgsToDelete = [...player.queueMsgs];
           player.queueMsgs = [];
-          
+
           for (const msg of msgsToDelete) {
             if (msg?.delete) {
               msg.delete().catch((err) => {
@@ -87,12 +89,12 @@ module.exports = {
         const requester = track.requester?.username || 'Unknown';
         const queueSize = player.queue?.size ?? player.queue?.length ?? 0;
         const progressBar = buildProgressBar(0, track.duration ?? 0);
-        
+
         // Log with safe guild/channel name access
         const guildName = channel.guild?.name || 'Unknown';
         const channelName = channel.name || 'Unknown';
         logger.info(`Playing: ${title} by ${author} in ${channelName} (${guildName})`);
-        
+
         const queueText = queueSize > 0 ? `${queueSize} song${queueSize !== 1 ? 's' : ''} in queue` : 'No songs in queue';
         const sectionContent = [
           `### ${EMOJIS.bot.hakariAnimated} Now Playing`,
@@ -103,7 +105,7 @@ module.exports = {
           `${progressBar}`,
           `-# ${queueText}`
         ].join('\n');
-        
+
         // Send message with error handling
         const sent = await channel.send(hakariPlayerCard({
           sectionContent,

@@ -44,6 +44,10 @@ const EMOJIS = {
     youtube: '<:yt:1481718394075222248>',
     soundcloud: '<:sc:1481718389226602506>',
   },
+  queue:{
+    add: '<:addtoqueue:1499216747956408350>',
+    playlist: '<:playlist:1499217239063269406>',
+  },
   lyrics: {
     musicalnote: '<:musicalnote:1482113385486352586>',
     lyrics: '<:lyrics:1482110308435628153>',

@@ -87,7 +87,7 @@ module.exports = {
   // Bot settings
   prefix: process.env.PREFIX || '.',
   autoplay: parseBool(process.env.AUTOPLAY, true),
-  cleanTimeout: parseIntDefault(process.env.CLEAN_TIMEOUT, 15000),
+  cleanTimeout: parseIntDefault(process.env.CLEAN_TIMEOUT, 60000),
   twentyFourSeven: parseBool(process.env.TWENTY_FOUR_SEVEN, false),
   validateConfig
 };

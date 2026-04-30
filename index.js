@@ -46,6 +46,11 @@ function initMoonlink() {
           resumeTimeout: 60000, // Timeout for resume attempts
           heartBeatInterval: 10000 // Heartbeat to detect dead connections
         },
+        player: {
+          resumeTimeout: 300000, // Keep player alive for 5 minutes between tracks
+          resumeByAddress: true,
+          address: '0.0.0.0'
+        }
       },
       send: (guildId, payload) => {
         try {

@@ -61,7 +61,11 @@ module.exports = {
                                             const nextTrack = result.tracks[0];
                                             nextTrack.setRequester?.(lastTrack.requester) || (nextTrack.requester = lastTrack.requester);
                                             player.queue.add(nextTrack);
-                                            player.play();
+                                            
+                                            // Immediately play the next track without waiting
+                                            if (!player.playing && !player.paused) {
+                                                player.play();
+                                            }
                                             logger.info(`Added autoplay track: ${nextTrack.title || 'Unknown'} in ${guildName}`);
                                         } else {
                                             logger.warn(`queueEnd: No autoplay results for "${query}"`);
@@ -79,7 +83,7 @@ module.exports = {
 
                 // Schedule cleanup if no new tracks were added
                 const config = require('../../structures/config');
-                const cleanTimeout = config.cleanTimeout || 15000;
+                const cleanTimeout = config.cleanTimeout || 60000; // Increased to 60 seconds for smoother transitions
                 
                 setTimeout(async () => {
                     try {
