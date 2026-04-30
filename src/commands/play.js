@@ -1,5 +1,6 @@
 const logger = require('../structures/logger');
 const config = require('../structures/config');
+const guildDB = require('../structures/guildDB');
 const { hakariMessage, hakariCard } = require('../structures/builders');
 const { EMOJIS } = require('../structures/emojis');
 const FALLBACK_THUMB = 'https://files.catbox.moe/fnlch5.jpg';
@@ -55,6 +56,8 @@ module.exports = {
       // Don't block if nodes might be connecting - let search/play handle errors
 
       // Create or get existing player
+      const guildSettings = guildDB.getGuild(message.guild.id);
+
       let player;
       try {
         player = client.manager.players.create({
@@ -62,8 +65,8 @@ module.exports = {
           voiceChannelId: message.member.voice.channel.id,
           textChannelId: message.channel.id,
           deaf: true,
-          autoplay: true,
-          volume: 100, // Default volume
+          autoplay: guildSettings.autoplay,
+          volume: guildSettings.volume,
           selfDeaf: true,
           instaUpdateFilters: true
         });
@@ -97,9 +100,8 @@ module.exports = {
       let searchQuery = query;
       const isURL = /^(https?:\/\/)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(:\d+)?(\/.*)?$/i.test(query);
       
-      // If not a URL, use Spotify search prefix
       if (!isURL && !query.startsWith('spsearch:') && !query.startsWith('ytsearch:') && !query.startsWith('ytmsearch:') && !query.startsWith('scsearch:')) {
-        searchQuery = `spsearch:${query}`;
+        searchQuery = `${guildSettings.defaultSearch}:${query}`;
       }
 
       // Search for tracks with timeout

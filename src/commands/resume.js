@@ -1,6 +1,6 @@
 const { hakariMessage } = require('../structures/builders');
 
-// Helper: Check if requester is still in voice channel
+
 function isRequesterInVoice(player, message) {
     const requester = player.current?.requester;
     if (!requester) return false;
@@ -11,18 +11,16 @@ function isRequesterInVoice(player, message) {
     return voiceChannel.members.has(requester.id);
 }
 
-// Helper: Handle voting system
+
 async function handleVoting(player, message, action) {
     const userVoice = message.member.voice.channel;
     if (!userVoice || userVoice.id !== player.voiceChannelId) {
         return { allowed: false, reason: "You must be in the voice channel to use this command." };
     }
 
-    // Check if requester is in voice
     const requesterInVoice = isRequesterInVoice(player, message);
     const isRequester = player.current?.requester && message.author.id === player.current.requester.id;
 
-    // If requester is in voice and this is not the requester, trigger voting
     if (requesterInVoice && !isRequester) {
         const voteKey = `${action}Votes`;
         player[voteKey] = player[voteKey] || new Set();
@@ -41,12 +39,10 @@ async function handleVoting(player, message, action) {
             return { allowed: false, reason: `Vote to ${action} added! (${player[voteKey].size}/${required} votes needed)` };
         }
 
-        // Voting passed
         player[voteKey] = new Set();
         return { allowed: true };
     }
 
-    // Requester or requester not in voice - allow immediately
     return { allowed: true };
 }
 
@@ -65,7 +61,6 @@ module.exports = {
         return message.reply(hakariMessage('### Not Paused\nTrack is already playing.'))
       }
 
-      // Check voting system
       const voteResult = await handleVoting(player, message, 'pause');
       if (!voteResult.allowed) {
         return message.reply(hakariMessage(voteResult.reason));

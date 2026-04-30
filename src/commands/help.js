@@ -123,6 +123,16 @@ const commandDefinitions = {
     description: 'Show command list or details of a specific command',
     usage: '.help [command name]',
     permission: 'Available anywhere'
+  },
+  settings: {
+    description: 'View or modify guild settings',
+    usage: '.settings [set/reset] [key] [value]',
+    permission: 'Available anywhere'
+  },
+  setup: {
+    description: 'Setup announce and request channels',
+    usage: '.setup [announce/request/reset]',
+    permission: 'Requires Manage Channels permission'
   }
 };
 

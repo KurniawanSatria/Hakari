@@ -21,11 +21,11 @@ const EMOJIS = {
   },
   ui: {
     command: '<:icons8command100:1497903456067780698>',
-    settings: '<:settings:1449501278329327656>',
-    info: '<:info:1449501267901935686>',
-    warning: '<:warning:1449501288466399243>',
-    error: '<:error:1449501265720774657>',
-    success: '<:success:1449501284272181310>',
+    settings: '<:settings:1497903048423374859>',
+    info: '<:info:1476619350927741131>',
+    warning: '<:warning:1476619352748064818>',
+    error: '<:error:1476619354706542766>',
+    success: '<:success:1476619345680400534>',
   },
   music_filters: {
     bassboost: '<:filter:1451683859845615697>',

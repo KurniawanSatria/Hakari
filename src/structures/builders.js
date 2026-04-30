@@ -64,7 +64,7 @@ function hakariCard({ content, thumbnailURL = FALLBACK_THUMB, accentColor = ACCE
  * Full player card with Section + thumbnail, separator, body text, and playback buttons.
  * Replaces Pattern 3 (trackStart, playerUpdate, lyricsFound, lyricsLine).
  */
-function hakariPlayerCard({ sectionContent, bodyContent, thumbnailURL = FALLBACK_THUMB, accentColor = ACCENT_COLOR } = {}) {
+function hakariPlayerCard({ sectionContent, bodyContent, thumbnailURL = FALLBACK_THUMB, accentColor = null } = {}) {
   const container = new ContainerBuilder()
     .setAccentColor(accentColor)
     .addSectionComponents(section =>
@@ -74,6 +74,7 @@ function hakariPlayerCard({ sectionContent, bodyContent, thumbnailURL = FALLBACK
     )
     .addSeparatorComponents(sep => sep.setDivider(true).setSpacing(SeparatorSpacingSize.Small))
     .addTextDisplayComponents(td => td.setContent(bodyContent))
+    .addSeparatorComponents(sep => sep.setDivider(true).setSpacing(SeparatorSpacingSize.Small))
     .addActionRowComponents(playbackButtons());
 
   return { components: [container], flags: 36864 };

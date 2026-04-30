@@ -7,6 +7,7 @@ const { Manager, Connectors } = require('moonlink.js');
 const logger = require('./src/structures/logger');
 const config = require('./src/structures/config');
 const { validateConfig } = require('./src/structures/config');
+const guildDB = require('./src/structures/guildDB');
 const figlet = require('figlet');
 const chalk = require('chalk');
 
@@ -147,6 +148,14 @@ function loadCommands() {
 async function start() {
   console.clear();
   try {
+    guildDB.init();
+    const migrated = guildDB.migrateAllGuilds();
+    if (migrated > 0) {
+      logger.info(`Guild database initialized - Migrated ${migrated} guild(s) with missing defaults`);
+    } else {
+      logger.info('Guild database initialized');
+    }
+
     const banner = await new Promise((resolve, reject) => {
       figlet.text(
         'Hakari',
