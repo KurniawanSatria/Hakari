@@ -1,6 +1,5 @@
 const path = require('path');
 const config = require('../../structures/config');
-const guildDB = require('../../structures/guildDB');
 const logger = require('../../structures/logger');
 const { rejectMessage } = require('../../structures/builders');
 
@@ -37,26 +36,9 @@ module.exports = {
   name: 'messageCreate',
   execute: async (client, message) => {
     if (message.author.bot) return;
-
-    const guildSettings = guildDB.getGuild(message.guild.id);
-    const prefix = guildSettings.prefix || config.prefix;
-    
-    if (guildSettings.requestChannelId) {
-      const isPlayCommand = ['play', 'p', 'autoplay', 'ap', 'queue', 'q', 'skip', 's', 'next', 'pause', 'resume', 'stop', 'loop', 'shuffle', 'lyrics', 'lyric', 'lrc'].includes(message.content.trim().split(/ +/)[0]?.toLowerCase().replace(prefix, ''));
-      
-      if (isPlayCommand && message.channel.id !== guildSettings.requestChannelId) {
-        const requestChannel = client.channels?.cache.get(guildSettings.requestChannelId);
-        if (requestChannel) {
-          return message.channel.send(
-            `❌ Please use music commands in <#${guildSettings.requestChannelId}>`
-          );
-        }
-      }
-    }
-    
-    if (!message.content.startsWith(prefix)) return;
-    
-    const args = message.content.slice(prefix.length).trim().split(/ +/);
+    if (!message.content.startsWith(config.prefix)) return;
+    //message.suppressEmbeds().catch(() => { });
+    const args = message.content.slice(config.prefix.length).trim().split(/ +/);
     const commandName = args.shift().toLowerCase();
     if (!global.__hakariCommands) {
       const loaded = loadCommands();

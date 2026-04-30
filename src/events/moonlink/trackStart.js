@@ -1,5 +1,4 @@
 const logger = require('../../structures/logger');
-const guildDB = require('../../structures/guildDB');
 const { hakariPlayerCard, playbackButtons } = require('../../structures/builders');
 const { EMOJIS } = require('../../structures/emojis');
 
@@ -46,16 +45,7 @@ module.exports = {
         }
 
         // Safely get text channel
-        const guildSettings = guildDB.getGuild(player.guildId);
-        let channel = client.channels?.cache.get(player.textChannelId);
-        
-        if (guildSettings.announceChannelId) {
-          const announceChannel = client.channels?.cache.get(guildSettings.announceChannelId);
-          if (announceChannel) {
-            channel = announceChannel;
-          }
-        }
-        
+        const channel = client.channels?.cache.get(player.textChannelId);
         if (!channel) {
           logger.warn(`trackStart: Text channel ${player.textChannelId} not found for guild ${player.guildId}`);
           return;

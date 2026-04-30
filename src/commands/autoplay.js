@@ -1,6 +1,5 @@
 // src/commands/autoplay.js - Toggle autoplay
 
-const guildDB = require('../structures/guildDB');
 const { hakariMessage } = require('../structures/builders');
 const { EMOJIS } = require('../structures/emojis');
 
@@ -18,18 +17,19 @@ module.exports = {
         else if (arg === 'off' || arg === 'false' || arg === '0') newState = false;
         else return message.channel.send(hakariMessage('### Invalid Option\nUse `.autoplay on` or `.autoplay off`'));
       } else {
-        const guildSettings = guildDB.getGuild(message.guild.id);
-        newState = !guildSettings.autoplay;
+        newState = !player?.autoPlay;
       }
 
-      guildDB.setGuildSetting(message.guild.id, 'autoplay', newState);
-      
       if (player) {
         player.setAutoPlay(newState);
+        const status = newState ? `${EMOJIS.toggle.on} Enabled` : `${EMOJIS.toggle.off} Disabled`;
+        message.channel.send(hakariMessage(`### ${EMOJIS.music_filters.autoplay} AutoPlay\nAutoplay is now ${status}`));
+      } else {
+        const config = require('../structures/config');
+        const defaultState = config.autoplay;
+        const status = defaultState ? `${EMOJIS.toggle.on} Enabled` : `${EMOJIS.toggle.off} Disabled`;
+        message.channel.send(hakariMessage(`### ${EMOJIS.music_filters.autoplay} AutoPlay\nDefault autoplay: ${status}\n\nUse \`.autoplay on/off\` when a player is active.`));
       }
-      
-      const status = newState ? `${EMOJIS.toggle.on} Enabled` : `${EMOJIS.toggle.off} Disabled`;
-      message.channel.send(hakariMessage(`### ${EMOJIS.music_filters.autoplay} AutoPlay\nAutoplay is now ${status}`));
 
     } catch (err) {
       message.channel.send(hakariMessage('### Error\nError toggling autoplay.'));

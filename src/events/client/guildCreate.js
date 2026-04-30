@@ -1,5 +1,4 @@
 const logger = require('../../structures/logger');
-const guildDB = require('../../structures/guildDB');
 const {
     ContainerBuilder,
     TextDisplayBuilder,
@@ -18,19 +17,21 @@ module.exports = {
         try {
             logger.info(`Joined a new guild: ${guild.name} (${guild.id})`);
 
-            guildDB.init();
-
+            // Wait a bit for guild to be fully ready
             await new Promise(resolve => setTimeout(resolve, 2000));
+
+            // Find a suitable channel
             let channel = null;
             
-
+            // Try system channel first
             if (guild.systemChannelId) {
                 channel = guild.channels.cache.get(guild.systemChannelId);
             }
             
+            // If no system channel, find a text channel
             if (!channel) {
                 channel = guild.channels.cache.find(c => 
-                    c.type === 0 && 
+                    c.type === 0 && // GuildText
                     c.permissionsFor(guild.members.me)?.has('SendMessages')
                 );
             }
@@ -75,12 +76,13 @@ module.exports = {
                 ]
             };
 
-
+            // Send welcome message
             try {
                 await channel.send(welcomeMessage);
                 logger.info(`Welcome message sent successfully to ${guild.name}`);
             } catch (sendError) {
                 logger.error(`Failed to send welcome message in ${guild.name}: ${sendError.message}`);
+                // Try sending a simple text message as fallback
                 try {
                     await channel.send("Thanks for inviting Hakari Music! Use `.help` to see all commands.");
                 } catch (fallbackError) {
