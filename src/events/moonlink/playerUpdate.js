@@ -1,6 +1,7 @@
 const logger = require('../../structures/logger');
 const { hakariPlayerCard } = require('../../structures/builders');
 const { EMOJIS } = require('../../structures/emojis');
+const { getPlayerMsg } = require('../../structures/db');
 
 function msToTime(ms) {
     if (!ms || ms < 0) return '00:00';
@@ -33,7 +34,23 @@ module.exports = {
                 }
 
                 // Check if there's a message to update
-                const msg = player.msg;
+                let msg = player.msg;
+                if (!msg && !player.msgFetchAttempted) {
+                    player.msgFetchAttempted = true;
+                    try {
+                        const oldMsgData = await getPlayerMsg(player.guildId);
+                        if (oldMsgData && oldMsgData.msgId && oldMsgData.channelId) {
+                            const channel = client.channels.cache.get(oldMsgData.channelId);
+                            if (channel) {
+                                msg = await channel.messages.fetch(oldMsgData.msgId).catch(() => null);
+                                if (msg) player.msg = msg;
+                            }
+                        }
+                    } catch (e) {
+                        logger.debug(`playerUpdate: failed to recover msg from db: ${e.message}`);
+                    }
+                }
+
                 if (!msg || !msg.editable) {
                     return;
                 }
