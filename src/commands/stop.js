@@ -80,8 +80,8 @@ module.exports = {
       }
       player.msg = null;
 
-      player.queue.clear();
-      await player.destroy();
+      await player.stop();
+      await player.queue.clear();
       message.reply(hakariMessage('Stopped the player.'));
     } catch (err) {
       message.reply(hakariMessage('### Error\nError stopping.'));

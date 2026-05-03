@@ -61,15 +61,15 @@ module.exports = {
       }
 
       player.setAutoPlay(true);
-      if (!player.connected) {
-        try {
-          await player.connect();
-        } catch (err) {
-          logger.error(`Failed to connect to voice: ${err.message}`);
-          player.destroy();
-          return message.reply(hakariMessage('### Connection Error\nFailed to join voice channel. Check permissions and try again.'));
-        }
-      }
+      // if (!player.connected) {
+      //   try {
+      //     await player.connect();
+      //   } catch (err) {
+      //     logger.error(`Failed to connect to voice: ${err.message}`);
+      //     player.destroy();
+      //     return message.reply(hakariMessage('### Connection Error\nFailed to join voice channel. Check permissions and try again.'));
+      //   }
+      // }
       const voiceChannel = message.member.voice.channel;
       const permissions = voiceChannel.permissionsFor(client.user);
       if (!permissions?.has('Connect') || !permissions?.has('Speak')) {

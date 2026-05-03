@@ -89,15 +89,13 @@ module.exports = {
           );
         }
 
-        fs.writeFileSync('./debug/lyricsLine.json', JSON.stringify(payload, null, 2));
-
         const lyricsDisplay = buildLyricsDisplay(lines, currentIdx, lineText);
         const currentMs = lineTime ?? player.position ?? 0;
         const totalMs = track?.duration ?? 0;
-        
+
         const progressBar = buildProgressBar(currentMs, totalMs);
         const currentTime = formatTime(currentMs);
-        
+
         const sectionContent = [
           `### ${EMOJIS.bot.hakariAnimated} Now Playing`,
           `**[${title}](${track.uri})**`,
@@ -108,7 +106,7 @@ module.exports = {
           `${progressBar} \`${currentTime} / ${duration}\``,
           `-# ${queueText}`,
         ].join('\n');
-        
+
         await msg.edit(hakariPlayerCard({
           sectionContent,
           bodyContent,

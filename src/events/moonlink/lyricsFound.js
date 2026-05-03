@@ -54,21 +54,19 @@ module.exports = {
         const track = player.current;
         const title = track?.title || 'Unknown';
 
-        fs.writeFileSync('./debug/lyricsFound.json', JSON.stringify(payload, null, 2));
 
         player.lyricsData = payload;
         player.lyricsLines = payload?.lyrics?.lines || [];
         player.current.lyrics_provider = payload?.lyrics?.provider || 'Unknown';
         player.current.lyrics = payload?.lyrics?.text || '';
         player.HandleByLyrics = true;
-
         logger.info(`Lyrics Found for ${title} - ${player.lyricsLines.length} lines (${player.guildId})`);
         logger.info(`Found lyrics for ${title} from ${player.current.lyrics_provider}`);
 
         // Notif pendingLyricsMsg dulu
         if (player.pendingLyricsMsg) {
           const msg = await player.pendingLyricsMsg.edit(rejectMessage(`Found lyrics for **${title}** from \`${player.current.lyrics_provider}\``));
-          setTimeout(() => msg.delete().catch(() => {}), 3000);
+          setTimeout(() => msg.delete().catch(() => { }), 3000);
         }
 
         // Edit player.msg tampilkan semua lirik dimmed
@@ -97,11 +95,15 @@ module.exports = {
           `-# ${queueText}`,
         ].join('\n');
 
-        await playerMsg.edit(hakariPlayerCard({
-          sectionContent,
-          bodyContent,
-          thumbnailURL: thumb,
-        }));
+        await client.channels.fetch(playerMsg.channelId).then(ch => {
+          ch.messages.fetch(playerMsg.id).then(msg => {
+            msg.edit(hakariPlayerCard({
+              sectionContent,
+              bodyContent,
+              thumbnailURL: thumb,
+            }));
+          })
+        })
 
       } catch (err) {
         logger.error(`in lyricsFound: ${err.message}`);

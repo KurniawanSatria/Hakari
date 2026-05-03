@@ -323,8 +323,8 @@ module.exports = {
                     }
                     player.msg = null;
                     
-                    player.queue.clear();
-                    await player.destroy();
+                    await player.stop();
+                    await player.queue.clear();
                     
                     await safeReply(rejectMessage(`Stopped by <@${interaction.user.id}>.`));
                 }
