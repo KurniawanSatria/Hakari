@@ -16,7 +16,7 @@ module.exports = {
       if (oldState.member?.id !== client.user?.id && newState.member?.id !== client.user?.id) {
         return;
       }
-      
+
       // Safely get guild and channel info
       const guildId = newState.guild?.id || oldState.guild?.id;
       if (!guildId) {
@@ -29,45 +29,53 @@ module.exports = {
       const oldChannelName = oldState.channelId ? (client.channels?.cache.get(oldState.channelId)?.name || 'Unknown') : 'None';
       const newChannelName = newState.channelId ? (client.channels?.cache.get(newState.channelId)?.name || 'Unknown') : 'None';
       const player = client.manager?.players.get(guildId);
-      
+
       // Bot joined a channel
       if (!oldState.channelId && newState.channelId) {
         logger.info(`Bot Joined Voice Channel: ${newChannelName} in ${guildName}`);
         return;
       }
-      
+
       // Bot was kicked/disconnected from voice channel
       if (oldState.channelId && !newState.channelId) {
         logger.warn(`Bot was kicked/disconnected from Voice Channel: ${oldChannelName} in ${guildName}`);
-        
+
         // Clean up player and notify text channel
         try {
           if (player && !player.destroyed) {
             // Find text channel to send notification
             const textChannel = guild?.channels?.cache.get(player.textChannelId);
-            
-            // Clean up messages
-            if (player.msg?.delete) {
-              player.msg.delete().catch(() => {});
-              player.msg = null;
+
+            // Clean up track message
+            const playerMsg = global.db.data.guilds[player.guildId].message;
+            if (playerMsg?.id && playerMsg?.channelId) {
+              const oldChannel = client.channels?.cache.get(playerMsg.channelId);
+              if (oldChannel) {
+                const oldMsg = await oldChannel.messages.fetch(playerMsg.id).catch(() => null);
+                if (oldMsg && oldMsg.deletable) {
+                  await oldMsg.delete().catch(() => null);
+                  global.db.data.guilds[player.guildId].message = null;
+                  await global.db.write();
+                }
+              }
             }
-            
+
             if (player.lyricsMsg?.delete) {
-              player.lyricsMsg.delete().catch(() => {});
+              player.lyricsMsg.delete().catch(() => { });
               player.lyricsMsg = null;
             }
-            
+
             // Clear queue and destroy player
             player.queue?.clear();
             await player.destroy('bot kicked from voice channel');
-            
+
             // Notify in text channel
             if (textChannel) {
               await textChannel.send(
                 rejectMessage(`I have been kicked from the voice channel ${EMOJIS.emotions.sad}`)
-              ).catch(() => {});
+              ).catch(() => { });
             }
-            
+
             logger.info(`voiceStateUpdate: Player destroyed after bot was kicked from voice in ${guildName}`);
           }
         } catch (err) {
@@ -75,11 +83,11 @@ module.exports = {
         }
         return;
       }
-      
+
       // Bot was moved to another voice channel
       if (oldState.channelId && newState.channelId && oldState.channelId !== newState.channelId) {
         logger.info(`Bot was moved: ${oldChannelName} -> ${newChannelName} in ${guildName}`);
-        
+
         try {
           if (player && !player.destroyed) {
             // Update player voice channel ID
@@ -89,15 +97,15 @@ module.exports = {
               // Fallback: manually update the property
               player.voiceChannelId = newState.channelId;
             }
-            
+
             // Notify in text channel
             const textChannel = guild?.channels?.cache.get(player.textChannelId);
             if (textChannel) {
               await textChannel.send(
                 rejectMessage(`I’ve been moved to ${newChannelName}. Alright, continuing playback there.`)
-              ).catch(() => {});
+              ).catch(() => { });
             }
-            
+
             logger.debug(`voiceStateUpdate: Updated player voice channel to ${newChannelName}`);
           }
         } catch (err) {
@@ -105,45 +113,53 @@ module.exports = {
         }
         return;
       }
-      
+
       // Check if all humans left the voice channel (bot alone)
       if (newState.channelId && player && !player.destroyed) {
         const voiceChannel = guild?.channels?.cache.get(newState.channelId);
         if (voiceChannel) {
           const humanMembers = voiceChannel.members.filter(m => !m.user.bot);
-          
+
           if (humanMembers.size === 0) {
             logger.info(`Bot is alone in voice channel ${newChannelName}, waiting before disconnect...`);
-            
+
             // Set a timeout to auto-disconnect after 30 seconds if still alone
             player.aloneTimeout = setTimeout(async () => {
               try {
                 const currentVoiceChannel = guild?.channels?.cache.get(player.voiceChannelId);
                 const currentHumanMembers = currentVoiceChannel?.members.filter(m => !m.user.bot);
-                
+
                 if (currentHumanMembers?.size === 0) {
                   logger.info(`Bot still alone, disconnecting from ${newChannelName}`);
-                  
+
                   const textChannel = guild?.channels?.cache.get(player.textChannelId);
-                  
-                  // Clean up messages
-                  if (player.msg?.delete) {
-                    player.msg.delete().catch(() => {});
-                    player.msg = null;
+
+                  // Clean up track message
+                  const playerMsg = global.db.data.guilds[player.guildId].message;
+                  if (playerMsg?.id && playerMsg?.channelId) {
+                    const oldChannel = client.channels?.cache.get(playerMsg.channelId);
+                    if (oldChannel) {
+                      const oldMsg = await oldChannel.messages.fetch(playerMsg.id).catch(() => null);
+                      if (oldMsg && oldMsg.deletable) {
+                        await oldMsg.delete().catch(() => null);
+                        global.db.data.guilds[player.guildId].message = null;
+                        await global.db.write();
+                      }
+                    }
                   }
-                  
+
                   if (player.lyricsMsg?.delete) {
-                    player.lyricsMsg.delete().catch(() => {});
+                    player.lyricsMsg.delete().catch(() => { });
                     player.lyricsMsg = null;
                   }
-                  
+
                   player.queue?.clear();
                   await player.destroy('left alone in voice channel');
-                  
+
                   if (textChannel) {
                     await textChannel.send(
                       rejectMessage('No one’s here anymore... I guess I’ll leave too.')
-                    ).catch(() => {});
+                    ).catch(() => { });
                   }
                 }
               } catch (err) {
@@ -160,7 +176,7 @@ module.exports = {
           }
         }
       }
-      
+
     } catch (err) {
       logger.error(`voiceStateUpdate handler error: ${err.message}`, { stack: err.stack });
     }

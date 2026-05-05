@@ -75,10 +75,19 @@ module.exports = {
       player.lyricsData = null;
       player.lyricsLines = null;
 
-      if (player.msg?.delete) {
-        player.msg.delete().catch(() => {});
-      }
-      player.msg = null;
+     // Clean up track message
+        const playerMsg = global.db.data.guilds[player.guildId].message;
+        if (playerMsg?.id && playerMsg?.channelId) {
+          const oldChannel = client.channels?.cache.get(playerMsg.channelId);
+          if (oldChannel) {
+            const oldMsg = await oldChannel.messages.fetch(playerMsg.id).catch(() => null);
+            if (oldMsg && oldMsg.deletable) {
+              await oldMsg.delete().catch(() => null);
+              global.db.data.guilds[player.guildId].message = null;
+              await global.db.write();
+            }
+          }
+        }
 
       await player.stop();
       await player.queue.clear();

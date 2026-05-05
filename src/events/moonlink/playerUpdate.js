@@ -28,16 +28,16 @@ module.exports = {
                 if (!player.playing && !player.paused) {
                     return;
                 }
-                let msg = player.msg;
-                if (!msg && !player.msgFetchAttempted) {
-                    player.msgFetchAttempted = true;
+                let msg = global.db.data.guilds[player.guildId].message;
+                if (!msg) {
                     try {
                         const playerMsgData = global.db.data.guilds[player.guildId].message;
                         if (playerMsgData?.id && playerMsgData?.channelId) {
                             const channel = client.channels.cache.get(playerMsgData.channelId);
                             if (channel) {
                                 msg = await channel.messages.fetch(playerMsgData.id).catch(() => null);
-                                if (msg) player.msg = msg;
+                                if (msg) global.db.data.guilds[player.guildId].message = msg;
+                                await global.db.write();
                             }
                         }
                     } catch (e) {

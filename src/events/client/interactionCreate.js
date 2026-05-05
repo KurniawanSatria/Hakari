@@ -24,7 +24,7 @@ module.exports = {
             if (customId === 'help_playback' || customId === 'help_filters' || customId === 'help_utility' || customId === 'help_owner') {
                 try {
                     if (!interaction.deferred && !interaction.replied) {
-                        await interaction.deferReply({ ephemeral: true }).catch(() => {});
+                        await interaction.deferReply({ ephemeral: true }).catch(() => { });
                     }
 
                     const response = {
@@ -51,9 +51,9 @@ module.exports = {
                     }
 
                     if (interaction.deferred || interaction.replied) {
-                        await interaction.editReply(response).catch(() => {});
+                        await interaction.editReply(response).catch(() => { });
                     } else {
-                        await interaction.reply(response).catch(() => {});
+                        await interaction.reply(response).catch(() => { });
                     }
                     return;
                 } catch (err) {
@@ -65,7 +65,7 @@ module.exports = {
             // Handle guild welcome buttons (no player required)
             if (customId === 'setup_now' || customId === 'show_commands') {
                 try {
-                    await interaction.deferReply({ ephemeral: true }).catch(() => {});
+                    await interaction.deferReply({ ephemeral: true }).catch(() => { });
 
                     if (customId === 'setup_now') {
                         await interaction.editReply({
@@ -78,8 +78,8 @@ module.exports = {
                     } else if (customId === 'show_commands') {
                         const commandList = Array.from(client.commands.values())
                             .map(cmd => {
-                                const aliases = cmd.aliases && cmd.aliases.length > 0 
-                                    ? ` *(${cmd.aliases.join(', ')})*` 
+                                const aliases = cmd.aliases && cmd.aliases.length > 0
+                                    ? ` *(${cmd.aliases.join(', ')})*`
                                     : '';
                                 return `- \`.${cmd.name}${aliases}\``;
                             })
@@ -105,7 +105,7 @@ module.exports = {
                 return interaction.reply({
                     ...rejectMessage('Music not initialized.'),
                     ephemeral: true
-                }).catch(() => {});
+                }).catch(() => { });
             }
 
             // Safely get player (for music buttons)
@@ -114,7 +114,7 @@ module.exports = {
                 return interaction.reply({
                     ...rejectMessage('No active player.'),
                     ephemeral: true
-                }).catch(() => {});
+                }).catch(() => { });
             }
 
             // Safe reply helper
@@ -130,7 +130,7 @@ module.exports = {
             async function reject(reason) {
                 const msg = await safeReply(rejectMessage(reason), false);
                 if (msg) {
-                    setTimeout(() => msg.delete().catch(() => {}), 60000);
+                    setTimeout(() => msg.delete().catch(() => { }), 60000);
                 }
             }
 
@@ -166,7 +166,7 @@ module.exports = {
                     // If requester is in voice and this is not the requester, trigger voting
                     if (requesterInVoice && !isRequester) {
                         const voteKey = `${action}Votes`;
-                        
+
                         // Ensure vote set exists and is a Set
                         if (!(player[voteKey] instanceof Set)) {
                             player[voteKey] = new Set();
@@ -246,7 +246,7 @@ module.exports = {
 
                     const header = `### ${EMOJIS.music.queue} Music Queue`;
                     const body = `${queueList}\n\n-# Total: ${totalTracks} tracks`
-                    
+
                     // Create navigation buttons
                     const buttons = new ActionRowBuilder();
 
@@ -310,7 +310,7 @@ module.exports = {
 
                     // Clean up lyrics
                     if (player.lyricsMsg) {
-                        player.lyricsMsg.delete().catch(() => {});
+                        player.lyricsMsg.delete().catch(() => { });
                         player.lyricsMsg = null;
                     }
                     player.lyricsData = null;
@@ -318,14 +318,23 @@ module.exports = {
                     player.HandleByLyrics = false;
 
                     // Clean up track message
-                    if (player.msg?.delete) {
-                        player.msg.delete().catch(() => {});
+                    // Clean up track message
+                    const playerMsg = global.db.data.guilds[player.guildId].message;
+                    if (playerMsg?.id && playerMsg?.channelId) {
+                        const oldChannel = client.channels?.cache.get(playerMsg.channelId);
+                        if (oldChannel) {
+                            const oldMsg = await oldChannel.messages.fetch(playerMsg.id).catch(() => null);
+                            if (oldMsg && oldMsg.deletable) {
+                                await oldMsg.delete().catch(() => null);
+                                global.db.data.guilds[player.guildId].message = null;
+                                await global.db.write();
+                            }
+                        }
                     }
-                    player.msg = null;
-                    
+
                     await player.stop();
                     await player.queue.clear();
-                    
+
                     await safeReply(rejectMessage(`Stopped by <@${interaction.user.id}>.`));
                 }
                     break;
@@ -386,7 +395,7 @@ module.exports = {
                 case 'queue': {
                     // Defer interaction first
                     if (!interaction.deferred && !interaction.replied) {
-                        await interaction.deferReply({ ephemeral: true }).catch(() => {});
+                        await interaction.deferReply({ ephemeral: true }).catch(() => { });
                     }
 
                     const userVoice = interaction.member?.voice?.channel;
@@ -481,7 +490,7 @@ module.exports = {
                 interaction.reply({
                     ...rejectMessage('Error processing interaction.'),
                     ephemeral: true
-                }).catch(() => {});
+                }).catch(() => { });
             }
         }
     }

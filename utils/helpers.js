@@ -148,10 +148,18 @@ async function safeDestroyPlayer(player, reason = 'cleanup') {
 
         logger.info(`safeDestroyPlayer: Destroying player in guild ${player.guildId} - Reason: ${reason}`);
 
-        // Clean up messages
-        if (player.msg?.delete) {
-            await player.msg.delete().catch(() => {});
-            player.msg = null;
+        // Clean up track message
+        const playerMsg = global.db.data.guilds[player.guildId].message;
+        if (playerMsg?.id && playerMsg?.channelId) {
+          const oldChannel = client.channels?.cache.get(playerMsg.channelId);
+          if (oldChannel) {
+            const oldMsg = await oldChannel.messages.fetch(playerMsg.id).catch(() => null);
+            if (oldMsg && oldMsg.deletable) {
+              await oldMsg.delete().catch(() => null);
+              global.db.data.guilds[player.guildId].message = null;
+              await global.db.write();
+            }
+          }
         }
 
         if (player.lyricsMsg?.delete) {
