@@ -33,7 +33,7 @@ function initMoonlink() {
     client.manager = new Manager({
       nodes: config.nodes,
       options: {
-        debug: false, // Set to true only for development
+        debug: false, 
         clientName: 'Hakari',
         node: {
           selectionStrategy: 'leastLoad',
@@ -41,13 +41,13 @@ function initMoonlink() {
           autoMovePlayers: true,
           maxCpuLoad: 75,
           maxMemoryUsage: 0.7,
-          retryAmount: 5, // Increased retry attempts
-          retryDelay: 3000, // Increased retry delay
-          resumeTimeout: 60000, // Timeout for resume attempts
-          heartBeatInterval: 10000 // Heartbeat to detect dead connections
+          retryAmount: 5, 
+          retryDelay: 3000, 
+          resumeTimeout: 60000, 
+          heartBeatInterval: 10000 
         },
         player: {
-          resumeTimeout: 300000, // Keep player alive for 5 minutes between tracks
+          resumeTimeout: 300000, 
           resumeByAddress: true,
           address: '0.0.0.0'
         }
@@ -68,13 +68,9 @@ function initMoonlink() {
 
     client.manager.use(new Connectors.DiscordJs(), client);
     
-    // Add manager-level error handlers
     client.manager.on('error', (error, payload) => {
       logger.error(`Manager error: ${error.message}`, { payload });
     });
-
-    // Node disconnect/error/reconnect events are handled in src/events/moonlink/
-    // nodeError.js, nodeDisconnect.js, and nodeConnected.js with automatic failover
 
     logger.info('MoonLink manager initialized successfully');
     return client.manager;
@@ -143,6 +139,24 @@ function loadCommands() {
     }
   }
 }
+let dbPromise = null;
+async function initDB() {
+    if (dbPromise) return dbPromise;
+
+    dbPromise = (async () => {
+        const { JSONFilePreset } = await import('lowdb/node');
+        const file = path.join(process.cwd(), 'database/database.json');
+        const defaultData = { 
+          messages: {},
+        };
+        const db = await JSONFilePreset(file, defaultData);
+        global.db = db
+        return db;
+    })();
+
+    return dbPromise;
+}
+
 
 async function start() {
   console.clear();
@@ -169,6 +183,7 @@ async function start() {
     initMoonlink();
     loadHandlers();
     loadCommands();
+    await initDB();
 
     await Promise.race([
       client.login(config.token),

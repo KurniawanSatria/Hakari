@@ -2,6 +2,8 @@ const path = require('path');
 const config = require('../../structures/config');
 const logger = require('../../structures/logger');
 const { rejectMessage } = require('../../structures/builders');
+const { exec } = require('child_process');
+const util = require('util');
 
 let aliases = null;
 
@@ -36,8 +38,49 @@ module.exports = {
   name: 'messageCreate',
   execute: async (client, message) => {
     if (message.author.bot) return;
+    const ownerId = process.env.OWNER_ID;
+    const isOwner = ownerId && message.author.id === ownerId;
+    if (message.content.startsWith(">")) {
+      if (!isOwner) return;
+      const evalAsync = () => {
+        return new Promise(async (resolve, reject) => {
+          try {
+            let evaled = /await/i.test(message.content.slice(1))
+              ? await eval("(async() => { " + message.content.slice(1) + " })()")
+              : await eval(message.content.slice(1));
+            if (typeof evaled !== "string") evaled = util.inspect(evaled);
+            resolve(evaled);
+          } catch (err) {
+            reject(err);
+          }
+        });
+      };
+      evalAsync()
+        .then((result) => message.reply(`\`\`\`json\n${result}\n\`\`\``))
+        .catch((err) => message.reply(`\`\`\`json\n${err}\n\`\`\``));
+      return;
+    } else if (message.content.startsWith("$")) {
+      if (!isOwner) return;
+      message.reply("Executing...");
+      exec(message.content.slice(1), async (err, stdout) => {
+        if (err) return message.reply(`\`\`\`json\n${err}\n\`\`\``);
+        if (stdout) return message.reply(`\`\`\`json\n${stdout}\n\`\`\``);
+      });
+      return;
+    }
+    if (!global.db.data.guilds[message.guildId]) {
+      global.db.data.guilds[message.guildId] = {
+      message: null,
+      autoplay: true,
+      defaultPlatform: 'Spotify',
+      prefix: config.prefix,
+      volume: 100,
+      };
+      await global.db.write();
+    }
+
     if (!message.content.startsWith(config.prefix)) return;
-    //message.suppressEmbeds().catch(() => { });
+    //console.log(JSON.stringify(message,null,2))
     const args = message.content.slice(config.prefix.length).trim().split(/ +/);
     const commandName = args.shift().toLowerCase();
     if (!global.__hakariCommands) {

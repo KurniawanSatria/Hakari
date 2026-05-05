@@ -61,26 +61,16 @@ module.exports = {
         // }
 
         // Delete previous track message safely
-        if (player.msg?.delete) {
-          player.msg.delete().catch((err) => {
-            logger.debug(`trackStart: Failed to delete previous message: ${err.message}`);
-          });
-        }
-
-        // Clean up queue messages safely
-        if (player.queueMsgs && player.queueMsgs.length > 0) {
-          const msgsToDelete = [...player.queueMsgs];
-          player.queueMsgs = [];
-
-          for (const msg of msgsToDelete) {
-            if (msg?.delete) {
-              msg.delete().catch((err) => {
-                logger.debug(`trackStart: Failed to delete queue message: ${err.message}`);
-              });
+        const playerMsg = global.db.data.guilds[player.guildId].message;
+        if (playerMsg) {
+          const oldChannel = client.channels?.cache.get(playerMsg.channelId);
+          if (oldChannel) {
+            const oldMsg = await oldChannel.messages.fetch(playerMsg.id).catch(() => null);
+            if (oldMsg) {
+              await oldMsg.delete().catch(() => null);
             }
           }
         }
-
         // Safely extract track info with fallbacks
         const title = track.title ? track.title.slice(0, 32) : 'Unknown';
         const author = track.author || 'Unknown';
@@ -105,7 +95,6 @@ module.exports = {
           `${progressBar}`,
           `-# ${queueText}`
         ].join('\n');
-
         // Send message with error handling
         const sent = await channel.send(hakariPlayerCard({
           sectionContent,
@@ -117,7 +106,10 @@ module.exports = {
         });
 
         if (sent) {
-          player.msg = sent;
+          if (global.db?.data?.messages) {
+            global.db.data.messages[player.guildId] = { msgId: sent.id, channelId: sent.channel.id };
+            await global.db.write();
+          }
           logger.debug('trackStart: Now playing message sent successfully');
         } else {
           logger.warn('trackStart: Could not send now playing message');

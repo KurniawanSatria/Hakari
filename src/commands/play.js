@@ -115,7 +115,7 @@ module.exports = {
           const source = getSourceInfo(tracks[0].uri);
           await message.reply(hakariCard({
             content: `### ${EMOJIS.queue.playlist} Playlist Loaded\n**[${playlistInfo?.name || 'Unknown Playlist'}](${query})**\n\n> **Tracks:** ${tracks.length}\n> **Duration:** \`${formatDuration(playlistInfo?.duration) || formatDuration(totalDuration)}\`\n\n-# ${source.emoji || ''} ${source.name}`,
-            thumbnailURL: tracks[0]?.thumbnail || FALLBACK_THUMB,
+            thumbnailURL: message.embeds[0]?.thumbnail?.url || tracks[0]?.thumbnail,
           }));
         } catch (err) {
           logger.error(`Failed to add playlist: ${err.message}`);

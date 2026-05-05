@@ -1,7 +1,6 @@
 // src/events/moonlink/trackEnd.js - Track end event
 
 const logger = require('../../structures/logger');
-const { getPlayerMsg, removePlayerMsg } = require('../../structures/db');
 
 module.exports = {
   name: 'trackEnd',
@@ -18,28 +17,19 @@ module.exports = {
         player.HandleByLyrics = false;
 
         // Clean up track message
-        if (player.msg?.delete) {
-          player.msg.delete().catch(() => { });
-        }
-        
-        try {
-          const oldMsgData = await getPlayerMsg(player.guildId);
-          if (oldMsgData && oldMsgData.msgId && oldMsgData.channelId) {
-            if (!player.msg || player.msg.id !== oldMsgData.msgId) {
-              const oldChannel = client.channels?.cache.get(oldMsgData.channelId);
-              if (oldChannel) {
-                const oldMsg = await oldChannel.messages.fetch(oldMsgData.msgId).catch(() => null);
-                if (oldMsg && oldMsg.deletable) {
-                  await oldMsg.delete().catch(() => null);
-                }
-              }
+        const playerMsg = global.db.data.guilds[player.guildId].message;
+        if (playerMsg?.id && playerMsg?.channelId) {
+          const oldChannel = client.channels?.cache.get(playerMsg.channelId);
+          if (oldChannel) {
+            const oldMsg = await oldChannel.messages.fetch(playerMsg.id).catch(() => null);
+            if (oldMsg && oldMsg.deletable) {
+              await oldMsg.delete().catch(() => null);
+              global.db.data.guilds[player.guildId].message = null;
+              await global.db.write();
             }
           }
-          await removePlayerMsg(player.guildId);
-        } catch (dbErr) {
-          logger.warn(`trackEnd: Failed to delete previous message from DB: ${dbErr.message}`);
         }
-        player.msg = null;
+
 
         const title = track.title || 'Unknown';
         const author = track.author || 'Unknown';

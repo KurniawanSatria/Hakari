@@ -65,7 +65,7 @@ module.exports = {
         player.HandleByLyrics = true;
 
         const track = player.current;
-        const msg = player.msg;
+        const msg = global.db.data.guilds[player.guildId].message;
         if (!msg || !msg.editable) return;
 
         const thumb = track?.thumbnail || 'https://files.catbox.moe/fnlch5.jpg';

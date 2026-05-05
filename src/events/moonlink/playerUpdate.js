@@ -1,7 +1,6 @@
 const logger = require('../../structures/logger');
 const { hakariPlayerCard } = require('../../structures/builders');
 const { EMOJIS } = require('../../structures/emojis');
-const { getPlayerMsg } = require('../../structures/db');
 
 function msToTime(ms) {
     if (!ms || ms < 0) return '00:00';
@@ -23,26 +22,21 @@ module.exports = {
     register: (client) => {
         client.manager.on('playerUpdate', async (player, track, payload) => {
             try {
-                // Validate player state
                 if (!player || player.destroyed) {
                     return;
                 }
-
-                // Only update if playing or paused
                 if (!player.playing && !player.paused) {
                     return;
                 }
-
-                // Check if there's a message to update
                 let msg = player.msg;
                 if (!msg && !player.msgFetchAttempted) {
                     player.msgFetchAttempted = true;
                     try {
-                        const oldMsgData = await getPlayerMsg(player.guildId);
-                        if (oldMsgData && oldMsgData.msgId && oldMsgData.channelId) {
-                            const channel = client.channels.cache.get(oldMsgData.channelId);
+                        const playerMsgData = global.db.data.guilds[player.guildId].message;
+                        if (playerMsgData?.id && playerMsgData?.channelId) {
+                            const channel = client.channels.cache.get(playerMsgData.channelId);
                             if (channel) {
-                                msg = await channel.messages.fetch(oldMsgData.msgId).catch(() => null);
+                                msg = await channel.messages.fetch(playerMsgData.id).catch(() => null);
                                 if (msg) player.msg = msg;
                             }
                         }
@@ -55,22 +49,16 @@ module.exports = {
                     return;
                 }
 
-                // Skip if lyrics are being displayed
                 if (player.HandleByLyrics) {
                     return;
                 }
-
-                // Validate track exists
                 if (!track) {
                     logger.debug('playerUpdate: No track data available');
                     return;
                 }
 
-                // Safely extract position and duration with fallbacks
                 const position = payload?.state?.position ?? player.position ?? 0;
                 const trackDuration = track?.duration ?? 0;
-                
-                // Validate duration is reasonable
                 if (trackDuration <= 0 && position <= 0) {
                     return;
                 }
@@ -80,11 +68,7 @@ module.exports = {
                 const duration = msToTime(trackDuration);
                 const queueSize = player.queue?.size ?? player.queue?.length ?? 0;
                 const status = player.paused ? 'Paused' : 'Playing';
-                const pauseEmoji = player.paused 
-                    ? EMOJIS.music.play 
-                    : EMOJIS.music.pause;
-                
-                // Safely get track title with fallback
+                const pauseEmoji = player.paused ? EMOJIS.music.play : EMOJIS.music.pause;
                 const trackTitle = track?.title ? track.title.slice(0, 32) : 'Unknown';
                 const trackUri = track?.uri || '#';
                 const trackAuthor = track?.author || 'Unknown';
@@ -97,26 +81,20 @@ module.exports = {
                 ].join('\n');
                 
                 const bodyContent = `${progressBar} \`${currentTime} / ${duration}\`\n-# ${queueSize > 0 ? `${queueSize} song${queueSize !== 1 ? 's' : ''} in queue` : 'No songs in queue'}`;
-                                
-                // Update message with error handling
                 await msg.edit(hakariPlayerCard({
                   sectionContent,
                   bodyContent,
                   thumbnailURL: trackThumbnail,
                 })).catch(err => {
-                    // Only log if it's not a known Discord API error
                     if (!err.message?.includes('Unknown Message') && 
                         !err.message?.includes('Missing Access')) {
                         logger.debug(`playerUpdate: Message edit failed: ${err.message}`);
                     }
-                    // If message is no longer editable, clear reference
                     if (err.message?.includes('Unknown Message')) {
-                        player.msg = null;
                     }
                 });
 
             } catch (err) {
-                // Don't log common errors too verbosely
                 if (!err.message?.includes('Unknown Message') && 
                     !err.message?.includes('Missing Access')) {
                     logger.error(`playerUpdate error: ${err.message}`, { stack: err.stack });
